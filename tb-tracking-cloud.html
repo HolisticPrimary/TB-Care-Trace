@@ -1007,6 +1007,39 @@
     border: 1px dashed var(--border);
     margin-bottom: 10px;
   }
+  .pill-group {
+    display: inline-flex;
+    gap: 0;
+    padding: 3px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .pill-group input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .pill-group label {
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-700);
+    cursor: pointer;
+    border-radius: 7px;
+    transition: all .15s ease;
+    user-select: none;
+    letter-spacing: 0;
+  }
+  .pill-group label:hover {
+    color: var(--ink-900);
+  }
+  .pill-group input[type="radio"]:checked + label {
+    background: var(--surface);
+    color: var(--primary-dark);
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+  }
   @media (max-width: 720px) {
     .contact-card .form-row { grid-template-columns: 1fr 1fr; }
   }
@@ -1420,7 +1453,7 @@ const DEMO_PATIENTS = [
   {
     id: 'demo-1', name: 'นายสมชาย ใจดี', hn: 'HN12345', age: '45', gender: 'ชาย', phone: '081-234-5678',
     addrNo: '99/1', addrMoo: '5', addrTambon: 'ทับคล้อ', addrAmphoe: 'ทับคล้อ', addrProvince: 'พิจิตร',
-    zone: '203', contactPerson: 'นางสมหญิง ใจดี - ภรรยา - 089-111-2222',
+    zone: '203', areaType: 'ในเขต', contactPerson: 'นางสมหญิง ใจดี - ภรรยา - 089-111-2222',
     treatmentStartDate: '2026-04-01', regimen: '2HRZE / 4HR', regimenMonths: 6,
     testResult: 'X-pert Detect', patientType: 'รายใหม่', status: 'active', transferTo: '',
     householdContacts: [
@@ -1432,7 +1465,7 @@ const DEMO_PATIENTS = [
   {
     id: 'demo-2', name: 'นางสาวมาลี ดอกไม้', hn: 'HN67890', age: '28', gender: 'หญิง', phone: '062-987-6543',
     addrNo: '15', addrMoo: '2', addrTambon: 'เขาทราย', addrAmphoe: 'ทับคล้อ', addrProvince: 'พิจิตร',
-    zone: '207', contactPerson: '',
+    zone: '207', areaType: 'นอกเขต', contactPerson: '',
     treatmentStartDate: '2026-02-15', regimen: '2HRZE / 4HR', regimenMonths: 6,
     testResult: 'AFB Post', patientType: 'กลับมาเป็นซ้ำ', status: 'treatmentComplete', transferTo: '',
     householdContacts: [], notes: '', createdBy: 'Demo', updatedAt: '2026-05-10'
@@ -1453,7 +1486,8 @@ const STATUS_LABELS = {
 };
 const TEST_RESULTS = ['AFB','AFB Post','TB Lamp Post','X-pert Detect','CT','Film'];
 const PATIENT_TYPES = ['รายใหม่','กลับมาเป็นซ้ำ','รับโอนจากที่อื่น','โอนออกไปที่อื่น'];
-const ZONES = ['201','202','203','204','205','206','207','208','209','ในเขต','นอกเขต'];
+const ZONES = ['201','202','203','204','205','206','207','208','209'];
+const AREA_TYPES = ['ในเขต','นอกเขต'];
 const IGRA_RESULTS = ['Positive','Negative','Indeterminate','Pending','Not done'];
 const SYMPTOM_LABELS = {
   cough: 'ไอเรื้อรัง',
@@ -1801,6 +1835,7 @@ function renderInfoTab(p) {
     ['เบอร์โทร', p.phone],
     ['ที่อยู่', fullAddress(p)],
     ['เขตพื้นที่รับผิดชอบ', p.zone],
+    ['สถานะพื้นที่', p.areaType],
     ['ผู้ดูแล / ผู้ติดต่อ', p.contactPerson],
     ['สถานะ', statusDisplay]
   ];
@@ -2035,7 +2070,7 @@ function openPatientModal(id = null) {
   const p = isEdit ? State.patients.find(x => x.id === id) : {
     name: '', hn: '', age: '', gender: '', phone: '',
     addrNo: '', addrMoo: '', addrTambon: '', addrAmphoe: '', addrProvince: '',
-    zone: '', contactPerson: '', treatmentStartDate: '',
+    zone: '', areaType: '', contactPerson: '', treatmentStartDate: '',
     regimen: '2HRZE / 4HR', regimenMonths: 6, status: 'active',
     testResult: '', patientType: '', transferTo: '',
     householdContacts: [], notes: ''
@@ -2090,7 +2125,15 @@ function openPatientModal(id = null) {
                   ${ZONES.map(z => `<option value="${z}" ${p.zone === z ? 'selected' : ''}>${z}</option>`).join('')}
                 </select>
               </div>
-              <div class="form-group" style="grid-column: span 2;"><label>ผู้ดูแล / ผู้ติดต่อ</label><input class="input" id="f-contact" value="${escapeHTML(p.contactPerson)}" placeholder="ชื่อ - ความสัมพันธ์ - เบอร์โทร"></div>
+              <div class="form-group"><label>สถานะพื้นที่</label>
+                <div class="pill-group" id="f-areaType-group">
+                  ${AREA_TYPES.map((a, i) => `
+                    <input type="radio" name="f-areaType" id="f-areaType-${i}" value="${a}" ${p.areaType === a ? 'checked' : ''}>
+                    <label for="f-areaType-${i}">${a}</label>
+                  `).join('')}
+                </div>
+              </div>
+              <div class="form-group"><label>ผู้ดูแล / ผู้ติดต่อ</label><input class="input" id="f-contact" value="${escapeHTML(p.contactPerson)}" placeholder="ชื่อ - ความสัมพันธ์ - เบอร์โทร"></div>
             </div>
           </div>
 
@@ -2218,7 +2261,9 @@ async function savePatient(id) {
     name, hn: get('hn'), age: get('age'), gender: get('gender'), phone: get('phone'),
     addrNo: get('addrNo'), addrMoo: get('addrMoo'), addrTambon: get('addrTambon'),
     addrAmphoe: get('addrAmphoe'), addrProvince: get('addrProvince'),
-    zone: get('zone'), contactPerson: get('contact'),
+    zone: get('zone'),
+    areaType: (document.querySelector('input[name="f-areaType"]:checked') || {}).value || '',
+    contactPerson: get('contact'),
     treatmentStartDate: get('treatmentStartDate'),
     regimen: get('regimen'), regimenMonths: parseInt(get('regimenMonths')) || 6,
     testResult: get('testResult'), patientType: get('patientType'),
