@@ -964,6 +964,40 @@
   .contact-card .input,
   .contact-card .select { padding: 7px 10px; font-size: 13px; }
   .contact-card .form-group label { font-size: 11px; }
+  .zone-stack { display: flex; flex-direction: column; gap: 12px; }
+  .zone-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px 14px;
+  }
+  .zone-block-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .zone-tag {
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+  }
+  .zone-tag.zone-rphs { background: #dbeafe; color: #1e40af; }
+  .zone-tag.zone-hospital { background: var(--primary-soft); color: var(--primary-dark); }
+  .zone-block-head .zone-hint {
+    font-size: 11px;
+    color: var(--ink-500);
+    letter-spacing: .2px;
+  }
+  .zone-block .form-row { grid-template-columns: 2fr 80px; }
+  .zone-block.zone-block-hospital .form-row { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 720px) {
+    .zone-block .form-row,
+    .zone-block.zone-block-hospital .form-row { grid-template-columns: 1fr 1fr; }
+  }
   .contact-remove {
     width: 28px; height: 28px;
     border: 1px solid var(--border);
@@ -2213,16 +2247,32 @@ function renderHouseholdList() {
         <span>ผู้สัมผัสคนที่ ${i + 1}</span>
         <button type="button" class="contact-remove" onclick="removeHouseholdContact(${i})" title="ลบ">✕</button>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label>ชื่อ-นามสกุล</label><input class="input" oninput="updateHC(${i},'name',this.value)" value="${escapeHTML(c.name || '')}" placeholder="ชื่อ-นามสกุล"></div>
-        <div class="form-group"><label>อายุ</label><input class="input" type="number" oninput="updateHC(${i},'age',this.value)" value="${escapeHTML(c.age || '')}" placeholder="—"></div>
-        <div class="form-group"><label>วันที่ CXR</label><input class="input" type="date" onchange="updateHC(${i},'cxrDate',this.value)" value="${escapeHTML(c.cxrDate || '')}"></div>
-        <div class="form-group"><label>วันที่ตรวจ IGRAs</label><input class="input" type="date" onchange="updateHC(${i},'igraDate',this.value)" value="${escapeHTML(c.igraDate || '')}"></div>
-        <div class="form-group"><label>ผล IGRAs</label>
-          <select class="select" onchange="updateHC(${i},'igraResult',this.value)">
-            <option value="">—</option>
-            ${IGRA_RESULTS.map(r => `<option value="${r}" ${c.igraResult === r ? 'selected' : ''}>${r}</option>`).join('')}
-          </select>
+      <div class="zone-stack">
+        <div class="zone-block">
+          <div class="zone-block-head">
+            <span class="zone-tag zone-rphs">รพ.สต.</span>
+            <span class="zone-hint">ข้อมูลพื้นฐาน — กรอกโดยเจ้าหน้าที่ รพ.สต.</span>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>ชื่อ-นามสกุล</label><input class="input" oninput="updateHC(${i},'name',this.value)" value="${escapeHTML(c.name || '')}" placeholder="ชื่อ - สกุล"></div>
+            <div class="form-group"><label>อายุ</label><input class="input" type="number" oninput="updateHC(${i},'age',this.value)" value="${escapeHTML(c.age || '')}" placeholder="—"></div>
+          </div>
+        </div>
+        <div class="zone-block zone-block-hospital">
+          <div class="zone-block-head">
+            <span class="zone-tag zone-hospital">โรงพยาบาล</span>
+            <span class="zone-hint">ผลตรวจ — กรอกโดยเจ้าหน้าที่โรงพยาบาล</span>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>วันที่ CXR</label><input class="input" type="date" onchange="updateHC(${i},'cxrDate',this.value)" value="${escapeHTML(c.cxrDate || '')}"></div>
+            <div class="form-group"><label>วันที่ตรวจ IGRAs</label><input class="input" type="date" onchange="updateHC(${i},'igraDate',this.value)" value="${escapeHTML(c.igraDate || '')}"></div>
+            <div class="form-group"><label>ผล IGRAs</label>
+              <select class="select" onchange="updateHC(${i},'igraResult',this.value)">
+                <option value="">—</option>
+                ${IGRA_RESULTS.map(r => `<option value="${r}" ${c.igraResult === r ? 'selected' : ''}>${r}</option>`).join('')}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
     </div>
