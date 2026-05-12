@@ -1412,8 +1412,32 @@ const State = {
   search: '',
   lastSync: null,
   syncing: false,
-  user: null
+  user: null,
+  demo: false
 };
+
+const DEMO_PATIENTS = [
+  {
+    id: 'demo-1', name: 'นายสมชาย ใจดี', hn: 'HN12345', age: '45', gender: 'ชาย', phone: '081-234-5678',
+    addrNo: '99/1', addrMoo: '5', addrTambon: 'ทับคล้อ', addrAmphoe: 'ทับคล้อ', addrProvince: 'พิจิตร',
+    zone: '203', contactPerson: 'นางสมหญิง ใจดี - ภรรยา - 089-111-2222',
+    treatmentStartDate: '2026-04-01', regimen: '2HRZE / 4HR', regimenMonths: 6,
+    testResult: 'X-pert Detect', patientType: 'รายใหม่', status: 'active', transferTo: '',
+    householdContacts: [
+      { name: 'นางสมหญิง ใจดี', age: '42', cxrDate: '2026-04-05', igraDate: '2026-04-10', igraResult: 'Negative' },
+      { name: 'เด็กชายเอก ใจดี', age: '10', cxrDate: '2026-04-05', igraDate: '', igraResult: 'Pending' }
+    ],
+    notes: 'แพ้ยา Penicillin', createdBy: 'Demo', updatedAt: '2026-05-12'
+  },
+  {
+    id: 'demo-2', name: 'นางสาวมาลี ดอกไม้', hn: 'HN67890', age: '28', gender: 'หญิง', phone: '062-987-6543',
+    addrNo: '15', addrMoo: '2', addrTambon: 'เขาทราย', addrAmphoe: 'ทับคล้อ', addrProvince: 'พิจิตร',
+    zone: '207', contactPerson: '',
+    treatmentStartDate: '2026-02-15', regimen: '2HRZE / 4HR', regimenMonths: 6,
+    testResult: 'AFB Post', patientType: 'กลับมาเป็นซ้ำ', status: 'treatmentComplete', transferTo: '',
+    householdContacts: [], notes: '', createdBy: 'Demo', updatedAt: '2026-05-10'
+  }
+];
 
 /* ════════════════════════════════════════════════════════════════
    HELPERS
@@ -2212,7 +2236,20 @@ async function savePatient(id) {
   btn.textContent = 'กำลังบันทึก...';
 
   try {
-    if (id) {
+    if (State.demo) {
+      if (id) {
+        const idx = State.patients.findIndex(p => p.id === id);
+        if (idx >= 0) State.patients[idx] = normalizePatient({ ...State.patients[idx], ...data, id, updatedAt: todayISO() });
+        toast('บันทึกการแก้ไข (Demo)', 'success');
+      } else {
+        const created = normalizePatient({ ...data, id: 'demo-' + Date.now(), createdBy: 'Demo', updatedAt: todayISO() });
+        State.patients.unshift(created);
+        State.currentPatientId = created.id;
+        State.view = 'detail';
+        State.currentTab = 'info';
+        toast('เพิ่มผู้ป่วย (Demo)', 'success');
+      }
+    } else if (id) {
       const updated = await API.updatePatient(id, data);
       const idx = State.patients.findIndex(p => p.id === id);
       if (idx >= 0) State.patients[idx] = normalizePatient(updated);
@@ -2676,8 +2713,8 @@ async function refreshData() {
    ROUTER
    ═══════════════════════════════════════════════════════════════ */
 function render() {
-  if (!API.url) { renderSetup(); return; }
-  document.getElementById('settingsBtn').style.display = 'grid';
+  if (!API.url && !State.demo) { renderSetup(); return; }
+  document.getElementById('settingsBtn').style.display = State.demo ? 'none' : 'grid';
   if (State.view === 'detail' && State.currentPatientId) renderDetail();
   else renderList();
 }
@@ -2686,6 +2723,18 @@ function render() {
    BOOT
    ═══════════════════════════════════════════════════════════════ */
 (async function init() {
+  // Demo mode: ?demo=1 — preview the UI without backend (read-only, in-memory data)
+  const isDemo = /[?&]demo=1\b/.test(location.search);
+  if (isDemo) {
+    State.demo = true;
+    State.patients = DEMO_PATIENTS.map(normalizePatient);
+    State.user = 'Demo';
+    document.getElementById('settingsBtn').style.display = 'none';
+    render();
+    showDemoBanner();
+    return;
+  }
+
   if (!API.url) { renderSetup(); return; }
   document.getElementById('settingsBtn').style.display = 'grid';
 
@@ -2717,6 +2766,14 @@ function render() {
     });
   }, 60000);
 })();
+
+function showDemoBanner() {
+  const b = document.createElement('div');
+  b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2000;padding:8px 16px;background:#fef3c7;color:#92400e;border-bottom:1px solid #fcd34d;font-size:13px;font-weight:500;text-align:center;letter-spacing:.2px;';
+  b.innerHTML = '🧪 โหมดทดลอง (Demo) — ข้อมูลตัวอย่างในหน่วยความจำเท่านั้น ไม่บันทึกไปยัง Google Sheets · <a href="' + location.pathname + '" style="color:#92400e;text-decoration:underline;">ออกจากโหมดทดลอง</a>';
+  document.body.appendChild(b);
+  document.body.style.paddingTop = '36px';
+}
 </script>
 </body>
 </html>
