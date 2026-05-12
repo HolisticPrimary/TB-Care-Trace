@@ -2601,6 +2601,248 @@
     a[href]:after { content: " (" attr(href) ")"; font-size: 8pt; color: #666; }
   }
 
+  /* ════════════════════════════════════════════════════════════════
+     ANIMATIONS — World-class micro-interactions
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* — Easing tokens — */
+  /* (used inline: cubic-bezier(.22,.61,.36,1) = natural-decel, .34,1.56,.64,1 = bounce-out) */
+
+  /* ── KEYFRAMES ─────────────────────────────────────────────── */
+  @keyframes anim-fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes anim-fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes anim-scaleIn {
+    from { opacity: 0; transform: scale(.94) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes anim-slideInRight {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes anim-shimmer-active {
+    0%, 100% { box-shadow: 0 4px 14px rgba(26, 58, 94, 0.32); }
+    50%      { box-shadow: 0 6px 22px rgba(41, 96, 196, 0.42); }
+  }
+  @keyframes anim-tabPanelIn {
+    from { opacity: 0; transform: translateX(8px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes anim-modalIn {
+    from { opacity: 0; transform: scale(.94) translateY(16px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes anim-backdropIn {
+    from { opacity: 0; backdrop-filter: blur(0); -webkit-backdrop-filter: blur(0); }
+    to   { opacity: 1; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  }
+  @keyframes anim-ripple {
+    from { transform: scale(0); opacity: 0.6; }
+    to   { transform: scale(2.5); opacity: 0; }
+  }
+  @keyframes anim-revealRise {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SCROLL-TRIGGERED REVEAL ──────────────────────────────── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .65s cubic-bezier(.22,.61,.36,1), transform .65s cubic-bezier(.22,.61,.36,1); will-change: opacity, transform; }
+  .reveal.in-view { opacity: 1; transform: translateY(0); }
+  /* Stagger children */
+  .reveal-stagger > * { opacity: 0; transform: translateY(16px); transition: opacity .55s cubic-bezier(.22,.61,.36,1), transform .55s cubic-bezier(.22,.61,.36,1); }
+  .reveal-stagger.in-view > *:nth-child(1) { opacity: 1; transform: translateY(0); transition-delay: .05s; }
+  .reveal-stagger.in-view > *:nth-child(2) { opacity: 1; transform: translateY(0); transition-delay: .10s; }
+  .reveal-stagger.in-view > *:nth-child(3) { opacity: 1; transform: translateY(0); transition-delay: .15s; }
+  .reveal-stagger.in-view > *:nth-child(4) { opacity: 1; transform: translateY(0); transition-delay: .20s; }
+  .reveal-stagger.in-view > *:nth-child(5) { opacity: 1; transform: translateY(0); transition-delay: .25s; }
+  .reveal-stagger.in-view > *:nth-child(6) { opacity: 1; transform: translateY(0); transition-delay: .30s; }
+  .reveal-stagger.in-view > *:nth-child(7) { opacity: 1; transform: translateY(0); transition-delay: .35s; }
+  .reveal-stagger.in-view > *:nth-child(n+8) { opacity: 1; transform: translateY(0); transition-delay: .40s; }
+
+  /* ── MODAL ENHANCED ANIMATIONS ────────────────────────────── */
+  .modal-backdrop { animation: anim-backdropIn .25s ease both; }
+  .modal {
+    animation: anim-modalIn .4s cubic-bezier(.34, 1.56, .64, 1) both;
+    transform-origin: center top;
+  }
+
+  /* ── TOAST SLIDE-IN ───────────────────────────────────────── */
+  .toast { animation: anim-slideInRight .35s cubic-bezier(.22, .61, .36, 1) both; }
+
+  /* ── TAB PANEL CROSSFADE ──────────────────────────────────── */
+  .tab-panel {
+    animation: anim-tabPanelIn .3s cubic-bezier(.22,.61,.36,1) both;
+  }
+
+  /* ── ACTIVE TAB BREATHING GLOW ────────────────────────────── */
+  .subnav .nav-tab.active { animation: anim-shimmer-active 3.5s ease-in-out infinite; }
+  [data-theme="dark"] .subnav .nav-tab.active {
+    animation-name: anim-shimmer-active-dark;
+  }
+  @keyframes anim-shimmer-active-dark {
+    0%, 100% { box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35); }
+    50%      { box-shadow: 0 6px 24px rgba(74, 141, 232, 0.50); }
+  }
+
+  /* ── BUTTON MICRO-BOUNCE + RIPPLE ─────────────────────────── */
+  .btn {
+    position: relative;
+    overflow: hidden;
+    transition: transform .15s cubic-bezier(.34, 1.56, .64, 1),
+                box-shadow .2s ease,
+                background .2s ease,
+                border-color .2s ease;
+  }
+  .btn:active { transform: scale(.97); transition: transform .08s ease; }
+  /* Ripple effect via ::after — triggered by JS adding .rippling class */
+  .btn::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 12px; height: 12px;
+    background: rgba(255, 255, 255, 0.55);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .btn.rippling::after {
+    animation: anim-ripple .6s ease-out;
+  }
+  .btn-secondary.rippling::after { background: rgba(45, 79, 63, 0.25); }
+  .btn-danger.rippling::after { background: rgba(255, 255, 255, 0.5); }
+
+  /* ── INPUT FOCUS GLOW ─────────────────────────────────────── */
+  .input, .select, .textarea {
+    transition: border-color .2s, box-shadow .25s cubic-bezier(.22, .61, .36, 1), background .2s;
+  }
+  .input:focus, .select:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-glow), 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  /* ── PATIENT ROW HOVER LIFT ───────────────────────────────── */
+  .patient-row {
+    transition: transform .25s cubic-bezier(.22,.61,.36,1),
+                box-shadow .25s ease,
+                border-color .2s ease;
+  }
+  .patient-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(13, 37, 66, 0.08);
+    border-color: var(--primary-soft);
+  }
+  [data-theme="dark"] .patient-row:hover {
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    border-color: rgba(111, 211, 160, 0.20);
+  }
+
+  /* ── KPI CARD HOVER ───────────────────────────────────────── */
+  .kpi-card, .stat-card {
+    transition: transform .25s cubic-bezier(.22,.61,.36,1),
+                box-shadow .25s ease;
+  }
+  .kpi-card:hover, .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(13, 37, 66, 0.08);
+  }
+
+  /* ── DASH CARD HOVER ──────────────────────────────────────── */
+  .dash-card {
+    transition: transform .25s cubic-bezier(.22,.61,.36,1),
+                box-shadow .25s ease;
+  }
+  .dash-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(13, 37, 66, 0.06);
+  }
+
+  /* ── ICON BUTTON SCALE ────────────────────────────────────── */
+  .icon-btn { transition: background .15s, color .15s, transform .15s, box-shadow .2s; }
+  .icon-btn:active { transform: scale(.92); }
+
+  /* ── BANNER PARALLAX (subtle) ─────────────────────────────── */
+  body[data-view="list"] .app-header,
+  body[data-view="dashboard"] .app-header {
+    transition: background-position .6s ease-out;
+  }
+
+  /* ── CHART ENTRANCE ANIMATIONS ────────────────────────────── */
+  /* Donut chart — arcs draw from 0 */
+  @keyframes anim-donut-draw {
+    from { stroke-dashoffset: var(--circ, 1000); }
+    to   { stroke-dashoffset: 0; }
+  }
+  .chart-wrap svg circle[stroke-dasharray] {
+    animation: anim-donut-draw 1.2s cubic-bezier(.22, .61, .36, 1) both;
+  }
+  /* Vertical bar chart — bars grow from bottom */
+  @keyframes anim-bar-grow-v {
+    from { transform: scaleY(0); }
+    to   { transform: scaleY(1); }
+  }
+  .chart-wrap svg rect[rx="4"] {
+    transform-origin: bottom;
+    transform-box: fill-box;
+    animation: anim-bar-grow-v .9s cubic-bezier(.22, .61, .36, 1) both;
+  }
+  /* Horizontal bar chart — bars grow from left */
+  @keyframes anim-bar-grow-h {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+  .chart-wrap svg rect[rx="6"] {
+    transform-origin: left;
+    transform-box: fill-box;
+    animation: anim-bar-grow-h 1s cubic-bezier(.22, .61, .36, 1) both;
+  }
+  /* Line chart — path draw + dots fade-in */
+  @keyframes anim-line-draw {
+    from { stroke-dashoffset: 2000; }
+    to   { stroke-dashoffset: 0; }
+  }
+  .chart-wrap svg path[stroke] {
+    stroke-dasharray: 2000;
+    animation: anim-line-draw 1.6s cubic-bezier(.22, .61, .36, 1) both;
+  }
+  @keyframes anim-dot-pop {
+    0%   { opacity: 0; transform: scale(0); }
+    70%  { opacity: 1; transform: scale(1.3); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .chart-wrap svg circle[r="4"] {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: anim-dot-pop .6s ease-out both;
+    animation-delay: 1.4s;
+  }
+  /* Chart labels & values — gentle fade */
+  .chart-wrap svg text {
+    animation: anim-fadeIn .8s ease both;
+    animation-delay: .3s;
+  }
+  /* Empty axis-labels skip fade (always visible) */
+  .chart-wrap svg .axis-label, .chart-wrap svg .grid-line {
+    animation: anim-fadeIn .5s ease both;
+  }
+
+  /* ── REDUCED MOTION FALLBACK ──────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    .reveal, .reveal-stagger > * { opacity: 1; transform: none; }
+  }
+
   /* Util */
   .row-flex {
     display: flex;
@@ -4054,6 +4296,85 @@ function animateAllCounts(container = document) {
     if (Number.isFinite(target)) animateCount(el, target);
   });
 }
+
+/* ════════════════════════════════════════════════════════════════
+   WORLD-CLASS ANIMATIONS — Scroll reveal, parallax, ripple
+   ═══════════════════════════════════════════════════════════════ */
+
+// Single shared IntersectionObserver for .reveal / .reveal-stagger elements
+let _revealObserver = null;
+function getRevealObserver() {
+  if (_revealObserver) return _revealObserver;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // No-op observer for reduced motion
+    _revealObserver = { observe: el => el.classList.add('in-view') };
+    return _revealObserver;
+  }
+  _revealObserver = new IntersectionObserver((entries, obs) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in-view');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  return _revealObserver;
+}
+
+// Scan #mainView for reveal-eligible elements and observe them
+function applyScrollReveals() {
+  const root = document.getElementById('mainView');
+  if (!root) return;
+  const observer = getRevealObserver();
+  // Auto-tag common dashboard/list containers as stagger groups
+  root.querySelectorAll(
+    '.stats, .kpi-grid, .cover-features, .insight-row, .dash-grid'
+  ).forEach(el => {
+    el.classList.add('reveal-stagger');
+    observer.observe(el);
+  });
+  // Single elements that fade up on scroll
+  root.querySelectorAll(
+    '.toolbar, .filter-bar, .patient-list-wrap, .dash-card, .detail-view > *, .zone-table, .empty-state-modern, .cover-cta, .cover-subtitle, .cover-headline'
+  ).forEach(el => {
+    el.classList.add('reveal');
+    observer.observe(el);
+  });
+}
+
+// Button ripple effect — adds .rippling class briefly on click
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn');
+  if (!btn) return;
+  btn.classList.remove('rippling');
+  // Force reflow then add class to restart animation
+  void btn.offsetWidth;
+  btn.classList.add('rippling');
+  setTimeout(() => btn.classList.remove('rippling'), 650);
+});
+
+// Subtle banner parallax — only on list/dashboard
+let _parallaxRAF = null;
+function setupBannerParallax() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  window.addEventListener('scroll', () => {
+    if (_parallaxRAF) return;
+    _parallaxRAF = requestAnimationFrame(() => {
+      _parallaxRAF = null;
+      const view = document.body.dataset.view;
+      if (view !== 'list' && view !== 'dashboard') return;
+      const header = document.querySelector('.app-header');
+      if (!header) return;
+      const offset = Math.min(window.scrollY * 0.25, 80);
+      header.style.setProperty('--parallax-y', `${offset}px`);
+      // Reposition the cover-banner.png layer (3rd background layer)
+      const baseY = 32;  // initial position from CSS
+      const newY = baseY - (window.scrollY * 0.12);
+      header.style.backgroundPosition = `center 0, center 30%, center ${newY}%, center 0`;
+    });
+  }, { passive: true });
+}
+setupBannerParallax();
 
 function setSyncState(state, msg) {
   const indicator = document.getElementById('syncIndicator');
@@ -6207,8 +6528,11 @@ function render() {
   else if (State.view === 'detail' && State.currentPatientId) renderDetail();
   else if (State.view === 'dashboard') renderDashboard();
   else renderList();
-  // Trigger count-up animation on any KPI numbers in the new view
-  requestAnimationFrame(() => animateAllCounts());
+  // Trigger animations on the freshly rendered view
+  requestAnimationFrame(() => {
+    animateAllCounts();
+    applyScrollReveals();
+  });
 }
 
 /* ════════════════════════════════════════════════════════════════
