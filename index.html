@@ -242,19 +242,45 @@
   body[data-view="list"] .header-inner,
   body[data-view="dashboard"] .header-inner { min-height: 140px; }
 
-  /* ── SUBNAV BAR (below header) ──────────────────────────────── */
+  /* ── SUBNAV BAR (below header) — distinctive brand-tinted background ─ */
   .subnav {
     position: sticky;
     top: 0;
     z-index: 50;
-    background: var(--bg-elevated);
+    /* Soft brand gradient: mint → cream, ties in with system identity */
+    background:
+      linear-gradient(180deg,
+        var(--primary-soft) 0%,
+        var(--bg-elevated) 100%);
     border-bottom: 1px solid var(--border);
     margin-bottom: 20px;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 8px rgba(45, 79, 63, 0.04);
+  }
+  /* Top accent line — brand color gradient bar for visual separation from navy header */
+  .subnav::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg,
+      var(--primary) 0%,
+      var(--success) 50%,
+      var(--primary) 100%);
+    opacity: 0.85;
   }
   [data-theme="dark"] .subnav {
-    background: rgba(22, 24, 28, 0.92);
+    background:
+      linear-gradient(180deg,
+        rgba(111, 211, 160, 0.08) 0%,
+        rgba(22, 24, 28, 0.95) 100%);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  }
+  [data-theme="dark"] .subnav::before {
+    opacity: 0.7;
   }
   .subnav-inner {
     width: 100%;
