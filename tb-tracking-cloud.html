@@ -1124,6 +1124,30 @@
     background: var(--accent);
     border-color: var(--accent);
   }
+  .check-grid.warning .check-item { border-color: rgba(220,38,38,.18); background: #fff7f5; }
+  .check-grid.warning .check-item:hover { border-color: rgba(220,38,38,.4); }
+  .check-grid.warning .check-item.checked {
+    background: #fde8e2;
+    border-color: var(--danger);
+    color: #7a1d1d;
+  }
+  .check-grid.warning .check-item.checked .box { background: var(--danger); border-color: var(--danger); }
+  .check-grid.warning .check-item .box::after,
+  .check-grid.warning .check-item.checked .box::after { color: white; }
+  .warning-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #fff1eb;
+    border: 1px solid rgba(220,38,38,.22);
+    border-left: 3px solid var(--danger);
+    border-radius: 8px;
+    color: #7a1d1d;
+    font-size: 12.5px;
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
   .check-item.checked .box::after {
     content: "✓";
     color: white;
@@ -1541,6 +1565,21 @@ const SYMPTOM_LABELS = {
   fatigue: 'อ่อนเพลีย',
   appetiteLoss: 'เบื่ออาหาร'
 };
+const GENERAL_SYMPTOM_LABELS = {
+  urineOrange: 'ปัสสาวะสีส้มหรือแดง',
+  numbness: 'ชาปลายมือ ปลายเท้า',
+  jointPain: 'ปวดตามข้อ',
+  itchySkin: 'คันตามผิวหนัง',
+  nausea: 'คลื่นไส้อาเจียน'
+};
+const WARNING_SIGN_LABELS = {
+  rashItchy: 'คันและมีผื่น',
+  rashRed: 'ผื่นแดงที่ผิวหนัง',
+  visionAbnormal: 'การมองเห็นผิดปกติ',
+  yellowEyesBody: 'ตาเหลือง ตัวเหลือง',
+  jaundice: 'ภาวะดีซ่าน',
+  hepatitis: 'ตับอักเสบ'
+};
 
 function fmtDate(iso) {
   if (!iso) return '—';
@@ -1579,6 +1618,8 @@ function normalizeVisit(v) {
     ...v,
     date: toISODateOnly(v.date),
     symptoms: safeJSON(v.symptoms, {}),
+    generalSymptoms: safeJSON(v.generalSymptoms, {}),
+    warningSigns: safeJSON(v.warningSigns, {}),
     photos: safeJSON(v.photos, []),
     medicationTaken: v.medicationTaken === true || v.medicationTaken === 'TRUE' || v.medicationTaken === 'true' ? true
                   : (v.medicationTaken === false || v.medicationTaken === 'FALSE' || v.medicationTaken === 'false' ? false : null)
@@ -2382,10 +2423,11 @@ let visitPhotos = []; // { base64?: string, url?: string, name: string, isNew?: 
 function openVisitModal(id = null) {
   const isEdit = !!id;
   const v = isEdit ? State.visits.find(x => x.id === id) : {
-    date: todayISO(), visitorName: '', visitorRole: '',
+    date: todayISO(), visitTime: '', visitorName: '', visitorRole: '', asmName: '',
     medicationTaken: null, missedDoses: 0,
-    symptoms: {}, sideEffects: '',
-    weight: '', bloodPressure: '', temperature: '',
+    symptoms: {}, generalSymptoms: {}, generalSymptomsOther: '',
+    warningSigns: {}, sideEffects: '',
+    weight: '', bloodPressure: '', pulse: '', respiration: '', temperature: '', spo2: '',
     notes: '', photos: []
   };
   visitPhotos = (v.photos || []).map(p => ({ ...p, isNew: false }));
@@ -2402,10 +2444,15 @@ function openVisitModal(id = null) {
             <h4>ข้อมูลการเยี่ยม</h4>
             <div class="form-row">
               <div class="form-group"><label>วันที่เยี่ยม<span class="req">*</span></label><input class="input" id="v-date" type="date" value="${escapeHTML(v.date)}"></div>
+              <div class="form-group"><label>เวลาที่เยี่ยม</label><input class="input" id="v-visitTime" type="time" value="${escapeHTML(v.visitTime)}"></div>
               <div class="form-group"><label>ผู้เยี่ยม</label><input class="input" id="v-visitorName" value="${escapeHTML(v.visitorName)}" placeholder="ชื่อเจ้าหน้าที่"></div>
-              <div class="form-group"><label>ตำแหน่ง</label><input class="input" id="v-visitorRole" value="${escapeHTML(v.visitorRole)}" placeholder="พยาบาลวิชาชีพ / อสม."></div>
+              <div class="form-group"><label>ตำแหน่ง</label><input class="input" id="v-visitorRole" value="${escapeHTML(v.visitorRole)}" placeholder="พยาบาลวิชาชีพ"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group full"><label>ชื่อ อสม. ในพื้นที่</label><input class="input" id="v-asmName" value="${escapeHTML(v.asmName)}" placeholder="ชื่อ - สกุล อสม. ผู้ดูแลพื้นที่"></div>
             </div>
           </div>
+
           <div class="form-section">
             <h4>การกินยา</h4>
             <div class="toggle-group">
@@ -2417,25 +2464,51 @@ function openVisitModal(id = null) {
               <div class="form-group"><label>จำนวนมื้อที่ขาด (โดยประมาณ)</label><input class="input" id="v-missedDoses" type="number" min="0" value="${escapeHTML(v.missedDoses || 0)}" style="max-width: 200px;"></div>
             </div>
           </div>
+
           <div class="form-section">
-            <h4>อาการที่พบ</h4>
-            <div class="check-grid" id="v-symptoms">
-              ${Object.entries(SYMPTOM_LABELS).map(([k, l]) => `<label class="check-item ${v.symptoms?.[k] ? 'checked' : ''}" data-sym="${k}" onclick="toggleSymptom('${k}')"><span class="box"></span><span>${l}</span></label>`).join('')}
-            </div>
-            <div class="form-group" style="margin-top: 10px;"><label>ผลข้างเคียงจากยา</label><input class="input" id="v-sideEffects" value="${escapeHTML(v.sideEffects)}" placeholder="เช่น ตับอักเสบ คลื่นไส้ ผื่น"></div>
-          </div>
-          <div class="form-section">
-            <h4>สัญญาณชีพ (ถ้ามี)</h4>
+            <h4>สัญญาณชีพ (Vital Signs)</h4>
             <div class="form-row">
               <div class="form-group"><label>น้ำหนัก (kg)</label><input class="input" id="v-weight" value="${escapeHTML(v.weight)}" placeholder="55"></div>
               <div class="form-group"><label>ความดัน (mmHg)</label><input class="input" id="v-bloodPressure" value="${escapeHTML(v.bloodPressure)}" placeholder="120/80"></div>
+              <div class="form-group"><label>ชีพจร (bpm)</label><input class="input" id="v-pulse" value="${escapeHTML(v.pulse)}" placeholder="72"></div>
+              <div class="form-group"><label>การหายใจ (/min)</label><input class="input" id="v-respiration" value="${escapeHTML(v.respiration)}" placeholder="18"></div>
               <div class="form-group"><label>อุณหภูมิ (°C)</label><input class="input" id="v-temperature" value="${escapeHTML(v.temperature)}" placeholder="37.0"></div>
+              <div class="form-group"><label>SpO₂ (%)</label><input class="input" id="v-spo2" value="${escapeHTML(v.spo2)}" placeholder="98"></div>
             </div>
           </div>
+
+          <div class="form-section">
+            <h4>อาการของวัณโรคที่พบ</h4>
+            <div class="check-grid" id="v-symptoms">
+              ${Object.entries(SYMPTOM_LABELS).map(([k, l]) => `<label class="check-item ${v.symptoms?.[k] ? 'checked' : ''}" data-sym="${k}" onclick="toggleSymptom('${k}')"><span class="box"></span><span>${l}</span></label>`).join('')}
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h4>อาการทั่วไป</h4>
+            <div class="check-grid" id="v-generalSymptoms">
+              ${Object.entries(GENERAL_SYMPTOM_LABELS).map(([k, l]) => `<label class="check-item ${v.generalSymptoms?.[k] ? 'checked' : ''}" data-gsym="${k}" onclick="toggleGeneralSymptom('${k}')"><span class="box"></span><span>${l}</span></label>`).join('')}
+            </div>
+            <div class="form-group" style="margin-top: 10px;"><label>อื่น ๆ ระบุ</label><input class="input" id="v-generalSymptomsOther" value="${escapeHTML(v.generalSymptomsOther)}" placeholder="ระบุอาการทั่วไปอื่น ๆ"></div>
+            <div class="form-group" style="margin-top: 10px;"><label>ผลข้างเคียงจากยา</label><input class="input" id="v-sideEffects" value="${escapeHTML(v.sideEffects)}" placeholder="เช่น ตับอักเสบ คลื่นไส้ ผื่น"></div>
+          </div>
+
+          <div class="form-section">
+            <h4>⚠️ อาการที่ควรมาพบแพทย์</h4>
+            <div class="warning-banner">
+              <span style="font-size:18px; line-height:1;">⚠️</span>
+              <span>หากมีอาการต่อไปนี้ ผู้ป่วยควรหยุดยาและ<strong>มาพบแพทย์ทันที</strong> เนื่องจากอาจเป็นผลข้างเคียงที่รุนแรง</span>
+            </div>
+            <div class="check-grid warning" id="v-warningSigns">
+              ${Object.entries(WARNING_SIGN_LABELS).map(([k, l]) => `<label class="check-item ${v.warningSigns?.[k] ? 'checked' : ''}" data-warn="${k}" onclick="toggleWarningSign('${k}')"><span class="box"></span><span>${l}</span></label>`).join('')}
+            </div>
+          </div>
+
           <div class="form-section">
             <h4>บันทึกเพิ่มเติม</h4>
             <div class="form-group"><textarea class="textarea" id="v-notes" placeholder="บันทึกการเยี่ยมบ้าน สภาพแวดล้อม คำแนะนำที่ให้...">${escapeHTML(v.notes)}</textarea></div>
           </div>
+
           <div class="form-section">
             <h4>รูปภาพประกอบ (อัพโหลดขึ้น Google Drive)</h4>
             <label class="photo-uploader">
@@ -2454,6 +2527,16 @@ function openVisitModal(id = null) {
       </div>
     </div>`;
   refreshPhotoPreview();
+}
+
+function toggleGeneralSymptom(key) {
+  const el = document.querySelector(`[data-gsym="${key}"]`);
+  if (el) el.classList.toggle('checked');
+}
+
+function toggleWarningSign(key) {
+  const el = document.querySelector(`[data-warn="${key}"]`);
+  if (el) el.classList.toggle('checked');
 }
 
 function setMedStatus(s) {
@@ -2502,6 +2585,14 @@ async function saveVisit(id) {
   document.querySelectorAll('#v-symptoms .check-item').forEach(el => {
     if (el.classList.contains('checked')) symptoms[el.dataset.sym] = true;
   });
+  const generalSymptoms = {};
+  document.querySelectorAll('#v-generalSymptoms .check-item').forEach(el => {
+    if (el.classList.contains('checked')) generalSymptoms[el.dataset.gsym] = true;
+  });
+  const warningSigns = {};
+  document.querySelectorAll('#v-warningSigns .check-item').forEach(el => {
+    if (el.classList.contains('checked')) warningSigns[el.dataset.warn] = true;
+  });
 
   let medicationTaken = null;
   if (document.getElementById('v-med-taken').classList.contains('active')) medicationTaken = true;
@@ -2537,23 +2628,37 @@ async function saveVisit(id) {
   const data = {
     patientId: State.currentPatientId,
     date,
+    visitTime: get('visitTime'),
     visitorName: get('visitorName'),
     visitorRole: get('visitorRole'),
+    asmName: get('asmName'),
     medicationTaken,
     missedDoses: parseInt(get('missedDoses')) || 0,
     symptoms,
+    generalSymptoms,
+    generalSymptomsOther: get('generalSymptomsOther'),
+    warningSigns,
     sideEffects: get('sideEffects'),
     weight: get('weight'),
     bloodPressure: get('bloodPressure'),
+    pulse: get('pulse'),
+    respiration: get('respiration'),
     temperature: get('temperature'),
+    spo2: get('spo2'),
     notes: get('notes'),
     photos: allPhotos
   };
 
   try {
-    const created = await API.addVisit(data);
-    State.visits.unshift(normalizeVisit(created));
-    toast('บันทึกการเยี่ยมบ้านเรียบร้อย', 'success');
+    if (State.demo) {
+      const created = normalizeVisit({ ...data, id: 'demo-v-' + Date.now() });
+      State.visits.unshift(created);
+      toast('บันทึกการเยี่ยม (Demo)', 'success');
+    } else {
+      const created = await API.addVisit(data);
+      State.visits.unshift(normalizeVisit(created));
+      toast('บันทึกการเยี่ยมบ้านเรียบร้อย', 'success');
+    }
     visitPhotos = [];
     closeModal();
     render();
