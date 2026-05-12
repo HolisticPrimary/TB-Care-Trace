@@ -2478,19 +2478,11 @@ function openVisitModal(id = null) {
           </div>
 
           <div class="form-section">
-            <h4>อาการของวัณโรคที่พบ</h4>
-            <div class="check-grid" id="v-symptoms">
-              ${Object.entries(SYMPTOM_LABELS).map(([k, l]) => `<label class="check-item ${v.symptoms?.[k] ? 'checked' : ''}" data-sym="${k}" onclick="toggleSymptom('${k}')"><span class="box"></span><span>${l}</span></label>`).join('')}
-            </div>
-          </div>
-
-          <div class="form-section">
-            <h4>อาการทั่วไป</h4>
+            <h4>อาการทั่วไปที่พบ</h4>
             <div class="check-grid" id="v-generalSymptoms">
               ${Object.entries(GENERAL_SYMPTOM_LABELS).map(([k, l]) => `<label class="check-item ${v.generalSymptoms?.[k] ? 'checked' : ''}" data-gsym="${k}" onclick="toggleGeneralSymptom('${k}')"><span class="box"></span><span>${l}</span></label>`).join('')}
             </div>
-            <div class="form-group" style="margin-top: 10px;"><label>อื่น ๆ ระบุ</label><input class="input" id="v-generalSymptomsOther" value="${escapeHTML(v.generalSymptomsOther)}" placeholder="ระบุอาการทั่วไปอื่น ๆ"></div>
-            <div class="form-group" style="margin-top: 10px;"><label>ผลข้างเคียงจากยา</label><input class="input" id="v-sideEffects" value="${escapeHTML(v.sideEffects)}" placeholder="เช่น ตับอักเสบ คลื่นไส้ ผื่น"></div>
+            <div class="form-group" style="margin-top: 10px;"><label>อื่น ๆ ระบุ</label><input class="input" id="v-generalSymptomsOther" value="${escapeHTML(v.generalSymptomsOther)}" placeholder="ระบุอาการอื่น ๆ ที่พบ"></div>
           </div>
 
           <div class="form-section">
@@ -2581,10 +2573,6 @@ async function saveVisit(id) {
   const date = get('date');
   if (!date) { toast('กรุณาเลือกวันที่เยี่ยม', 'error'); return; }
 
-  const symptoms = {};
-  document.querySelectorAll('#v-symptoms .check-item').forEach(el => {
-    if (el.classList.contains('checked')) symptoms[el.dataset.sym] = true;
-  });
   const generalSymptoms = {};
   document.querySelectorAll('#v-generalSymptoms .check-item').forEach(el => {
     if (el.classList.contains('checked')) generalSymptoms[el.dataset.gsym] = true;
@@ -2634,11 +2622,9 @@ async function saveVisit(id) {
     asmName: get('asmName'),
     medicationTaken,
     missedDoses: parseInt(get('missedDoses')) || 0,
-    symptoms,
     generalSymptoms,
     generalSymptomsOther: get('generalSymptomsOther'),
     warningSigns,
-    sideEffects: get('sideEffects'),
     weight: get('weight'),
     bloodPressure: get('bloodPressure'),
     pulse: get('pulse'),
