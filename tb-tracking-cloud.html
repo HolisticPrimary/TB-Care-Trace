@@ -398,9 +398,11 @@
   }
   .status-active { background: var(--primary-soft); color: var(--primary-dark); }
   .status-cured { background: var(--success-soft); color: var(--success); }
+  .status-treatmentComplete { background: #dbeafe; color: #1e40af; }
   .status-lost { background: var(--warning-soft); color: var(--warning); }
   .status-transferred { background: #e8e3f0; color: #5d4a8a; }
   .status-died { background: #ebe7e4; color: #5a4a44; }
+  .status-diagnosisChange { background: #fef3c7; color: #92400e; }
 
   .treatment-progress {
     margin-top: 14px;
@@ -922,6 +924,92 @@
     color: var(--ink-500);
     margin-bottom: 12px;
   }
+  .form-section h4 .count-pill {
+    margin-left: 8px;
+    padding: 2px 9px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--ink-700);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .contact-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .contact-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .contact-card-head span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: 0.3px;
+  }
+  .contact-card .form-row {
+    grid-template-columns: 2fr 80px 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+  .contact-card .input,
+  .contact-card .select { padding: 7px 10px; font-size: 13px; }
+  .contact-card .form-group label { font-size: 11px; }
+  .contact-remove {
+    width: 28px; height: 28px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--ink-500);
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: all .15s;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .contact-remove:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(220,38,38,.06);
+  }
+  .contact-add-btn {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all .15s;
+  }
+  .contact-add-btn:hover {
+    background: var(--bg-elevated);
+    border-color: var(--primary);
+  }
+  .contact-empty {
+    padding: 14px;
+    text-align: center;
+    color: var(--ink-500);
+    font-size: 13px;
+    background: var(--bg-elevated);
+    border-radius: 8px;
+    border: 1px dashed var(--border);
+    margin-bottom: 10px;
+  }
+  @media (max-width: 720px) {
+    .contact-card .form-row { grid-template-columns: 1fr 1fr; }
+  }
 
   .check-grid {
     display: grid;
@@ -1332,11 +1420,17 @@ const State = {
    ═══════════════════════════════════════════════════════════════ */
 const STATUS_LABELS = {
   active: 'กำลังรักษา',
+  transferred: 'ส่งต่อ รพ.',
+  died: 'เสียชีวิต',
+  treatmentComplete: 'รักษาครบ',
   cured: 'รักษาหาย',
   lost: 'ขาดยา',
-  transferred: 'ส่งต่อ',
-  died: 'เสียชีวิต'
+  diagnosisChange: 'เปลี่ยนการวินิจฉัย'
 };
+const TEST_RESULTS = ['AFB','AFB Post','TB Lamp Post','X-pert Detect','CT','Film'];
+const PATIENT_TYPES = ['รายใหม่','กลับมาเป็นซ้ำ','รับโอนจากที่อื่น','โอนออกไปที่อื่น'];
+const ZONES = ['201','202','203','204','205','206','207','208','209','ในเขต','นอกเขต'];
+const IGRA_RESULTS = ['Positive','Negative','Indeterminate','Pending','Not done'];
 const SYMPTOM_LABELS = {
   cough: 'ไอเรื้อรัง',
   fever: 'ไข้',
@@ -1397,8 +1491,20 @@ function normalizePatient(p) {
     ...p,
     diagnosisDate: toISODateOnly(p.diagnosisDate),
     treatmentStartDate: toISODateOnly(p.treatmentStartDate),
-    regimenMonths: parseInt(p.regimenMonths) || 6
+    regimenMonths: parseInt(p.regimenMonths) || 6,
+    householdContacts: safeJSON(p.householdContacts, [])
   };
+}
+
+function fullAddress(p) {
+  const parts = [
+    p.addrNo,
+    p.addrMoo ? `ม.${p.addrMoo}` : '',
+    p.addrTambon ? `ต.${p.addrTambon}` : '',
+    p.addrAmphoe ? `อ.${p.addrAmphoe}` : '',
+    p.addrProvince ? `จ.${p.addrProvince}` : ''
+  ].filter(Boolean);
+  return parts.length ? parts.join(' ') : (p.address || '');
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -1661,24 +1767,28 @@ function renderDetail() {
 }
 
 function renderInfoTab(p) {
+  const statusLabel = STATUS_LABELS[p.status || 'active'] || STATUS_LABELS.active;
+  const statusDisplay = (p.status === 'transferred' && p.transferTo) ? `${statusLabel} (${p.transferTo})` : statusLabel;
   const fields = [
     ['ชื่อ-นามสกุล', p.name],
     ['HN', p.hn],
     ['อายุ', p.age ? p.age + ' ปี' : null],
     ['เพศ', p.gender],
     ['เบอร์โทร', p.phone],
-    ['ที่อยู่', p.address],
+    ['ที่อยู่', fullAddress(p)],
+    ['เขตพื้นที่รับผิดชอบ', p.zone],
     ['ผู้ดูแล / ผู้ติดต่อ', p.contactPerson],
-    ['สถานะ', STATUS_LABELS[p.status || 'active']]
+    ['สถานะ', statusDisplay]
   ];
   const treatment = [
-    ['วันที่วินิจฉัย', fmtDate(p.diagnosisDate)],
     ['วันที่เริ่มรักษา', fmtDate(p.treatmentStartDate)],
     ['สูตรยา (Regimen)', p.regimen],
     ['ระยะเวลารักษา', p.regimenMonths ? p.regimenMonths + ' เดือน' : null],
-    ['ผลเสมหะ AFB', p.afbResult],
+    ['ผลตรวจ', p.testResult || p.afbResult],
     ['ประเภทผู้ป่วย', p.patientType]
   ];
+
+  const contacts = Array.isArray(p.householdContacts) ? p.householdContacts : [];
 
   return `
     <div class="section-title"><h3>ข้อมูลส่วนบุคคล</h3></div>
@@ -1697,6 +1807,37 @@ function renderInfoTab(p) {
           <span class="value ${!v || v === '—' ? 'empty' : ''}">${v && v !== '—' ? escapeHTML(v) : '— ยังไม่ระบุ —'}</span>
         </div>`).join('')}
     </div>
+    <div class="section-title"><h3>ผู้สัมผัสร่วมบ้าน <span style="font-weight:400; color:var(--ink-500); font-size:13px;">· จำนวน ${contacts.length} ราย</span></h3></div>
+    ${contacts.length === 0 ? `
+      <div style="padding:18px; text-align:center; background:var(--bg-elevated); border:1px dashed var(--border); border-radius:10px; color:var(--ink-500); font-size:13px;">— ยังไม่มีข้อมูลผู้สัมผัสร่วมบ้าน —</div>
+    ` : `
+      <div style="overflow-x:auto; border:1px solid var(--border); border-radius:10px;">
+        <table style="width:100%; border-collapse:collapse; font-size:13.5px; background:var(--surface);">
+          <thead>
+            <tr style="background:var(--bg-elevated); text-align:left;">
+              <th style="padding:10px 14px; font-weight:600; color:var(--ink-700); border-bottom:1px solid var(--border);">#</th>
+              <th style="padding:10px 14px; font-weight:600; color:var(--ink-700); border-bottom:1px solid var(--border);">ชื่อ-นามสกุล</th>
+              <th style="padding:10px 14px; font-weight:600; color:var(--ink-700); border-bottom:1px solid var(--border);">อายุ</th>
+              <th style="padding:10px 14px; font-weight:600; color:var(--ink-700); border-bottom:1px solid var(--border);">วันที่ CXR</th>
+              <th style="padding:10px 14px; font-weight:600; color:var(--ink-700); border-bottom:1px solid var(--border);">วันที่ตรวจ IGRAs</th>
+              <th style="padding:10px 14px; font-weight:600; color:var(--ink-700); border-bottom:1px solid var(--border);">ผล IGRAs</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${contacts.map((c, i) => `
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:10px 14px; color:var(--ink-500);">${i + 1}</td>
+                <td style="padding:10px 14px;">${c.name ? escapeHTML(c.name) : '<span style="color:var(--ink-500);">—</span>'}</td>
+                <td style="padding:10px 14px;">${c.age ? escapeHTML(c.age) + ' ปี' : '<span style="color:var(--ink-500);">—</span>'}</td>
+                <td style="padding:10px 14px;">${c.cxrDate ? fmtDate(c.cxrDate) : '<span style="color:var(--ink-500);">—</span>'}</td>
+                <td style="padding:10px 14px;">${c.igraDate ? fmtDate(c.igraDate) : '<span style="color:var(--ink-500);">—</span>'}</td>
+                <td style="padding:10px 14px;">${c.igraResult ? escapeHTML(c.igraResult) : '<span style="color:var(--ink-500);">—</span>'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `}
     ${p.notes ? `
       <div class="section-title"><h3>หมายเหตุ</h3></div>
       <div style="background: var(--bg-elevated); padding: 16px; border-radius: 10px; white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: var(--ink-700); border: 1px solid var(--border);">${escapeHTML(p.notes)}</div>
@@ -1868,11 +2009,19 @@ function renderSymptomsTab(p, visits) {
 function openPatientModal(id = null) {
   const isEdit = !!id;
   const p = isEdit ? State.patients.find(x => x.id === id) : {
-    name: '', hn: '', age: '', gender: '', phone: '', address: '',
-    contactPerson: '', diagnosisDate: '', treatmentStartDate: '',
+    name: '', hn: '', age: '', gender: '', phone: '',
+    addrNo: '', addrMoo: '', addrTambon: '', addrAmphoe: '', addrProvince: '',
+    zone: '', contactPerson: '', treatmentStartDate: '',
     regimen: '2HRZE / 4HR', regimenMonths: 6, status: 'active',
-    afbResult: '', patientType: '', notes: ''
+    testResult: '', patientType: '', transferTo: '',
+    householdContacts: [], notes: ''
   };
+  // legacy fallback: keep old address string visible if new fields empty
+  if (isEdit && p.address && !p.addrNo && !p.addrMoo && !p.addrTambon && !p.addrAmphoe && !p.addrProvince) {
+    p.addrNo = p.address;
+  }
+  // ensure household contacts is array
+  householdContacts = Array.isArray(p.householdContacts) ? p.householdContacts.map(c => ({...c})) : [];
 
   document.getElementById('modalRoot').innerHTML = `
     <div class="modal-backdrop" onclick="if(event.target===this) closeModal()">
@@ -1899,45 +2048,65 @@ function openPatientModal(id = null) {
               </div>
               <div class="form-group"><label>เบอร์โทร</label><input class="input" id="f-phone" value="${escapeHTML(p.phone)}" placeholder="08X-XXX-XXXX"></div>
             </div>
-            <div class="form-row"><div class="form-group full"><label>ที่อยู่</label><input class="input" id="f-address" value="${escapeHTML(p.address)}" placeholder="บ้านเลขที่ หมู่ ตำบล อำเภอ จังหวัด"></div></div>
-            <div class="form-row"><div class="form-group full"><label>ผู้ดูแล / ผู้ติดต่อ</label><input class="input" id="f-contact" value="${escapeHTML(p.contactPerson)}" placeholder="ชื่อ - ความสัมพันธ์ - เบอร์โทร"></div></div>
           </div>
+
+          <div class="form-section">
+            <h4>ที่อยู่</h4>
+            <div class="form-row">
+              <div class="form-group"><label>บ้านเลขที่</label><input class="input" id="f-addrNo" value="${escapeHTML(p.addrNo)}" placeholder="123/4"></div>
+              <div class="form-group"><label>หมู่</label><input class="input" id="f-addrMoo" value="${escapeHTML(p.addrMoo)}" placeholder="5"></div>
+              <div class="form-group"><label>ตำบล</label><input class="input" id="f-addrTambon" value="${escapeHTML(p.addrTambon)}" placeholder="ทับคล้อ"></div>
+              <div class="form-group"><label>อำเภอ</label><input class="input" id="f-addrAmphoe" value="${escapeHTML(p.addrAmphoe)}" placeholder="ทับคล้อ"></div>
+              <div class="form-group"><label>จังหวัด</label><input class="input" id="f-addrProvince" value="${escapeHTML(p.addrProvince)}" placeholder="พิจิตร"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>เขตพื้นที่รับผิดชอบ</label>
+                <select class="select" id="f-zone">
+                  <option value="">—</option>
+                  ${ZONES.map(z => `<option value="${z}" ${p.zone === z ? 'selected' : ''}>${z}</option>`).join('')}
+                </select>
+              </div>
+              <div class="form-group" style="grid-column: span 2;"><label>ผู้ดูแล / ผู้ติดต่อ</label><input class="input" id="f-contact" value="${escapeHTML(p.contactPerson)}" placeholder="ชื่อ - ความสัมพันธ์ - เบอร์โทร"></div>
+            </div>
+          </div>
+
           <div class="form-section">
             <h4>ข้อมูลการรักษา</h4>
             <div class="form-row">
-              <div class="form-group"><label>วันที่วินิจฉัย</label><input class="input" id="f-diagnosisDate" type="date" value="${escapeHTML(p.diagnosisDate)}"></div>
               <div class="form-group"><label>วันที่เริ่มรักษา</label><input class="input" id="f-treatmentStartDate" type="date" value="${escapeHTML(p.treatmentStartDate)}"></div>
               <div class="form-group"><label>ระยะเวลา (เดือน)</label><input class="input" id="f-regimenMonths" type="number" value="${escapeHTML(p.regimenMonths)}" placeholder="6"></div>
+              <div class="form-group"><label>สูตรยา (Regimen)</label><input class="input" id="f-regimen" value="${escapeHTML(p.regimen)}" placeholder="2HRZE / 4HR"></div>
             </div>
             <div class="form-row">
-              <div class="form-group"><label>สูตรยา (Regimen)</label><input class="input" id="f-regimen" value="${escapeHTML(p.regimen)}" placeholder="2HRZE / 4HR"></div>
-              <div class="form-group"><label>ผล AFB</label>
-                <select class="select" id="f-afbResult">
+              <div class="form-group"><label>ผลตรวจ</label>
+                <select class="select" id="f-testResult">
                   <option value="">—</option>
-                  <option ${p.afbResult === 'Positive' ? 'selected' : ''}>Positive</option>
-                  <option ${p.afbResult === 'Negative' ? 'selected' : ''}>Negative</option>
-                  <option ${p.afbResult === 'Not done' ? 'selected' : ''}>Not done</option>
+                  ${TEST_RESULTS.map(t => `<option value="${t}" ${(p.testResult || p.afbResult) === t ? 'selected' : ''}>${t}</option>`).join('')}
                 </select>
               </div>
               <div class="form-group"><label>ประเภทผู้ป่วย</label>
                 <select class="select" id="f-patientType">
                   <option value="">—</option>
-                  <option ${p.patientType === 'New' ? 'selected' : ''}>New (รายใหม่)</option>
-                  <option ${p.patientType === 'Relapse' ? 'selected' : ''}>Relapse (กลับเป็นซ้ำ)</option>
-                  <option ${p.patientType === 'Treatment after failure' ? 'selected' : ''}>Treatment after failure</option>
-                  <option ${p.patientType === 'Treatment after default' ? 'selected' : ''}>Treatment after default</option>
-                  <option ${p.patientType === 'Other' ? 'selected' : ''}>Other</option>
+                  ${PATIENT_TYPES.map(t => `<option value="${t}" ${p.patientType === t ? 'selected' : ''}>${t}</option>`).join('')}
                 </select>
               </div>
-            </div>
-            <div class="form-row">
               <div class="form-group"><label>สถานะ</label>
-                <select class="select" id="f-status">
+                <select class="select" id="f-status" onchange="toggleTransferTo()">
                   ${Object.entries(STATUS_LABELS).map(([k, v]) => `<option value="${k}" ${p.status === k ? 'selected' : ''}>${v}</option>`).join('')}
                 </select>
               </div>
             </div>
+            <div class="form-row" id="transferToRow" style="display:${p.status === 'transferred' ? 'grid' : 'none'};">
+              <div class="form-group full"><label>ส่งต่อไปยัง รพ. (ระบุ)</label><input class="input" id="f-transferTo" value="${escapeHTML(p.transferTo)}" placeholder="เช่น รพ.พิจิตร, รพ.สมเด็จพระยุพราชตะพานหิน"></div>
+            </div>
           </div>
+
+          <div class="form-section">
+            <h4>ผู้สัมผัสร่วมบ้าน<span class="count-pill">จำนวน <span id="hcCount">0</span> ราย</span></h4>
+            <div id="householdList"></div>
+            <button type="button" class="contact-add-btn" onclick="addHouseholdContact()">+ เพิ่มผู้สัมผัสร่วมบ้าน</button>
+          </div>
+
           <div class="form-section">
             <h4>หมายเหตุ</h4>
             <div class="form-group"><textarea class="textarea" id="f-notes" placeholder="โรคประจำตัว / แพ้ยา / อื่นๆ">${escapeHTML(p.notes)}</textarea></div>
@@ -1949,6 +2118,60 @@ function openPatientModal(id = null) {
         </div>
       </div>
     </div>`;
+  renderHouseholdList();
+}
+
+let householdContacts = [];
+
+function renderHouseholdList() {
+  const list = document.getElementById('householdList');
+  const count = document.getElementById('hcCount');
+  if (count) count.textContent = householdContacts.length;
+  if (!list) return;
+  if (householdContacts.length === 0) {
+    list.innerHTML = '<div class="contact-empty">ยังไม่มีผู้สัมผัสร่วมบ้าน — กดปุ่มด้านล่างเพื่อเพิ่ม</div>';
+    return;
+  }
+  list.innerHTML = householdContacts.map((c, i) => `
+    <div class="contact-card">
+      <div class="contact-card-head">
+        <span>ผู้สัมผัสคนที่ ${i + 1}</span>
+        <button type="button" class="contact-remove" onclick="removeHouseholdContact(${i})" title="ลบ">✕</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>ชื่อ-นามสกุล</label><input class="input" oninput="updateHC(${i},'name',this.value)" value="${escapeHTML(c.name || '')}" placeholder="ชื่อ-นามสกุล"></div>
+        <div class="form-group"><label>อายุ</label><input class="input" type="number" oninput="updateHC(${i},'age',this.value)" value="${escapeHTML(c.age || '')}" placeholder="—"></div>
+        <div class="form-group"><label>วันที่ CXR</label><input class="input" type="date" onchange="updateHC(${i},'cxrDate',this.value)" value="${escapeHTML(c.cxrDate || '')}"></div>
+        <div class="form-group"><label>วันที่ตรวจ IGRAs</label><input class="input" type="date" onchange="updateHC(${i},'igraDate',this.value)" value="${escapeHTML(c.igraDate || '')}"></div>
+        <div class="form-group"><label>ผล IGRAs</label>
+          <select class="select" onchange="updateHC(${i},'igraResult',this.value)">
+            <option value="">—</option>
+            ${IGRA_RESULTS.map(r => `<option value="${r}" ${c.igraResult === r ? 'selected' : ''}>${r}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addHouseholdContact() {
+  householdContacts.push({ name: '', age: '', cxrDate: '', igraDate: '', igraResult: '' });
+  renderHouseholdList();
+}
+
+function removeHouseholdContact(i) {
+  householdContacts.splice(i, 1);
+  renderHouseholdList();
+}
+
+function updateHC(i, field, value) {
+  if (householdContacts[i]) householdContacts[i][field] = value;
+}
+
+function toggleTransferTo() {
+  const status = document.getElementById('f-status');
+  const row = document.getElementById('transferToRow');
+  if (status && row) row.style.display = (status.value === 'transferred') ? 'grid' : 'none';
 }
 
 async function savePatient(id) {
@@ -1956,14 +2179,33 @@ async function savePatient(id) {
   const name = get('name');
   if (!name) { toast('กรุณากรอกชื่อผู้ป่วย', 'error'); document.getElementById('f-name').focus(); return; }
 
+  const status = get('status') || 'active';
+  const cleanedContacts = householdContacts
+    .map(c => ({
+      name: (c.name || '').trim(),
+      age: (c.age || '').toString().trim(),
+      cxrDate: (c.cxrDate || '').trim(),
+      igraDate: (c.igraDate || '').trim(),
+      igraResult: (c.igraResult || '').trim()
+    }))
+    .filter(c => c.name || c.age || c.cxrDate || c.igraDate || c.igraResult);
+
   const data = {
-    name, hn: get('hn'), age: get('age'), gender: get('gender'),
-    phone: get('phone'), address: get('address'), contactPerson: get('contact'),
-    diagnosisDate: get('diagnosisDate'), treatmentStartDate: get('treatmentStartDate'),
+    name, hn: get('hn'), age: get('age'), gender: get('gender'), phone: get('phone'),
+    addrNo: get('addrNo'), addrMoo: get('addrMoo'), addrTambon: get('addrTambon'),
+    addrAmphoe: get('addrAmphoe'), addrProvince: get('addrProvince'),
+    zone: get('zone'), contactPerson: get('contact'),
+    treatmentStartDate: get('treatmentStartDate'),
     regimen: get('regimen'), regimenMonths: parseInt(get('regimenMonths')) || 6,
-    afbResult: get('afbResult'), patientType: get('patientType'),
-    status: get('status') || 'active', notes: get('notes')
+    testResult: get('testResult'), patientType: get('patientType'),
+    status, transferTo: status === 'transferred' ? get('transferTo') : '',
+    householdContacts: cleanedContacts,
+    notes: get('notes')
   };
+  // Build combined address string for backward compatibility (legacy 'address' column)
+  data.address = fullAddress(data);
+  // Keep legacy 'afbResult' in sync with new testResult (backward compat for old rows/columns)
+  data.afbResult = data.testResult;
 
   const btn = document.getElementById('savePatientBtn');
   btn.disabled = true;
