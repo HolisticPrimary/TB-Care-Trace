@@ -845,6 +845,203 @@
     color: var(--ink-300);
   }
 
+  /* Zone Dropdown — fully custom for consistent cross-theme appearance */
+  .zone-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  .zone-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0 14px 0 12px;
+    height: 44px;
+    min-width: 200px;
+    color: var(--ink-900);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+  }
+  .zone-trigger:hover {
+    border-color: #1a3a5e;
+    box-shadow: 0 2px 8px rgba(26, 58, 94, 0.08);
+  }
+  .zone-dropdown.open .zone-trigger {
+    border-color: #2960c4;
+    box-shadow: 0 0 0 3px rgba(41, 96, 196, 0.12);
+  }
+  [data-theme="dark"] .zone-trigger:hover {
+    border-color: #2960c4;
+  }
+  [data-theme="dark"] .zone-dropdown.open .zone-trigger {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.20);
+  }
+  .zone-trigger .zone-icon {
+    color: #1a3a5e;
+    flex-shrink: 0;
+  }
+  [data-theme="dark"] .zone-trigger .zone-icon { color: #6ba3f5; }
+  .zone-trigger-label {
+    flex: 1;
+    text-align: left;
+  }
+  .zone-chevron {
+    color: var(--ink-500);
+    transition: transform .25s cubic-bezier(.34, 1.56, .64, 1);
+    flex-shrink: 0;
+  }
+  .zone-dropdown.open .zone-chevron { transform: rotate(180deg); color: #1a3a5e; }
+  [data-theme="dark"] .zone-dropdown.open .zone-chevron { color: #6ba3f5; }
+
+  /* Dropdown panel */
+  .zone-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    min-width: 240px;
+    max-height: 360px;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow:
+      0 12px 32px rgba(13, 37, 66, 0.12),
+      0 4px 12px rgba(0, 0, 0, 0.06);
+    padding: 6px;
+    z-index: 100;
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    transform-origin: top center;
+    transition: opacity .2s ease, transform .2s cubic-bezier(.34, 1.56, .64, 1);
+    pointer-events: none;
+  }
+  .zone-panel[hidden] { display: none; }
+  .zone-dropdown.open .zone-panel {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  [data-theme="dark"] .zone-panel {
+    background: #1f2932;
+    border-color: rgba(80, 120, 180, 0.22);
+    box-shadow:
+      0 12px 36px rgba(0, 0, 0, 0.55),
+      0 4px 14px rgba(0, 0, 0, 0.32);
+  }
+
+  /* Dropdown option */
+  .zone-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    color: var(--ink-900);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: background .12s ease, color .12s ease;
+  }
+  .zone-option:hover {
+    background: rgba(41, 96, 196, 0.08);
+    color: #1a3a5e;
+  }
+  [data-theme="dark"] .zone-option:hover {
+    background: rgba(107, 163, 245, 0.12);
+    color: #93c0fa;
+  }
+  .zone-option.selected {
+    background: linear-gradient(135deg, rgba(26, 58, 94, 0.08) 0%, rgba(41, 96, 196, 0.08) 100%);
+    color: #1a3a5e;
+    font-weight: 700;
+  }
+  [data-theme="dark"] .zone-option.selected {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(107, 163, 245, 0.12) 100%);
+    color: #93c0fa;
+  }
+  .zone-option .zone-check {
+    color: transparent;
+    flex-shrink: 0;
+    transition: color .15s ease, transform .15s ease;
+  }
+  .zone-option.selected .zone-check {
+    color: #2960c4;
+  }
+  [data-theme="dark"] .zone-option.selected .zone-check { color: #6ba3f5; }
+  .zone-option-label {
+    flex: 1;
+  }
+  .zone-option-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-500);
+    background: var(--bg-elevated);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+  }
+  .zone-option.selected .zone-option-count {
+    color: #fff;
+    background: linear-gradient(135deg, #1a3a5e, #2960c4);
+  }
+  [data-theme="dark"] .zone-option .zone-option-count {
+    background: rgba(255, 255, 255, 0.06);
+    color: #b0c0d4;
+  }
+  [data-theme="dark"] .zone-option.selected .zone-option-count {
+    background: linear-gradient(135deg, #3b82f6, #2960c4);
+    color: #fff;
+  }
+  /* Custom scrollbar inside the panel */
+  .zone-panel::-webkit-scrollbar { width: 8px; }
+  .zone-panel::-webkit-scrollbar-track { background: transparent; }
+  .zone-panel::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+  }
+  .zone-panel::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+  /* Active filter chip — shows when a non-default filter is set */
+  .filters-divider {
+    width: 1px;
+    height: 22px;
+    background: var(--border);
+    margin: 0 8px;
+    flex-shrink: 0;
+  }
+  .filter-btn.active-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #1a3a5e 0%, #2960c4 100%);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    box-shadow:
+      0 3px 10px rgba(26, 58, 94, 0.30),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  .filter-btn.active-filter-chip:hover {
+    background: linear-gradient(135deg, #0d2542 0%, #1a3a5e 100%);
+    color: #fff;
+  }
+  [data-theme="dark"] .filter-btn.active-filter-chip {
+    background: linear-gradient(135deg, #3b82f6 0%, #2960c4 100%);
+  }
+
   .btn {
     padding: 10px 18px;
     border-radius: var(--radius);
@@ -887,6 +1084,53 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow-x: auto;
+    align-items: center;
+  }
+  /* Zone filter row — secondary filter for เขต 201-209 */
+  .filters.filters-zone {
+    background: linear-gradient(180deg, #eef3f9 0%, #f7fafd 100%);
+    border-color: #d9e2ee;
+    padding: 6px 10px 6px 6px;
+  }
+  [data-theme="dark"] .filters.filters-zone {
+    background: linear-gradient(180deg, rgba(60, 96, 160, 0.08) 0%, rgba(40, 50, 70, 0.4) 100%);
+    border-color: rgba(80, 120, 180, 0.20);
+  }
+  .filters-label {
+    padding: 0 12px 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a3a5e;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    border-right: 1px solid #d9e2ee;
+    margin-right: 4px;
+    line-height: 28px;
+  }
+  [data-theme="dark"] .filters-label {
+    color: #93c0fa;
+    border-right-color: rgba(80, 120, 180, 0.30);
+  }
+  /* Zone pill — navy theme when active */
+  .filter-btn.zone-pill {
+    padding: 7px 14px;
+    font-size: 12.5px;
+  }
+  .filter-btn.zone-pill.active {
+    background: linear-gradient(135deg, #1a3a5e 0%, #2960c4 100%);
+    color: #fff;
+    box-shadow:
+      0 3px 10px rgba(26, 58, 94, 0.30),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  [data-theme="dark"] .filter-btn.zone-pill.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2960c4 100%);
+    box-shadow:
+      0 3px 12px rgba(59, 130, 246, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  .filter-btn.zone-pill.active .count {
+    color: rgba(255, 255, 255, 0.92);
   }
   .filter-btn {
     padding: 9px 16px;
@@ -1021,6 +1265,33 @@
   .row-chip.zone-in { background: var(--primary-soft); color: var(--primary-dark); border-color: transparent; }
   .row-chip.zone-out { background: #fef3c7; color: #92400e; border-color: transparent; }
   .row-chip.muted { color: var(--ink-500); }
+  /* Zone-pill: prominent navy chip showing เขตรับผิดชอบ 201-209 */
+  .row-zone-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 9px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    background: linear-gradient(135deg, #1a3a5e 0%, #2960c4 100%);
+    color: #ffffff;
+    border-radius: 999px;
+    margin-left: 4px;
+    box-shadow: 0 1px 3px rgba(26, 58, 94, 0.30);
+  }
+  .row-zone-chip::before {
+    content: "เขต";
+    font-size: 9px;
+    font-weight: 600;
+    opacity: 0.80;
+    letter-spacing: 0.5px;
+    margin-right: 2px;
+  }
+  [data-theme="dark"] .row-zone-chip {
+    background: linear-gradient(135deg, #2960c4 0%, #3b82f6 100%);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.30);
+  }
   .row-mini-progress {
     display: flex;
     flex-direction: column;
@@ -1074,7 +1345,8 @@
   .form-group.has-error .pill-group {
     box-shadow: 0 0 0 1px var(--danger), 0 0 0 4px rgba(179, 70, 62, 0.10);
   }
-  .form-group .field-error {
+  .form-group .field-error,
+  .form-section .field-error {
     display: none;
     margin-top: 5px;
     font-size: 12px;
@@ -1083,7 +1355,21 @@
     align-items: center;
     gap: 4px;
   }
-  .form-group.has-error .field-error { display: inline-flex; }
+  .form-group.has-error .field-error,
+  .form-section.has-error > .field-error { display: inline-flex; }
+  /* Highlight the entire form-section when error */
+  .form-section.has-error {
+    position: relative;
+  }
+  .form-section.has-error h4 { color: var(--danger); }
+  .form-section.has-error .toggle-group {
+    box-shadow: 0 0 0 2px var(--danger), 0 0 0 5px rgba(179, 70, 62, 0.10);
+    border-radius: 10px;
+  }
+  .form-section.has-error .photo-uploader {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(179, 70, 62, 0.10);
+  }
   /* Banner alert at top of modal when form has errors */
   .form-alert {
     display: none;
@@ -1628,6 +1914,18 @@
   .pill-ok { background: var(--success-soft); color: var(--success); }
   .pill-warn { background: var(--warning-soft); color: var(--warning); }
   .pill-bad { background: var(--danger-soft); color: var(--danger); }
+  /* Visit type pill — navy theme to distinguish from status pills */
+  .pill-visit-type {
+    background: linear-gradient(135deg, rgba(26, 58, 94, 0.10) 0%, rgba(41, 96, 196, 0.10) 100%);
+    color: #1a3a5e;
+    border: 1px solid rgba(41, 96, 196, 0.20);
+    font-weight: 600;
+  }
+  [data-theme="dark"] .pill-visit-type {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(107, 163, 245, 0.15) 100%);
+    color: #93c0fa;
+    border-color: rgba(107, 163, 245, 0.30);
+  }
 
   .symptom-chips {
     display: flex;
@@ -4013,6 +4311,7 @@ const State = {
   currentPatientId: null,
   currentTab: 'info',
   filter: 'all',
+  zoneFilter: 'all',  // zone filter: 'all' or '201'..'209'
   search: '',
   lastSync: null,
   syncing: false,
@@ -4058,6 +4357,7 @@ const STATUS_LABELS = {
 const TEST_RESULTS = ['AFB','AFB Post','TB Lamp Post','X-pert Detect','CT','Film'];
 const PATIENT_TYPES = ['รายใหม่','กลับมาเป็นซ้ำ','รับโอนจากที่อื่น','โอนออกไปที่อื่น'];
 const TB_CLASSES = ['วัณโรคในปอด','วัณโรคนอกปอด'];
+const VISIT_TYPES = ['เยี่ยมโดย รพ.สต.','เยี่ยมร่วมกับโรงพยาบาล'];
 const ZONES = ['201','202','203','204','205','206','207','208','209'];
 const AREA_TYPES = ['ในเขต','นอกเขต'];
 const IGRA_RESULTS = ['Positive','Negative','Indeterminate','Pending','Not done'];
@@ -4433,12 +4733,17 @@ function renderList() {
   const stats = getStats();
   const filtered = State.patients.filter(p => {
     if (State.filter !== 'all' && p.status !== State.filter) return false;
+    if (State.zoneFilter !== 'all' && p.zone !== State.zoneFilter) return false;
     if (State.search) {
       const q = State.search.toLowerCase();
       return (p.name || '').toLowerCase().includes(q) || (p.hn || '').toLowerCase().includes(q);
     }
     return true;
   });
+
+  // Count patients per zone for filter pill badges
+  const zoneCounts = {};
+  ZONES.forEach(z => { zoneCounts[z] = State.patients.filter(p => p.zone === z).length; });
 
   document.getElementById('mainView').innerHTML = `
     <div class="stats">
@@ -4454,6 +4759,27 @@ function renderList() {
         ${ICON.search}
         <input type="text" id="searchInput" placeholder="ค้นหาด้วยชื่อ หรือ HN..." value="${escapeHTML(State.search)}">
       </div>
+      <div class="zone-dropdown" id="zoneDropdown" title="กรองตามเขตพื้นที่รับผิดชอบ">
+        <button type="button" class="zone-trigger" onclick="toggleZoneDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
+          <svg class="zone-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9.4 8 10 4.5-.6 8-5 8-10V6l-8-4Z"/></svg>
+          <span class="zone-trigger-label">${State.zoneFilter === 'all' ? `ทุกเขต (${State.patients.length})` : `เขต ${State.zoneFilter} (${zoneCounts[State.zoneFilter] || 0})`}</span>
+          <svg class="zone-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="zone-panel" role="listbox" hidden>
+          <button type="button" role="option" class="zone-option ${State.zoneFilter === 'all' ? 'selected' : ''}" onclick="selectZone('all')">
+            <svg class="zone-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span class="zone-option-label">ทุกเขต</span>
+            <span class="zone-option-count">${State.patients.length}</span>
+          </button>
+          ${ZONES.map(z => `
+            <button type="button" role="option" class="zone-option ${State.zoneFilter === z ? 'selected' : ''}" onclick="selectZone('${z}')">
+              <svg class="zone-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span class="zone-option-label">เขต ${z}</span>
+              <span class="zone-option-count">${zoneCounts[z]}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
       <button class="btn btn-primary" onclick="openPatientModal()">${ICON.plus} เพิ่มผู้ป่วยใหม่</button>
     </div>
 
@@ -4463,6 +4789,14 @@ function renderList() {
         const label = f === 'all' ? 'ทั้งหมด' : STATUS_LABELS[f];
         return `<button class="filter-btn ${State.filter === f ? 'active' : ''}" onclick="setFilter('${f}')">${label}<span class="count">${count}</span></button>`;
       }).join('')}
+      ${State.zoneFilter !== 'all' ? `
+        <div class="filters-divider"></div>
+        <button class="filter-btn active-filter-chip" onclick="setZoneFilter('all')" title="ล้างตัวกรองเขต">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 2 4 6v6c0 5 3.5 9.4 8 10 4.5-.6 8-5 8-10V6l-8-4Z"/></svg>
+          เขต ${State.zoneFilter}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      ` : ''}
     </div>
 
     ${filtered.length === 0 ? `
@@ -4539,7 +4873,7 @@ function renderPatientRow(p) {
         <div class="meta">
           ${p.hn ? `<span class="hn">${escapeHTML(p.hn)}</span>` : ''}
           ${meta.map(m => `<span>${escapeHTML(m)}</span>`).join('<span class="sep"></span>')}
-          ${p.zone ? `<span class="sep"></span><span>เขต ${escapeHTML(p.zone)}</span>` : ''}
+          ${p.zone ? `<span class="row-zone-chip" title="เขตพื้นที่รับผิดชอบ">${escapeHTML(p.zone)}</span>` : ''}
           ${p.areaType ? `<span class="row-chip ${areaClass}" style="margin-left:4px;">${escapeHTML(p.areaType)}</span>` : ''}
         </div>
       </div>
@@ -5525,6 +5859,7 @@ function renderVisitCard(v) {
         <div class="visit-date">
           <span class="date">${fmtDate(v.date)}</span>
           <span class="who">โดย ${escapeHTML(v.visitorName || '—')} ${v.visitorRole ? '· ' + escapeHTML(v.visitorRole) : ''}</span>
+          ${v.visitType ? `<span class="pill pill-visit-type">${escapeHTML(v.visitType)}</span>` : ''}
         </div>
         <div class="visit-status-row">
           ${v.medicationTaken === true ? '<span class="pill pill-ok">✓ กินยาครบ</span>' : ''}
@@ -6016,7 +6351,7 @@ let visitPhotos = []; // { base64?: string, url?: string, name: string, isNew?: 
 function openVisitModal(id = null) {
   const isEdit = !!id;
   const v = isEdit ? State.visits.find(x => x.id === id) : {
-    date: todayISO(), visitTime: '', visitorName: '', visitorRole: '', asmName: '',
+    date: todayISO(), visitTime: '', visitType: '', visitorName: '', visitorRole: '', asmName: '',
     medicationTaken: null, missedDoses: 0,
     symptoms: {}, generalSymptoms: {}, generalSymptomsOther: '',
     warningSigns: {}, sideEffects: '',
@@ -6039,6 +6374,15 @@ function openVisitModal(id = null) {
             <div class="form-row">
               <div class="form-group" data-field="date"><label>วันที่เยี่ยม<span class="req">*</span></label><input class="input" id="v-date" type="date" value="${escapeHTML(v.date)}"><span class="field-error">${ICON.alert} กรุณาเลือกวันที่</span></div>
               <div class="form-group"><label>เวลาที่เยี่ยม</label><input class="input" id="v-visitTime" type="time" value="${escapeHTML(v.visitTime)}"></div>
+              <div class="form-group" data-field="visitType"><label>ลงเยี่ยม<span class="req">*</span></label>
+                <select class="select" id="v-visitType">
+                  <option value="">—</option>
+                  ${VISIT_TYPES.map(t => `<option value="${t}" ${v.visitType === t ? 'selected' : ''}>${t}</option>`).join('')}
+                </select>
+                <span class="field-error">${ICON.alert} กรุณาเลือกประเภทการลงเยี่ยม</span>
+              </div>
+            </div>
+            <div class="form-row">
               <div class="form-group" data-field="visitorName"><label>ผู้เยี่ยม<span class="req">*</span></label><input class="input" id="v-visitorName" value="${escapeHTML(v.visitorName)}" placeholder="ชื่อเจ้าหน้าที่"><span class="field-error">${ICON.alert} กรุณากรอกชื่อผู้เยี่ยม</span></div>
               <div class="form-group"><label>ตำแหน่ง</label><input class="input" id="v-visitorRole" value="${escapeHTML(v.visitorRole)}" placeholder="พยาบาลวิชาชีพ"></div>
             </div>
@@ -6047,13 +6391,14 @@ function openVisitModal(id = null) {
             </div>
           </div>
 
-          <div class="form-section">
-            <h4>การกินยา</h4>
+          <div class="form-section" data-field="medicationTaken">
+            <h4>การกินยา<span class="req">*</span></h4>
             <div class="toggle-group">
               <button type="button" class="toggle-btn taken ${v.medicationTaken === true ? 'active' : ''}" id="v-med-taken" onclick="setMedStatus(true)">✓ กินยาครบ</button>
               <button type="button" class="toggle-btn missed ${v.medicationTaken === false ? 'active' : ''}" id="v-med-missed" onclick="setMedStatus(false)">✗ ขาดยา</button>
               <button type="button" class="toggle-btn ${v.medicationTaken == null ? 'active' : ''}" id="v-med-none" onclick="setMedStatus(null)" style="background: ${v.medicationTaken == null ? 'var(--bg-elevated)' : 'transparent'}; color: var(--ink-700);">— ไม่ทราบ</button>
             </div>
+            <span class="field-error">${ICON.alert} กรุณาเลือกสถานะการกินยา</span>
             <div id="v-missed-doses-wrap" style="margin-top: 10px; ${v.medicationTaken === false ? '' : 'display:none;'}">
               <div class="form-group"><label>จำนวนมื้อที่ขาด (โดยประมาณ)</label><input class="input" id="v-missedDoses" type="number" min="0" value="${escapeHTML(v.missedDoses || 0)}" style="max-width: 200px;"></div>
             </div>
@@ -6062,9 +6407,9 @@ function openVisitModal(id = null) {
           <div class="form-section">
             <h4>สัญญาณชีพ (Vital Signs)</h4>
             <div class="form-row">
-              <div class="form-group"><label>น้ำหนัก (kg)</label><input class="input" id="v-weight" value="${escapeHTML(v.weight)}" placeholder="55"></div>
-              <div class="form-group"><label>ความดัน (mmHg)</label><input class="input" id="v-bloodPressure" value="${escapeHTML(v.bloodPressure)}" placeholder="120/80"></div>
-              <div class="form-group"><label>ชีพจร (bpm)</label><input class="input" id="v-pulse" value="${escapeHTML(v.pulse)}" placeholder="72"></div>
+              <div class="form-group" data-field="weight"><label>น้ำหนัก (kg)<span class="req">*</span></label><input class="input" id="v-weight" value="${escapeHTML(v.weight)}" placeholder="55"><span class="field-error">${ICON.alert} กรุณากรอกน้ำหนัก</span></div>
+              <div class="form-group" data-field="bloodPressure"><label>ความดัน (mmHg)<span class="req">*</span></label><input class="input" id="v-bloodPressure" value="${escapeHTML(v.bloodPressure)}" placeholder="120/80"><span class="field-error">${ICON.alert} กรุณากรอกความดัน</span></div>
+              <div class="form-group" data-field="pulse"><label>ชีพจร (bpm)<span class="req">*</span></label><input class="input" id="v-pulse" value="${escapeHTML(v.pulse)}" placeholder="72"><span class="field-error">${ICON.alert} กรุณากรอกชีพจร</span></div>
               <div class="form-group"><label>การหายใจ (/min)</label><input class="input" id="v-respiration" value="${escapeHTML(v.respiration)}" placeholder="18"></div>
               <div class="form-group"><label>อุณหภูมิ (°C)</label><input class="input" id="v-temperature" value="${escapeHTML(v.temperature)}" placeholder="37.0"></div>
               <div class="form-group"><label>SpO₂ (%)</label><input class="input" id="v-spo2" value="${escapeHTML(v.spo2)}" placeholder="98"></div>
@@ -6095,8 +6440,8 @@ function openVisitModal(id = null) {
             <div class="form-group"><textarea class="textarea" id="v-notes" placeholder="บันทึกการเยี่ยมบ้าน สภาพแวดล้อม คำแนะนำที่ให้...">${escapeHTML(v.notes)}</textarea></div>
           </div>
 
-          <div class="form-section">
-            <h4>รูปภาพประกอบ</h4>
+          <div class="form-section" data-field="photos">
+            <h4>รูปภาพประกอบ<span class="req">*</span></h4>
             <label class="photo-uploader">
               <input type="file" id="v-photo-input" accept="image/*" multiple onchange="handlePhotoUpload(event)">
               <div class="upload-icon">${ICON.upload}</div>
@@ -6107,6 +6452,7 @@ function openVisitModal(id = null) {
                 <span class="upload-chip">หลายไฟล์ได้</span>
               </div>
             </label>
+            <span class="field-error">${ICON.alert} กรุณาแนบรูปภาพอย่างน้อย 1 รูป</span>
             <div class="photo-preview-grid" id="v-photo-preview"></div>
           </div>
         </div>
@@ -6170,24 +6516,41 @@ async function saveVisit(id) {
   const get = (k) => document.getElementById('v-' + k).value.trim();
 
   // Clear previous errors
-  document.querySelectorAll('.modal-body .form-group.has-error').forEach(el => el.classList.remove('has-error'));
+  document.querySelectorAll('.modal-body .form-group.has-error, .modal-body .form-section.has-error').forEach(el => el.classList.remove('has-error'));
   const alertBox = document.getElementById('visitFormAlert');
   if (alertBox) alertBox.classList.remove('show');
 
+  // Determine medication selection state (must have an active toggle)
+  const medSelected =
+    document.getElementById('v-med-taken').classList.contains('active') ||
+    document.getElementById('v-med-missed').classList.contains('active') ||
+    document.getElementById('v-med-none').classList.contains('active');
+
+  // Photos: must have at least 1 (existing or newly added)
+  const hasPhoto = (typeof visitPhotos !== 'undefined') && visitPhotos.length > 0;
+
   // Validate required fields
   const required = [
-    { field: 'date',         value: get('date'),         label: 'วันที่เยี่ยม' },
-    { field: 'visitorName',  value: get('visitorName'),  label: 'ผู้เยี่ยม' }
+    { field: 'date',           value: get('date'),           label: 'วันที่เยี่ยม' },
+    { field: 'visitType',      value: get('visitType'),      label: 'ลงเยี่ยม' },
+    { field: 'visitorName',    value: get('visitorName'),    label: 'ผู้เยี่ยม' },
+    { field: 'medicationTaken',value: medSelected ? 'ok' : '', label: 'การกินยา' },
+    { field: 'weight',         value: get('weight'),         label: 'น้ำหนัก' },
+    { field: 'bloodPressure',  value: get('bloodPressure'),  label: 'ความดัน' },
+    { field: 'pulse',          value: get('pulse'),          label: 'ชีพจร' },
+    { field: 'photos',         value: hasPhoto ? 'ok' : '',  label: 'รูปภาพประกอบ' }
   ];
   const missing = required.filter(r => !r.value);
   if (missing.length > 0) {
     missing.forEach(m => {
-      const el = document.querySelector(`.form-group[data-field="${m.field}"]`);
+      // Try form-group first, then form-section (medication, photos)
+      const el = document.querySelector(`.form-group[data-field="${m.field}"]`)
+              || document.querySelector(`.form-section[data-field="${m.field}"]`);
       if (el) el.classList.add('has-error');
     });
     if (alertBox) alertBox.classList.add('show');
     toast(`กรุณากรอกข้อมูลที่บังคับให้ครบ (${missing.length} ช่อง)`, 'error', 3500);
-    const firstEl = document.querySelector('.form-group.has-error');
+    const firstEl = document.querySelector('.form-group.has-error, .form-section.has-error');
     if (firstEl) firstEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
@@ -6238,6 +6601,7 @@ async function saveVisit(id) {
     patientId: State.currentPatientId,
     date,
     visitTime: get('visitTime'),
+    visitType: get('visitType'),
     visitorName: get('visitorName'),
     visitorRole: get('visitorRole'),
     asmName: get('asmName'),
@@ -6294,6 +6658,62 @@ function openDetail(id) {
 function goBack() { State.view = 'list'; State.currentPatientId = null; render(); }
 function setTab(t) { State.currentTab = t; render(); }
 function setFilter(f) { State.filter = f; render(); }
+function setZoneFilter(z) { State.zoneFilter = z; render(); }
+
+/* Custom zone dropdown — open/close + outside click */
+function toggleZoneDropdown(e) {
+  if (e) e.stopPropagation();
+  const dd = document.getElementById('zoneDropdown');
+  if (!dd) return;
+  const isOpen = dd.classList.contains('open');
+  // Close any other open dropdowns first
+  document.querySelectorAll('.zone-dropdown.open').forEach(el => {
+    el.classList.remove('open');
+    const panel = el.querySelector('.zone-panel');
+    if (panel) panel.hidden = true;
+    const trigger = el.querySelector('.zone-trigger');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  });
+  if (!isOpen) {
+    dd.classList.add('open');
+    const panel = dd.querySelector('.zone-panel');
+    if (panel) panel.hidden = false;
+    const trigger = dd.querySelector('.zone-trigger');
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+  }
+}
+function selectZone(z) {
+  // Close the dropdown then update state
+  const dd = document.getElementById('zoneDropdown');
+  if (dd) {
+    dd.classList.remove('open');
+    const panel = dd.querySelector('.zone-panel');
+    if (panel) panel.hidden = true;
+  }
+  State.zoneFilter = z;
+  render();
+}
+// Global outside-click + Escape to close dropdown
+document.addEventListener('click', (e) => {
+  const dd = document.querySelector('.zone-dropdown.open');
+  if (!dd) return;
+  if (!dd.contains(e.target)) {
+    dd.classList.remove('open');
+    const panel = dd.querySelector('.zone-panel');
+    if (panel) panel.hidden = true;
+    const trigger = dd.querySelector('.zone-trigger');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.zone-dropdown.open').forEach(el => {
+      el.classList.remove('open');
+      const panel = el.querySelector('.zone-panel');
+      if (panel) panel.hidden = true;
+    });
+  }
+});
 
 async function deletePatient(id) {
   const p = State.patients.find(x => x.id === id);
