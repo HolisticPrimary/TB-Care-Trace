@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบติดตามผู้ป่วยวัณโรค | TB Patient Tracking</title>
+<title>ระบบติดตามผู้ป่วยวัณโรคและการเยี่ยมบ้าน | TB Care Trace</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #f7f3ec;
@@ -23,6 +23,7 @@
     --primary: #2d4f3f;
     --primary-soft: #e4ede7;
     --primary-dark: #1d3a2c;
+    --primary-glow: rgba(45, 79, 63, 0.20);
 
     --accent: #c97560;
     --accent-soft: #f5e4dd;
@@ -36,6 +37,24 @@
     --success: #4a7a5a;
     --success-soft: #dfeae1;
 
+    /* Chart palette — adapts per theme */
+    --chart-primary: #2d4f3f;
+    --chart-primary-lite: #5a8073;
+    --chart-success: #4a7a5a;
+    --chart-warning: #c89832;
+    --chart-danger: #b3463e;
+    --chart-accent: #c97560;
+    --chart-neutral: #a8b1ab;
+    --chart-blue: #4a6f8a;
+
+    /* Body background gradients (theme-aware) */
+    --bg-gradient-a: rgba(45, 79, 63, 0.04);
+    --bg-gradient-b: rgba(201, 117, 96, 0.04);
+
+    /* Cover decoration blobs */
+    --cover-blob-a: #cfe3da;
+    --cover-blob-b: #dde9ed;
+
     --radius-sm: 6px;
     --radius: 10px;
     --radius-lg: 16px;
@@ -45,10 +64,77 @@
     --shadow: 0 4px 12px rgba(26, 38, 32, 0.06), 0 1px 2px rgba(26, 38, 32, 0.04);
     --shadow-lg: 0 12px 32px rgba(26, 38, 32, 0.12), 0 4px 8px rgba(26, 38, 32, 0.06);
 
-    --font-thai: "IBM Plex Sans Thai", system-ui, sans-serif;
-    --font-display: "Outfit", "IBM Plex Sans Thai", system-ui, sans-serif;
+    --font-thai: "IBM Plex Sans Thai", "Sarabun", system-ui, sans-serif;
+    --font-display: "Outfit", "IBM Plex Sans Thai", "Sarabun", system-ui, sans-serif;
+    --font-formal: "Sarabun", "IBM Plex Sans Thai", system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, monospace;
   }
+
+  [data-theme="dark"] {
+    /* Base — neutral warm slate (less green-saturated for less eye strain) */
+    --bg: #16181c;
+    --bg-elevated: #1e2228;
+    --surface: #262b32;
+
+    /* Text — soft warm off-white for reduced glare */
+    --ink-900: #e7eaee;
+    --ink-700: #b3bac1;
+    --ink-500: #828a92;
+    --ink-300: #565d65;
+    --ink-200: #353b43;
+
+    /* Borders — clearly visible against surfaces */
+    --border: #353a42;
+    --border-strong: #464d56;
+
+    /* Primary — vibrant warm mint, "pops" on neutral bg without harshness */
+    --primary: #6fd3a0;
+    --primary-soft: #1b3328;
+    --primary-dark: #58be8a;
+    --primary-glow: rgba(111, 211, 160, 0.22);
+
+    /* Accent — soft peach (warm complement) */
+    --accent: #ed9f80;
+    --accent-soft: #3a261f;
+
+    /* Warning — soft amber */
+    --warning: #ecbf74;
+    --warning-soft: #382e18;
+
+    /* Danger — desaturated coral (not too aggressive) */
+    --danger: #e08079;
+    --danger-soft: #3a201e;
+
+    /* Success — fresh mint that pairs with primary */
+    --success: #81d9a0;
+    --success-soft: #1d3329;
+
+    /* Chart palette — calibrated for dark surface visibility */
+    --chart-primary: #6fd3a0;
+    --chart-primary-lite: #a0e3bf;
+    --chart-success: #81d9a0;
+    --chart-warning: #ecbf74;
+    --chart-danger: #e08079;
+    --chart-accent: #ed9f80;
+    --chart-neutral: #6f7884;
+    --chart-blue: #87b3d4;
+
+    /* Background ambient glow — gentle warm + cool pair */
+    --bg-gradient-a: rgba(111, 211, 160, 0.05);
+    --bg-gradient-b: rgba(237, 159, 128, 0.04);
+
+    /* Cover decoration blobs — subtle paired tints */
+    --cover-blob-a: #1f3527;
+    --cover-blob-b: #2c2820;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.20), 0 1px 3px rgba(0, 0, 0, 0.28);
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.32), 0 1px 2px rgba(0, 0, 0, 0.20);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45), 0 4px 8px rgba(0, 0, 0, 0.28);
+  }
+
+  html { color-scheme: light dark; }
+  html[data-theme="dark"] { color-scheme: dark; }
+  html[data-theme="light"] { color-scheme: light; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -59,13 +145,29 @@
     font-size: 15px;
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     min-height: 100vh;
+    margin: 0;
+    transition: background-color .35s ease, color .35s ease;
+  }
+  /* Make body a flex column so <main> can grow to fill remaining viewport height — eliminates any empty cream/dark area below content */
+  body {
+    display: flex;
+    flex-direction: column;
   }
 
   body {
     background-image:
-      radial-gradient(ellipse 1200px 600px at 0% 0%, rgba(45, 79, 63, 0.04), transparent 60%),
-      radial-gradient(ellipse 800px 500px at 100% 100%, rgba(201, 117, 96, 0.04), transparent 60%);
+      radial-gradient(ellipse 1200px 600px at 0% 0%, var(--bg-gradient-a), transparent 60%),
+      radial-gradient(ellipse 800px 500px at 100% 100%, var(--bg-gradient-b), transparent 60%);
+  }
+
+  /* Smoothly fade surfaces when theme switches */
+  .stat-card, .kpi-card, .dash-card, .patient-row, .modal, .setup-card,
+  .cover-feature, .cover-logo-wrap, .nav-tab, .btn, .input, .select, .textarea,
+  .info-item, .contact-card, .attention-row, .zone-table {
+    transition: background-color .3s ease, border-color .3s ease, color .25s ease;
   }
 
   button { font-family: inherit; font-size: inherit; cursor: pointer; border: none; background: none; }
@@ -73,20 +175,396 @@
 
   /* ── HEADER ────────────────────────────────────────────────── */
   .app-header {
-    background: linear-gradient(180deg, var(--bg-elevated) 0%, transparent 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 24px 0 20px;
-    margin-bottom: 20px;
+    position: relative;
+    isolation: isolate;
+    /* Deep navy hero strip — matches reference poster background */
+    background:
+      radial-gradient(ellipse 70% 90% at 95% 30%, rgba(118, 165, 215, 0.22) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 70% at 10% 80%, rgba(20, 45, 80, 0.55) 0%, transparent 65%),
+      linear-gradient(135deg, #0d2542 0%, #112e4c 45%, #163758 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    min-height: 130px;
+    padding: 20px 0 18px;
+    margin-bottom: 0;
+    overflow: hidden;
+    /* Force light-text appearance regardless of theme */
+    color: #f5f7fb;
+  }
+  /* Subtle decorative gloss on top */
+  .app-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 900px 260px at 50% -50%, rgba(255,255,255,0.06), transparent 70%);
+  }
+  /* On LIST + DASHBOARD views: wide decorative banner strip (brand moves to subnav) */
+  body[data-view="list"] .app-header,
+  body[data-view="dashboard"] .app-header {
+    min-height: 280px;
+    padding: 0;
+    background:
+      /* Lighter overlay — let the image breathe */
+      linear-gradient(180deg,
+        rgba(13, 37, 66, 0.32) 0%,
+        rgba(13, 37, 66, 0.45) 60%,
+        rgba(13, 37, 66, 0.78) 100%),
+      radial-gradient(ellipse 60% 80% at 95% 30%, rgba(118, 165, 215, 0.18) 0%, transparent 60%),
+      /* Image larger, positioned to show focal content */
+      url('./cover-banner.png') center 32% / 100% auto no-repeat,
+      linear-gradient(135deg, #0d2542 0%, #112e4c 45%, #163758 100%);
+    background-color: #0d2542;
+  }
+  /* Hide empty header-inner on list/dashboard (no content) — keep banner visible */
+  body[data-view="list"] .header-inner,
+  body[data-view="dashboard"] .header-inner {
+    min-height: 0;
+    height: 280px;
+    padding: 0 clamp(20px, 3vw, 48px);
   }
   .header-inner {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 32px;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 clamp(20px, 3vw, 48px);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 24px;
     flex-wrap: wrap;
+    min-height: 90px;
+  }
+  body[data-view="list"] .header-inner,
+  body[data-view="dashboard"] .header-inner { min-height: 140px; }
+
+  /* ── SUBNAV BAR (below header) ──────────────────────────────── */
+  .subnav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  [data-theme="dark"] .subnav {
+    background: rgba(22, 24, 28, 0.92);
+  }
+  .subnav-inner {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 14px clamp(20px, 3vw, 48px);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 20px;
+  }
+  /* Brand slot — LEFT aligned */
+  .subnav-brand-slot {
+    display: flex;
+    align-items: center;
+    justify-self: start;
+  }
+  /* Nav tabs — CENTER */
+  .subnav .nav-tabs {
+    justify-self: center;
+  }
+  /* Right side of subnav — sync indicator + theme toggle + settings — RIGHT aligned */
+  .subnav-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-self: end;
+  }
+  /* Brand pill when relocated into subnav — light styling */
+  .brand.brand-in-subnav {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 6px 14px 6px 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    gap: 12px;
+  }
+  .brand.brand-in-subnav .brand-mark.has-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    padding: 3px;
+  }
+  .brand.brand-in-subnav .brand-text h1 {
+    color: var(--ink-900);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.1px;
+    text-shadow: none;
+    line-height: 1.25;
+    /* Truncate long title gracefully */
+    max-width: 360px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .brand.brand-in-subnav .brand-text p {
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-shadow: none;
+    margin-top: 2px;
+  }
+  .brand.brand-in-subnav:hover {
+    background: var(--bg-elevated);
+    border-color: var(--border-strong);
+  }
+  [data-theme="dark"] .brand.brand-in-subnav {
+    background: var(--surface);
+    border-color: var(--border);
+  }
+  [data-theme="dark"] .brand.brand-in-subnav:hover {
+    background: var(--bg-elevated);
+  }
+  /* Mobile responsive: stack subnav vertically */
+  @media (max-width: 980px) {
+    .subnav-inner {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .subnav-brand-slot, .subnav .nav-tabs, .subnav-actions {
+      justify-self: stretch;
+    }
+    .subnav .nav-tabs { justify-content: center; }
+    .subnav-actions { justify-content: flex-end; }
+    .brand.brand-in-subnav .brand-text h1 { max-width: none; font-size: 14px; }
+  }
+  @media (max-width: 640px) {
+    .brand.brand-in-subnav .brand-text h1 { white-space: normal; }
+  }
+  /* Sync indicator inside subnav — light bg, dark text */
+  .subnav-actions .sync-indicator {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--ink-700);
+    font-weight: 600;
+    font-size: 12px;
+    padding: 6px 4px 6px 12px;
+    text-shadow: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  }
+  .subnav-actions .sync-indicator .sync-dot {
+    background: var(--success);
+    box-shadow: 0 0 8px rgba(74, 122, 90, 0.5);
+    width: 7px;
+    height: 7px;
+  }
+  [data-theme="dark"] .subnav-actions .sync-indicator .sync-dot {
+    background: #6fd3a0;
+    box-shadow: 0 0 8px rgba(111, 211, 160, 0.6);
+  }
+  .subnav-actions .sync-indicator button {
+    color: var(--primary);
+    background: var(--primary-soft);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 4px 11px;
+    margin-left: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    transition: background .15s, color .15s, transform .15s;
+  }
+  .subnav-actions .sync-indicator button:hover {
+    background: var(--primary);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+  /* Icon buttons inside subnav — dark icons on light surface */
+  .subnav-actions .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    color: var(--ink-700);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    transition: background .15s, color .15s, border-color .15s, transform .15s;
+  }
+  .subnav-actions .icon-btn:hover {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border-color: var(--primary-soft);
+    transform: translateY(-1px);
+  }
+  .subnav-actions .theme-toggle .icon-moon { color: var(--primary); }
+  .subnav-actions .theme-toggle .icon-sun { color: var(--warning); }
+  [data-theme="dark"] .subnav-actions .theme-toggle .icon-moon { color: var(--primary); }
+  [data-theme="dark"] .subnav-actions .theme-toggle .icon-sun { color: var(--warning); }
+  @media (max-width: 720px) {
+    .subnav-inner { gap: 10px; }
+    .subnav-actions { gap: 6px; }
+    .subnav-actions .sync-indicator { font-size: 11px; padding: 5px 4px 5px 10px; }
+  }
+  /* nav-tabs inside subnav (light bg) — override the previous header-actions navy style */
+  .subnav .nav-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .subnav .nav-tab {
+    color: var(--ink-700);
+    font-weight: 600;
+  }
+  .subnav .nav-tab:hover {
+    color: var(--ink-900);
+    background: var(--bg-elevated);
+  }
+  .subnav .nav-tab.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    box-shadow:
+      0 3px 10px rgba(45, 79, 63, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  [data-theme="dark"] .subnav .nav-tab.active {
+    box-shadow:
+      0 3px 12px rgba(111, 211, 160, 0.30),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  @media (max-width: 720px) {
+    .subnav-inner { padding: 8px 16px; }
+  }
+  /* ── HEADER TYPOGRAPHY (on navy bg) ───────────────────────── */
+  /* Primary title — pure white, refined weight, subtle depth shadow */
+  .app-header .brand-text h1 {
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28), 0 0 1px rgba(0, 0, 0, 0.15);
+  }
+  /* Subtitle — mint accent (ties to TB Care Trace brand color) */
+  .app-header .brand-text p {
+    color: #7dd3a8;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+  /* Brand pill — translucent white-tinted glass */
+  .brand.brand-clickable {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 18px;
+    padding: 10px 18px 10px 12px;
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  .brand.brand-clickable:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.30);
+  }
+  /* Actions pill — same glass treatment */
+  .header-actions {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    padding: 4px 6px 4px 6px;
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  /* Icon buttons inside header — refined white with hover lift */
+  .app-header .icon-btn {
+    color: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .app-header .icon-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.30);
+  }
+  .app-header .theme-toggle .icon-moon { color: #e2e8f0; }
+  .app-header .theme-toggle .icon-sun { color: #fcd34d; }
+  /* Sync indicator: transparent (inherits actions pill glass) + bright text */
+  .app-header .sync-indicator {
+    background: transparent;
+    border: 0;
+    padding: 6px 10px 6px 14px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+  /* Dot — bright mint green, glowing */
+  .app-header .sync-indicator .sync-dot {
+    background: #6fd3a0;
+    box-shadow: 0 0 8px rgba(111, 211, 160, 0.6);
+    width: 7px;
+    height: 7px;
+  }
+  .app-header .sync-indicator .sync-dot.syncing { background: #fcd34d; box-shadow: 0 0 8px rgba(252, 211, 77, 0.6); }
+  .app-header .sync-indicator .sync-dot.error { background: #f87171; box-shadow: 0 0 8px rgba(248, 113, 113, 0.6); }
+  /* Refresh button — clean separator + bright white */
+  .app-header .sync-indicator button {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    border-left: 1px solid rgba(255, 255, 255, 0.20);
+    border-radius: 8px;
+    padding: 4px 11px;
+    margin-left: 8px;
+    padding-left: 11px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    transition: background .15s, border-color .15s, transform .15s;
+  }
+  .app-header .sync-indicator button:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+  }
+  /* Nav tabs — translucent glass; active uses primary with glow */
+  .app-header .nav-tabs {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  }
+  .app-header .nav-tab {
+    color: rgba(245, 247, 251, 0.85);
+    font-weight: 600;
+  }
+  .app-header .nav-tab:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .app-header .nav-tab.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    box-shadow:
+      0 4px 14px rgba(45, 79, 63, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.20);
+  }
+  /* Mobile shrink */
+  @media (max-width: 720px) {
+    .app-header { min-height: 140px; }
+    .header-inner { min-height: 100px; }
+    .brand.brand-clickable, .header-actions { padding: 6px 10px; border-radius: 14px; }
   }
   .brand { display: flex; align-items: center; gap: 14px; }
   .brand-mark {
@@ -165,11 +643,44 @@
   }
   .icon-btn:hover { background: var(--bg-elevated); color: var(--ink-900); }
 
+  /* Theme toggle — show/hide sun vs moon */
+  .theme-toggle {
+    position: relative;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .theme-toggle:hover { border-color: var(--border-strong); }
+  .theme-toggle .icon-sun,
+  .theme-toggle .icon-moon {
+    position: absolute;
+    transition: transform .4s cubic-bezier(.22,.61,.36,1), opacity .25s ease;
+  }
+  /* Light mode → show moon (action: go to dark) */
+  .theme-toggle .icon-sun { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+  .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg) scale(1); color: var(--primary); }
+  /* Dark mode → show sun (action: go to light) */
+  [data-theme="dark"] .theme-toggle .icon-sun { opacity: 1; transform: rotate(0deg) scale(1); color: var(--warning); }
+  [data-theme="dark"] .theme-toggle .icon-moon { opacity: 0; transform: rotate(90deg) scale(0.6); }
+
   /* ── MAIN LAYOUT ───────────────────────────────────────────── */
+  main {
+    /* Grow to fill remaining viewport height (parent body is flex-column) */
+    flex: 1 0 auto;
+    background: var(--bg);
+  }
   .container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 32px 80px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 clamp(20px, 3vw, 48px) 32px;
+  }
+  /* Empty UI container slots — must not contribute to layout */
+  #modalRoot:empty,
+  #viewerRoot:empty,
+  #toastRoot:empty,
+  #loadingRoot:empty {
+    display: none;
   }
 
   /* ── STATS GRID ────────────────────────────────────────────── */
@@ -298,27 +809,44 @@
     overflow-x: auto;
   }
   .filter-btn {
-    padding: 8px 14px;
-    border-radius: 7px;
+    padding: 9px 16px;
+    border-radius: 9px;
     font-size: 13px;
-    color: var(--ink-700);
-    transition: all 0.15s;
+    color: var(--ink-500);
+    transition: background .2s, color .2s, box-shadow .2s;
     white-space: nowrap;
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: 0.1px;
   }
-  .filter-btn:hover { color: var(--primary-dark); }
+  .filter-btn:hover {
+    color: var(--ink-900);
+    background: rgba(45, 79, 63, 0.06);
+  }
+  [data-theme="dark"] .filter-btn:hover {
+    background: rgba(111, 211, 160, 0.10);
+  }
   .filter-btn.active {
-    background: var(--surface);
-    color: var(--primary-dark);
-    box-shadow: var(--shadow-sm);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #ffffff;
+    box-shadow:
+      0 3px 10px rgba(45, 79, 63, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  [data-theme="dark"] .filter-btn.active {
+    box-shadow:
+      0 3px 12px rgba(111, 211, 160, 0.30),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
   .filter-btn .count {
     margin-left: 6px;
     font-size: 11px;
     color: var(--ink-500);
     font-variant-numeric: tabular-nums;
+    font-weight: 700;
   }
-  .filter-btn.active .count { color: var(--primary); }
+  .filter-btn.active .count {
+    color: rgba(255, 255, 255, 0.85);
+  }
 
   /* ── PATIENT LIST ──────────────────────────────────────────── */
   .patient-grid {
@@ -449,6 +977,129 @@
     align-items: center;
     gap: 4px;
   }
+  /* Required field indicator + error state */
+  .form-group label .req {
+    color: var(--danger);
+    font-weight: 700;
+    margin-left: 2px;
+  }
+  .form-group.has-error label { color: var(--danger); }
+  .form-group.has-error .input,
+  .form-group.has-error .select,
+  .form-group.has-error .textarea,
+  .form-group.has-error .pill-group {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(179, 70, 62, 0.10);
+  }
+  .form-group.has-error .pill-group {
+    box-shadow: 0 0 0 1px var(--danger), 0 0 0 4px rgba(179, 70, 62, 0.10);
+  }
+  .form-group .field-error {
+    display: none;
+    margin-top: 5px;
+    font-size: 12px;
+    color: var(--danger);
+    font-weight: 500;
+    align-items: center;
+    gap: 4px;
+  }
+  .form-group.has-error .field-error { display: inline-flex; }
+  /* Banner alert at top of modal when form has errors */
+  .form-alert {
+    display: none;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--danger-soft);
+    color: var(--danger);
+    border: 1px solid rgba(179, 70, 62, 0.20);
+    font-size: 13px;
+    font-weight: 600;
+    align-items: center;
+    gap: 8px;
+  }
+  .form-alert.show { display: flex; }
+  [data-theme="dark"] .form-alert {
+    background: rgba(224, 128, 121, 0.14);
+    color: #e08079;
+    border-color: rgba(224, 128, 121, 0.28);
+  }
+
+  /* Visit-count badge — unified status pill (count + recency in one) */
+  .visit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    line-height: 1.2;
+  }
+  .visit-badge strong {
+    font-weight: 700;
+    font-size: 12.5px;
+  }
+  .visit-badge .vb-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 0 currentColor;
+    flex-shrink: 0;
+  }
+  .visit-badge .vb-sep {
+    opacity: 0.45;
+    font-weight: 700;
+  }
+  .visit-badge .vb-meta {
+    opacity: 0.85;
+    font-weight: 500;
+  }
+  /* No visits / one visit — red urgent */
+  .visit-badge.vb-none,
+  .visit-badge.vb-low {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border-color: rgba(179, 70, 62, 0.22);
+  }
+  .visit-badge.vb-none .vb-dot,
+  .visit-badge.vb-low .vb-dot {
+    animation: vbPulse 2s ease-in-out infinite;
+  }
+  @keyframes vbPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(179, 70, 62, 0.55); }
+    50%      { box-shadow: 0 0 0 5px rgba(179, 70, 62, 0); }
+  }
+  /* 2+ visits — green OK */
+  .visit-badge.vb-ok {
+    background: var(--success-soft);
+    color: var(--success);
+    border-color: rgba(74, 122, 90, 0.22);
+  }
+  /* Dark mode variants */
+  [data-theme="dark"] .visit-badge.vb-none,
+  [data-theme="dark"] .visit-badge.vb-low {
+    background: rgba(224, 128, 121, 0.14);
+    color: #e08079;
+    border-color: rgba(224, 128, 121, 0.30);
+  }
+  [data-theme="dark"] .visit-badge.vb-none .vb-dot,
+  [data-theme="dark"] .visit-badge.vb-low .vb-dot {
+    animation: vbPulseDark 2s ease-in-out infinite;
+  }
+  @keyframes vbPulseDark {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(224, 128, 121, 0.55); }
+    50%      { box-shadow: 0 0 0 5px rgba(224, 128, 121, 0); }
+  }
+  [data-theme="dark"] .visit-badge.vb-ok {
+    background: rgba(129, 217, 160, 0.12);
+    color: #81d9a0;
+    border-color: rgba(129, 217, 160, 0.30);
+  }
   .row-status { display: flex; justify-content: flex-end; }
   @media (max-width: 980px) {
     .patient-row-header { display: none; }
@@ -534,6 +1185,13 @@
   .status-transferred { background: #e8e3f0; color: #5d4a8a; }
   .status-died { background: #ebe7e4; color: #5a4a44; }
   .status-diagnosisChange { background: #fef3c7; color: #92400e; }
+
+  /* Status pills — dark mode variants (paired warm/cool tints) */
+  [data-theme="dark"] .status-active { background: var(--primary-soft); color: var(--primary); }
+  [data-theme="dark"] .status-treatmentComplete { background: #1d2f4a; color: #9cc3ec; }
+  [data-theme="dark"] .status-transferred { background: #2c2840; color: #c4b8e0; }
+  [data-theme="dark"] .status-died { background: #2a2724; color: #aaa39a; }
+  [data-theme="dark"] .status-diagnosisChange { background: #382e16; color: #ecc874; }
 
   .treatment-progress {
     margin-top: 14px;
@@ -625,23 +1283,82 @@
     opacity: 0.6;
     pointer-events: none;
   }
+  /* Breadcrumb with elevated layer pill design */
   .breadcrumb {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     font-size: 13px;
     color: var(--ink-500);
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    padding: 5px 5px 5px 5px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+  [data-theme="dark"] .breadcrumb {
+    background: var(--bg-elevated);
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
   .breadcrumb button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     color: var(--primary);
-    font-weight: 500;
-    padding: 4px 8px;
-    margin: -4px -8px;
-    border-radius: 6px;
-    transition: background 0.15s;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    border: 1px solid transparent;
+    transition: background .18s ease, color .18s ease, transform .15s ease, box-shadow .18s ease;
   }
-  .breadcrumb button:hover { background: var(--primary-soft); }
+  .breadcrumb button:hover {
+    background: var(--primary);
+    color: #ffffff;
+    transform: translateX(-2px);
+    box-shadow: 0 3px 10px rgba(45, 79, 63, 0.25);
+  }
+  [data-theme="dark"] .breadcrumb button:hover {
+    box-shadow: 0 3px 10px rgba(111, 211, 160, 0.30);
+  }
+  .breadcrumb button svg { transition: transform .2s ease; }
+  .breadcrumb button:hover svg { transform: translateX(-2px); }
+  /* Separator dot — distinct visual marker */
+  .breadcrumb .crumb-sep {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--ink-300);
+    margin: 0 2px;
+    flex-shrink: 0;
+  }
+  /* Current page status chip */
+  .breadcrumb .crumb-current {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-700);
+  }
+  .breadcrumb .crumb-current::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 6px var(--primary-glow);
+  }
 
   .detail-name {
     font-family: var(--font-display);
@@ -682,17 +1399,31 @@
     padding: 12px 18px;
     font-size: 14px;
     color: var(--ink-500);
-    border-bottom: 2px solid transparent;
-    transition: all 0.15s;
-    font-weight: 500;
+    border-bottom: 2.5px solid transparent;
+    transition: color .2s, border-color .2s, background .2s;
+    font-weight: 600;
     white-space: nowrap;
     position: relative;
     margin-bottom: -1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
-  .tab:hover { color: var(--ink-900); }
+  .tab:hover {
+    color: var(--ink-900);
+    background: rgba(45, 79, 63, 0.04);
+  }
+  [data-theme="dark"] .tab:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
   .tab.active {
-    color: var(--primary-dark);
+    color: var(--primary);
     border-bottom-color: var(--primary);
+    background: rgba(45, 79, 63, 0.05);
+  }
+  [data-theme="dark"] .tab.active {
+    color: var(--primary);
+    background: rgba(111, 211, 160, 0.08);
   }
   .tab .badge {
     display: inline-block;
@@ -930,7 +1661,7 @@
   .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(26, 38, 32, 0.5);
+    background: rgba(10, 18, 14, 0.5);
     backdrop-filter: blur(4px);
     display: grid;
     place-items: center;
@@ -938,6 +1669,7 @@
     z-index: 100;
     animation: fadeIn 0.18s ease;
   }
+  [data-theme="dark"] .modal-backdrop { background: rgba(0, 0, 0, 0.6); }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .modal {
     background: var(--surface);
@@ -1172,16 +1904,19 @@
     border: 1px dashed var(--border);
     margin-bottom: 10px;
   }
+  /* Segmented pill-group — solid gradient active state for high clarity */
   .pill-group {
     display: flex;
-    gap: 0;
-    padding: 3px;
+    gap: 4px;
+    padding: 4px;
     background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
     width: 100%;
-    height: 38px;
+    height: 44px;
+    transition: border-color .2s;
   }
+  .pill-group:hover { border-color: var(--border-strong); }
   .pill-group input[type="radio"] {
     position: absolute;
     opacity: 0;
@@ -1192,26 +1927,38 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 14px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--ink-700);
+    padding: 0 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-500);
     cursor: pointer;
-    border-radius: 7px;
-    transition: all .15s ease;
+    border-radius: 9px;
+    transition: background .2s cubic-bezier(.22,.61,.36,1), color .2s, box-shadow .2s, transform .2s;
     user-select: none;
-    letter-spacing: 0;
+    letter-spacing: 0.1px;
     text-align: center;
     line-height: 1;
   }
   .pill-group label:hover {
     color: var(--ink-900);
+    background: rgba(45, 79, 63, 0.06);
+  }
+  [data-theme="dark"] .pill-group label:hover {
+    background: rgba(111, 211, 160, 0.10);
   }
   .pill-group input[type="radio"]:checked + label {
-    background: var(--surface);
-    color: var(--primary-dark);
-    font-weight: 600;
-    box-shadow: var(--shadow-sm);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #ffffff;
+    box-shadow:
+      0 4px 12px rgba(45, 79, 63, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.20);
+    transform: scale(1.01);
+  }
+  [data-theme="dark"] .pill-group input[type="radio"]:checked + label {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    box-shadow:
+      0 4px 14px rgba(111, 211, 160, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
   @media (max-width: 720px) {
     .contact-card .form-row { grid-template-columns: 1fr 1fr; }
@@ -1296,37 +2043,109 @@
   }
   .toggle-btn {
     flex: 1;
-    padding: 10px;
-    border-radius: 7px;
-    font-size: 13px;
-    font-weight: 500;
+    padding: 11px;
+    border-radius: 9px;
+    font-size: 13.5px;
+    font-weight: 600;
     color: var(--ink-500);
-    transition: all 0.15s;
+    transition: background .2s, color .2s, box-shadow .2s, transform .15s;
+    cursor: pointer;
   }
-  .toggle-btn.active.taken { background: var(--success); color: white; }
-  .toggle-btn.active.missed { background: var(--danger); color: white; }
+  .toggle-btn:hover {
+    color: var(--ink-900);
+    background: rgba(45, 79, 63, 0.06);
+  }
+  [data-theme="dark"] .toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .toggle-btn.active {
+    transform: scale(1.01);
+  }
+  .toggle-btn.active.taken {
+    background: linear-gradient(135deg, var(--success) 0%, #3d6850 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(74, 122, 90, 0.28), inset 0 1px 0 rgba(255,255,255,0.20);
+  }
+  .toggle-btn.active.missed {
+    background: linear-gradient(135deg, var(--danger) 0%, #973a33 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(179, 70, 62, 0.28), inset 0 1px 0 rgba(255,255,255,0.20);
+  }
+  [data-theme="dark"] .toggle-btn.active.taken {
+    background: linear-gradient(135deg, var(--success), #5fa07c);
+    box-shadow: 0 4px 14px rgba(129, 217, 160, 0.30), inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  [data-theme="dark"] .toggle-btn.active.missed {
+    background: linear-gradient(135deg, var(--danger), #b96762);
+    box-shadow: 0 4px 14px rgba(224, 128, 121, 0.30), inset 0 1px 0 rgba(255,255,255,0.18);
+  }
 
   .photo-uploader {
-    border: 2px dashed var(--border-strong);
-    border-radius: var(--radius);
-    padding: 28px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.15s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 32px 20px;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 14px;
     background: var(--bg-elevated);
+    cursor: pointer;
+    transition: border-color .18s, background .18s, transform .12s;
   }
   .photo-uploader:hover {
     border-color: var(--primary);
     background: var(--primary-soft);
   }
-  .photo-uploader p {
-    font-size: 13px;
-    color: var(--ink-500);
-    margin-top: 8px;
-  }
-  .photo-uploader .icon { color: var(--ink-300); }
-  .photo-uploader:hover .icon { color: var(--primary); }
+  .photo-uploader:active { transform: scale(.995); }
   .photo-uploader input { display: none; }
+  .photo-uploader .upload-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    color: var(--primary);
+    border: 1px solid var(--border);
+    transition: background .18s, color .18s, border-color .18s;
+  }
+  .photo-uploader:hover .upload-icon {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  .photo-uploader .upload-icon svg { width: 24px; height: 24px; }
+  .photo-uploader .upload-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-900);
+    margin: 0;
+  }
+  .photo-uploader .upload-title .accent { color: var(--primary); }
+  .photo-uploader .upload-sub {
+    font-size: 12px;
+    color: var(--ink-500);
+    margin: 0;
+    text-align: center;
+    line-height: 1.55;
+  }
+  .photo-uploader .upload-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .photo-uploader .upload-chip {
+    font-size: 11px;
+    color: var(--ink-700);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
 
   .photo-preview-grid {
     display: grid;
@@ -1514,6 +2333,194 @@
     color: var(--ink-700);
   }
 
+  /* ── SKELETON LOADERS ──────────────────────────────────────── */
+  .skeleton {
+    background: linear-gradient(90deg,
+      var(--bg-elevated) 0%,
+      var(--border) 50%,
+      var(--bg-elevated) 100%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.4s ease-in-out infinite;
+    border-radius: 6px;
+  }
+  @keyframes skeletonShimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .skeleton-line { height: 12px; margin-bottom: 8px; }
+  .skeleton-line.thin { height: 8px; }
+  .skeleton-line.thick { height: 18px; }
+  .skeleton-block { height: 84px; border-radius: 10px; margin-bottom: 12px; }
+  .skeleton-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .skeleton-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .skeleton-row .left { flex: 1; }
+  .skeleton-row .right { flex: 0 0 auto; }
+
+  /* ── EMPTY STATES ──────────────────────────────────────────── */
+  .empty-state-modern {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    text-align: center;
+    background: var(--surface);
+    border: 1px dashed var(--border-strong);
+    border-radius: 16px;
+  }
+  .empty-state-modern .empty-illust {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 22px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-soft), var(--bg-elevated));
+    color: var(--primary);
+    position: relative;
+  }
+  .empty-state-modern .empty-illust::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--primary-soft) 0%, transparent 70%);
+    opacity: 0.5;
+    z-index: -1;
+  }
+  .empty-state-modern .empty-illust svg { width: 44px; height: 44px; }
+  .empty-state-modern h3 {
+    font-family: var(--font-formal);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink-900);
+    margin: 0 0 8px;
+    letter-spacing: -0.1px;
+  }
+  .empty-state-modern p {
+    font-family: var(--font-formal);
+    font-size: 14px;
+    color: var(--ink-500);
+    line-height: 1.6;
+    margin: 0 0 22px;
+    max-width: 380px;
+  }
+  .empty-state-modern .btn {
+    padding: 11px 22px;
+    font-weight: 700;
+    box-shadow: 0 6px 16px rgba(45, 79, 63, 0.20);
+  }
+  [data-theme="dark"] .empty-state-modern .btn {
+    box-shadow: 0 6px 16px rgba(111, 211, 160, 0.22);
+  }
+
+  /* ── PAGE TRANSITIONS ──────────────────────────────────────── */
+  @keyframes pageEnterUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  #mainView > .stats,
+  #mainView > .toolbar,
+  #mainView > .filter-bar,
+  #mainView > .patient-list-wrap,
+  #mainView > .detail-view,
+  #mainView > .dash-head,
+  #mainView > .kpi-grid,
+  #mainView > .dash-grid {
+    animation: pageEnterUp .35s cubic-bezier(.22,.61,.36,1) both;
+  }
+  #mainView > *:nth-child(2) { animation-delay: .05s; }
+  #mainView > *:nth-child(3) { animation-delay: .10s; }
+  #mainView > *:nth-child(4) { animation-delay: .15s; }
+  #mainView > *:nth-child(5) { animation-delay: .20s; }
+  #mainView > *:nth-child(6) { animation-delay: .25s; }
+  @media (prefers-reduced-motion: reduce) {
+    #mainView > * { animation: none !important; }
+  }
+
+  /* ── COUNT-UP ANIMATION ──────────────────────────────────── */
+  .count-up { display: inline-block; font-variant-numeric: tabular-nums; }
+
+  /* ── PRINT STYLESHEET ──────────────────────────────────────── */
+  @media print {
+    @page { size: A4; margin: 14mm 12mm; }
+    html, body {
+      background: white !important;
+      color: #000 !important;
+      font-size: 11pt;
+    }
+    body::before {
+      content: "TB Care Trace · ระบบติดตามผู้ป่วยวัณโรค · โรงพยาบาลทับคล้อ";
+      display: block;
+      font-size: 9pt;
+      color: #666;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+    body::after {
+      content: "พิมพ์เมื่อ " attr(data-print-date) " · TB Care Trace";
+      position: fixed;
+      bottom: 8mm;
+      left: 12mm;
+      right: 12mm;
+      font-size: 8pt;
+      color: #999;
+      text-align: center;
+      border-top: 1px solid #ddd;
+      padding-top: 6px;
+    }
+    /* Hide non-content elements */
+    .app-header, .header-actions, .nav-tabs, .icon-btn, .theme-toggle, .modal-backdrop,
+    .toolbar, .filter-bar, .row-actions, .add-btn, .breadcrumb button,
+    .btn, .photo-uploader, .modal-footer, #toastRoot, .sync-indicator,
+    .cover, .dash-head .dash-range, [onclick] { display: none !important; }
+    /* Show titles + data only */
+    .container { max-width: 100% !important; padding: 0 !important; }
+    .detail-view, .stats, .dash-card, .patient-row, .info-grid, .timeline-item {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      background: white !important;
+      border: 1px solid #ccc !important;
+      box-shadow: none !important;
+      animation: none !important;
+    }
+    .detail-name { font-size: 18pt !important; color: #000 !important; }
+    h1, h2, h3, h4 { color: #000 !important; page-break-after: avoid; }
+    .visit-badge, .status, .row-chip {
+      border: 1px solid #666 !important;
+      background: white !important;
+      color: #000 !important;
+      animation: none !important;
+    }
+    .skeleton, .skeleton-line, .skeleton-block { display: none !important; }
+    /* Image quality */
+    img { max-width: 100%; page-break-inside: avoid; }
+    /* Ensure links show URL in print */
+    a[href]:after { content: " (" attr(href) ")"; font-size: 8pt; color: #666; }
+  }
+
   /* Util */
   .row-flex {
     display: flex;
@@ -1522,6 +2529,1009 @@
     flex-wrap: wrap;
   }
   .text-muted { color: var(--ink-500); }
+
+  /* ── COVER PAGE — Premium hero design ─────────────────────── */
+  @keyframes coverFadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes coverFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes coverScaleIn {
+    from { opacity: 0; transform: scale(0.88); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes logoFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+  @keyframes blobDrift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(40px, -30px) scale(1.05); }
+    66%      { transform: translate(-30px, 40px) scale(0.95); }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to   { background-position: 200% 0; }
+  }
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(74,122,90,0.55); }
+    50%      { box-shadow: 0 0 0 8px rgba(74,122,90,0); }
+  }
+
+  .cover {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 40px 20px 24px;
+    overflow: hidden;
+  }
+  .cover::before,
+  .cover::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 0;
+    animation: blobDrift 22s ease-in-out infinite;
+  }
+  [data-theme="dark"] .cover::before,
+  [data-theme="dark"] .cover::after { opacity: 0.85; filter: blur(110px); }
+  .cover::before {
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, var(--cover-blob-a) 0%, transparent 70%);
+    top: -150px;
+    left: -140px;
+  }
+  .cover::after {
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, var(--cover-blob-b) 0%, transparent 70%);
+    bottom: -130px;
+    right: -120px;
+    animation-delay: -8s;
+    animation-direction: reverse;
+  }
+
+  .cover-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 920px;
+    text-align: center;
+  }
+
+  /* Page hero banner — compact version for in-app pages (list/dashboard) */
+  .page-hero {
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 20px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow:
+      0 12px 32px rgba(45,79,63,0.08),
+      0 4px 10px rgba(0,0,0,0.03),
+      inset 0 0 0 1px var(--border);
+    transition: transform .3s ease, box-shadow .3s ease;
+    animation: coverFadeUp .6s ease both;
+  }
+  .page-hero:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 16px 40px rgba(45,79,63,0.10),
+      0 6px 14px rgba(0,0,0,0.04),
+      inset 0 0 0 1px var(--border);
+  }
+  [data-theme="dark"] .page-hero {
+    box-shadow:
+      0 12px 32px rgba(0,0,0,0.35),
+      0 4px 10px rgba(0,0,0,0.22),
+      inset 0 0 0 1px var(--border);
+  }
+  .page-hero img {
+    display: block;
+    width: 100%;
+    height: auto;
+    image-rendering: -webkit-optimize-contrast;
+  }
+  .page-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.03);
+  }
+  [data-theme="dark"] .page-hero::after { box-shadow: inset 0 0 60px rgba(0,0,0,0.16); }
+
+  /* Hero banner image — main visual at top of cover */
+  .cover-hero {
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 40px;
+    border-radius: 28px;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow:
+      0 24px 60px rgba(45,79,63,0.10),
+      0 8px 20px rgba(0,0,0,0.04),
+      inset 0 0 0 1px var(--border);
+    animation: coverScaleIn .9s cubic-bezier(.18,.89,.32,1.28) both;
+    transition: transform .35s ease, box-shadow .35s ease;
+  }
+  .cover-hero:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 32px 80px rgba(45,79,63,0.14),
+      0 12px 28px rgba(0,0,0,0.06),
+      inset 0 0 0 1px var(--border);
+  }
+  [data-theme="dark"] .cover-hero {
+    box-shadow:
+      0 24px 60px rgba(0,0,0,0.45),
+      0 8px 20px rgba(0,0,0,0.30),
+      inset 0 0 0 1px var(--border);
+  }
+  [data-theme="dark"] .cover-hero:hover {
+    box-shadow:
+      0 32px 80px rgba(0,0,0,0.55),
+      0 12px 28px rgba(0,0,0,0.35),
+      inset 0 0 0 1px var(--border);
+  }
+  .cover-hero img {
+    display: block;
+    width: 100%;
+    height: auto;
+    image-rendering: -webkit-optimize-contrast;
+  }
+  /* Subtle vignette to blend image edges with page */
+  .cover-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.04);
+  }
+  [data-theme="dark"] .cover-hero::after {
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.18);
+  }
+
+  /* Logo card with hover lift + auto float */
+  .cover-logo-wrap {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 260px;
+    height: 260px;
+    background: #ffffff;
+    border-radius: 48px;
+    box-shadow:
+      0 20px 50px var(--primary-glow),
+      0 6px 16px rgba(0,0,0,0.05),
+      inset 0 0 0 1px var(--border);
+    margin: 0 auto 32px;
+    padding: 20px;
+    animation: coverScaleIn .9s cubic-bezier(.18,.89,.32,1.28) both, logoFloat 5.5s ease-in-out 1s infinite;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  /* Spotlight halo behind the card (visible mostly in dark mode) */
+  .cover-logo-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -40px;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle at center,
+      rgba(74, 130, 230, 0.18) 0%,
+      rgba(95, 174, 138, 0.10) 35%,
+      transparent 70%
+    );
+    filter: blur(20px);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity .35s ease;
+    pointer-events: none;
+  }
+  [data-theme="dark"] .cover-logo-wrap::before { opacity: 1; }
+
+  .cover-logo-wrap:hover {
+    transform: translateY(-6px);
+    box-shadow:
+      0 30px 60px var(--primary-glow),
+      0 8px 22px rgba(0,0,0,0.08),
+      inset 0 0 0 1px var(--border);
+  }
+  /* Dark mode: softer edge + ambient glow that bridges card with dark bg */
+  [data-theme="dark"] .cover-logo-wrap {
+    background: #ffffff;
+    border-radius: 44px;
+    box-shadow:
+      /* Inner subtle highlight */
+      inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+      /* Soft white ambient diffusion (eases white-to-dark transition) */
+      0 0 70px 14px rgba(255, 255, 255, 0.045),
+      /* Brand-color glow */
+      0 24px 60px rgba(74, 130, 230, 0.22),
+      0 12px 28px rgba(95, 174, 138, 0.15),
+      /* Depth shadow */
+      0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+  [data-theme="dark"] .cover-logo-wrap:hover {
+    transform: translateY(-6px);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+      0 0 90px 18px rgba(255, 255, 255, 0.06),
+      0 30px 70px rgba(74, 130, 230, 0.30),
+      0 16px 36px rgba(95, 174, 138, 0.20),
+      0 10px 28px rgba(0, 0, 0, 0.50);
+  }
+
+  .cover-logo-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    image-rendering: -webkit-optimize-contrast;
+    border-radius: 28px;
+  }
+
+  /* Eyebrow status pill */
+  .cover-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-family: var(--font-formal);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    margin-bottom: 22px;
+    text-transform: uppercase;
+    animation: coverFadeUp .7s ease both .1s;
+  }
+  .cover-eyebrow .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulseGlow 2.2s infinite;
+  }
+
+  /* Section headline (below hero banner) */
+  .cover-headline {
+    font-family: var(--font-formal);
+    font-size: clamp(22px, 2.6vw, 30px);
+    font-weight: 700;
+    color: var(--ink-900);
+    letter-spacing: 0;
+    line-height: 1.5;
+    margin: 0 0 14px;
+    padding-bottom: 2px;
+    text-wrap: balance;
+    animation: coverFadeUp .8s cubic-bezier(.22,.61,.36,1) both .2s;
+  }
+  .cover-headline .accent {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--success) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding: 0 2px;
+  }
+
+  /* Hero title — formal Thai typography, all blue */
+  .cover-title {
+    font-family: var(--font-formal);
+    font-size: clamp(30px, 4.8vw, 46px);
+    font-weight: 800;
+    color: #1a3a6a;  /* deep navy for base */
+    /* Thai needs positive spacing — negative causes mark/vowel collisions */
+    letter-spacing: 0;
+    /* Tall line-height to keep tone marks (◌้◌่◌๊◌๋) from clipping into row above */
+    line-height: 1.55;
+    margin: 0 0 16px;
+    text-wrap: balance;
+    /* Prevent vertical clipping of diacritics on big text */
+    padding-bottom: 4px;
+    animation: coverFadeUp .8s cubic-bezier(.22,.61,.36,1) both .2s;
+  }
+  [data-theme="dark"] .cover-title {
+    color: #c5dafa;  /* very light blue for base in dark */
+  }
+  /* Bright blue gradient accent — pops against the navy base text */
+  .cover-title .accent {
+    background: linear-gradient(135deg, #2960c4 0%, #3b82f6 50%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    position: relative;
+    display: inline-block;
+    /* Stop background-clip from cutting off tall marks */
+    padding: 0 2px;
+  }
+  [data-theme="dark"] .cover-title .accent {
+    background: linear-gradient(135deg, #6ba3f5 0%, #93c0fa 50%, #b0d2fb 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Brand wordmark — blue tone, uses Outfit display font */
+  .cover-brand {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 2.4vw, 26px);
+    font-weight: 700;
+    color: #2960c4;
+    letter-spacing: 1.2px;
+    margin: 0 0 24px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    animation: coverFadeUp .8s ease both .3s;
+  }
+  [data-theme="dark"] .cover-brand {
+    color: #6ba3f5;
+  }
+  .cover-brand::before,
+  .cover-brand::after {
+    content: "";
+    width: 36px;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, #2960c4);
+    opacity: 0.6;
+  }
+  .cover-brand::after {
+    background: linear-gradient(90deg, #2960c4, transparent);
+  }
+  [data-theme="dark"] .cover-brand::before {
+    background: linear-gradient(90deg, transparent, #6ba3f5);
+  }
+  [data-theme="dark"] .cover-brand::after {
+    background: linear-gradient(90deg, #6ba3f5, transparent);
+  }
+
+  /* Description */
+  .cover-subtitle {
+    font-family: var(--font-formal);
+    font-size: clamp(15px, 1.5vw, 17px);
+    font-weight: 400;
+    color: var(--ink-500);
+    line-height: 1.75;
+    margin: 0 auto 36px;
+    max-width: 620px;
+    animation: coverFadeUp .8s ease both .4s;
+  }
+  .cover-subtitle strong { color: var(--ink-900); font-weight: 600; }
+
+  /* CTA buttons row */
+  .cover-cta {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+    animation: coverFadeUp .8s ease both .5s;
+  }
+  .cover-cta .btn {
+    padding: 14px 28px;
+    font-family: var(--font-formal);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border-radius: 12px;
+    transition: transform .2s cubic-bezier(.22,.61,.36,1), box-shadow .2s ease, background .2s ease;
+  }
+  .cover-cta .btn svg { width: 18px; height: 18px; transition: transform .25s ease; }
+  .cover-cta .btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    box-shadow:
+      0 10px 24px var(--primary-glow),
+      inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .cover-cta .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 16px 32px var(--primary-glow),
+      inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .cover-cta .btn-primary:hover svg { transform: translateX(3px); }
+  .cover-cta .btn-secondary {
+    background: var(--surface);
+    color: var(--ink-900);
+    border: 1.5px solid var(--border-strong);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .cover-cta .btn-secondary:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  }
+
+  /* Feature cards */
+  .cover-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .cover-feature {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px 22px;
+    text-align: left;
+    transition: transform .25s cubic-bezier(.22,.61,.36,1), box-shadow .25s ease, border-color .25s ease;
+    animation: coverFadeUp .7s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-feature:nth-child(1) { animation-delay: .55s; }
+  .cover-feature:nth-child(2) { animation-delay: .65s; }
+  .cover-feature:nth-child(3) { animation-delay: .75s; }
+  .cover-feature::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    padding: 1px;
+    background: linear-gradient(135deg, transparent 50%, var(--primary-soft) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity .25s ease;
+    pointer-events: none;
+  }
+  .cover-feature:hover {
+    transform: translateY(-4px);
+    border-color: transparent;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.08);
+  }
+  .cover-feature:hover::after { opacity: 1; }
+  .cover-feature-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-soft), var(--surface));
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    margin-bottom: 14px;
+    border: 1px solid var(--primary-soft);
+  }
+  .cover-feature-icon svg { width: 22px; height: 22px; }
+  .cover-feature h3 {
+    margin: 0 0 6px;
+    font-family: var(--font-formal);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink-900);
+    letter-spacing: -0.1px;
+  }
+  .cover-feature p {
+    margin: 0;
+    font-family: var(--font-formal);
+    font-size: 13px;
+    color: var(--ink-500);
+    line-height: 1.65;
+  }
+
+  /* Footer */
+  .cover-footer {
+    font-family: var(--font-formal);
+    font-size: 13px;
+    color: var(--ink-500);
+    line-height: 1.75;
+    padding-top: 8px;
+    animation: coverFadeIn 1s ease both 1s;
+  }
+  .cover-footer .org {
+    font-weight: 700;
+    color: var(--ink-700);
+  }
+  .cover-footer .divider {
+    color: var(--ink-300);
+    margin: 0 10px;
+  }
+  .cover-footer .stat-strong {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .cover-logo-wrap, .cover-eyebrow, .cover-title, .cover-brand,
+    .cover-subtitle, .cover-cta, .cover-feature, .cover-footer,
+    .cover::before, .cover::after {
+      animation: none !important;
+    }
+  }
+
+  /* Brand mark image (header logo) */
+  .brand-mark.has-logo {
+    background: white;
+    padding: 4px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .brand-mark.has-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .brand-clickable {
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .brand-clickable:hover { opacity: 0.85; }
+
+  @media (max-width: 720px) {
+    .cover-features { grid-template-columns: 1fr; }
+    .cover-logo-wrap { width: 200px; height: 200px; border-radius: 36px; padding: 14px; }
+    .cover { padding: 24px 16px 32px; }
+  }
+
+  /* ── NAV TABS (header) ─────────────────────────────────────── */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+  }
+  .nav-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-700);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .nav-tab:hover { color: var(--ink-900); }
+  .nav-tab.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08);
+  }
+
+  /* ── DASHBOARD ─────────────────────────────────────────────── */
+  .dash-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .dash-head h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink-900);
+    letter-spacing: -0.4px;
+  }
+  .dash-head p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--ink-500);
+  }
+  .dash-range {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .dash-range button {
+    border: 0;
+    background: transparent;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-700);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .dash-range button.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .kpi-card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    overflow: hidden;
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .kpi-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .kpi-card .kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .kpi-card .kpi-label {
+    font-size: 12px;
+    color: var(--ink-500);
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+  .kpi-card .kpi-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    color: var(--c, var(--primary));
+    background: var(--c-soft, var(--primary-soft));
+  }
+  .kpi-card .kpi-icon svg { width: 16px; height: 16px; }
+  .kpi-card .kpi-value {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--ink-900);
+    line-height: 1;
+    letter-spacing: -0.6px;
+  }
+  .kpi-card .kpi-value .unit {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--ink-500);
+    font-weight: 400;
+    margin-left: 5px;
+  }
+  .kpi-card .kpi-foot {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--ink-500);
+    line-height: 1.4;
+  }
+  .kpi-card .kpi-foot .pct {
+    font-weight: 600;
+    color: var(--c, var(--primary));
+  }
+
+  .dash-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .dash-card {
+    grid-column: span 6;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .dash-card.span-12 { grid-column: span 12; }
+  .dash-card.span-4 { grid-column: span 4; }
+  .dash-card.span-8 { grid-column: span 8; }
+  .dash-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 8px;
+  }
+  .dash-card-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink-900);
+    margin: 0;
+  }
+  .dash-card-subtitle {
+    font-size: 12px;
+    color: var(--ink-500);
+    margin-top: 2px;
+  }
+  .dash-card-pill {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-700);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+
+  /* SVG chart shared styles */
+  .chart-wrap { width: 100%; }
+  .chart-wrap svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .chart-wrap text { font-family: var(--font-sans); fill: var(--ink-700); }
+  .chart-wrap .axis-label { font-size: 11px; fill: var(--ink-500); }
+  .chart-wrap .grid-line { stroke: var(--border); stroke-dasharray: 2 4; }
+
+  .donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .donut-wrap > .chart-wrap {
+    flex: 0 0 auto;
+    width: 150px;
+  }
+  .donut-wrap > .chart-wrap svg {
+    width: 150px;
+    height: 150px;
+  }
+  .donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+  .donut-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .donut-legend-item .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .donut-legend-item .lbl { color: var(--ink-700); flex: 1; }
+  .donut-legend-item .val {
+    color: var(--ink-900);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .donut-legend-item .pct {
+    font-size: 11px;
+    color: var(--ink-500);
+    min-width: 38px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .attention-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .attention-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .attention-row:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+  .attention-row .who {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .attention-row .who-name {
+    font-weight: 600;
+    color: var(--ink-900);
+    font-size: 14px;
+  }
+  .attention-row .who-meta {
+    font-size: 12px;
+    color: var(--ink-500);
+  }
+  .attention-row .reason {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--warning-soft);
+    color: var(--warning);
+    white-space: nowrap;
+  }
+  .attention-row .reason.danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+  .attention-empty {
+    padding: 22px 14px;
+    text-align: center;
+    color: var(--ink-500);
+    background: var(--bg-elevated);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  /* Zone breakdown */
+  .seg-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    margin-bottom: 14px;
+  }
+  .seg-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink-700);
+  }
+  .seg-legend-item .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+  .zone-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+  .zone-table thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--ink-500);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .zone-table thead th.num { text-align: right; }
+  .zone-table tbody td {
+    padding: 11px 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-900);
+    vertical-align: middle;
+  }
+  .zone-table tbody tr:last-child td { border-bottom: 0; }
+  .zone-table tbody tr:hover td { background: var(--bg-elevated); }
+  .zone-table td.zone-cell {
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+  .zone-chip {
+    display: inline-grid;
+    place-items: center;
+    min-width: 38px;
+    padding: 3px 8px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+  }
+  .zone-table td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-700);
+  }
+  .zone-table td.num strong { color: var(--ink-900); }
+  .zone-table .rate {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  .zone-table .rate .rate-bar {
+    width: 60px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--bg-elevated);
+    overflow: hidden;
+  }
+  .zone-table .rate .rate-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--success);
+  }
+  .zone-table .rate .rate-val {
+    font-weight: 600;
+    color: var(--ink-900);
+    min-width: 38px;
+    text-align: right;
+  }
+  .zone-table .rate .rate-val.dim { color: var(--ink-300); }
+  .zone-table .alert-dot {
+    display: inline-grid;
+    place-items: center;
+    min-width: 22px;
+    padding: 0 7px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--danger-soft);
+    color: var(--danger);
+    font-weight: 700;
+    font-size: 11px;
+  }
+  .zone-table .alert-dot.muted { background: var(--bg-elevated); color: var(--ink-300); }
+  .zone-table tr.empty-zone td { color: var(--ink-300); }
+  .zone-table tr.empty-zone .zone-chip { background: var(--bg-elevated); color: var(--ink-500); }
+
+  @media (max-width: 740px) {
+    .zone-table { font-size: 12px; }
+    .zone-table .col-collapse { display: none; }
+    .zone-table .rate .rate-bar { width: 40px; }
+  }
+
+  .insight-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .insight-card {
+    padding: 12px 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .insight-card .label {
+    font-size: 11px;
+    color: var(--ink-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .insight-card .value {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+
+  @media (max-width: 880px) {
+    .dash-card, .dash-card.span-4, .dash-card.span-8 { grid-column: span 12; }
+    .donut-wrap { flex-direction: column; gap: 14px; }
+    .donut-wrap > svg { width: 130px; height: 130px; }
+    .nav-tab span { display: none; }
+    .nav-tab { padding: 7px 10px; }
+  }
 
   @media (max-width: 640px) {
     .container, .header-inner { padding-left: 16px; padding-right: 16px; }
@@ -1534,18 +3544,32 @@
     .detail-header { padding: 18px 20px; }
     .detail-name { font-size: 22px; }
     .setup-card { padding: 28px 22px; }
+    .kpi-card .kpi-value { font-size: 24px; }
   }
 </style>
+<script>
+  // Apply theme as early as possible to avoid flash of wrong theme
+  (function () {
+    try {
+      var saved = localStorage.getItem('tb_theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
 </head>
 <body>
 
 <header class="app-header">
   <div class="header-inner">
-    <div class="brand">
-      <div class="brand-mark">TB</div>
+    <div class="brand brand-clickable" onclick="goView('cover')" title="กลับหน้าปก">
+      <div class="brand-mark has-logo"><img src="./logo.png" alt="TB Care Trace"></div>
       <div class="brand-text">
-        <h1>ระบบติดตามผู้ป่วยวัณโรค</h1>
-        <p>TB Patient Tracking · รพ.สต.</p>
+        <h1>ระบบติดตามผู้ป่วยวัณโรคและการเยี่ยมบ้าน</h1>
+        <p>TB Care Trace</p>
       </div>
     </div>
     <div class="header-actions">
@@ -1554,6 +3578,15 @@
         <span id="syncText">เชื่อมต่อแล้ว</span>
         <button onclick="refreshData()">รีเฟรช</button>
       </div>
+      <button class="icon-btn theme-toggle" id="themeToggle" onclick="toggleTheme()" title="สลับโหมดสว่าง/มืด" aria-label="สลับธีม">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
       <button class="icon-btn" id="settingsBtn" onclick="openSettings()" style="display:none" title="ตั้งค่า">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
@@ -1563,6 +3596,24 @@
     </div>
   </div>
 </header>
+
+<!-- Secondary nav bar (below header, used on list/dashboard) -->
+<div class="subnav" id="subnav" style="display:none">
+  <div class="subnav-inner">
+    <div class="subnav-brand-slot" id="subnavBrandSlot"></div>
+    <nav class="nav-tabs" id="navTabs">
+      <button class="nav-tab" data-view="list" onclick="goView('list')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <span>รายชื่อผู้ป่วย</span>
+      </button>
+      <button class="nav-tab" data-view="dashboard" onclick="goView('dashboard')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+        <span>สรุปผลการดำเนิน</span>
+      </button>
+    </nav>
+    <div class="subnav-actions" id="subnavActions"></div>
+  </div>
+</div>
 
 <main class="container">
   <div id="mainView"></div>
@@ -1636,7 +3687,7 @@ const API = {
 const State = {
   patients: [],
   visits: [],
-  view: 'list',
+  view: 'cover',
   currentPatientId: null,
   currentTab: 'info',
   filter: 'all',
@@ -1684,6 +3735,7 @@ const STATUS_LABELS = {
 };
 const TEST_RESULTS = ['AFB','AFB Post','TB Lamp Post','X-pert Detect','CT','Film'];
 const PATIENT_TYPES = ['รายใหม่','กลับมาเป็นซ้ำ','รับโอนจากที่อื่น','โอนออกไปที่อื่น'];
+const TB_CLASSES = ['วัณโรคในปอด','วัณโรคนอกปอด'];
 const ZONES = ['201','202','203','204','205','206','207','208','209'];
 const AREA_TYPES = ['ในเขต','นอกเขต'];
 const IGRA_RESULTS = ['Positive','Negative','Indeterminate','Pending','Not done'];
@@ -1833,6 +3885,96 @@ function hideLoading() {
   document.getElementById('loadingRoot').innerHTML = '';
 }
 
+/* ════════════════════════════════════════════════════════════════
+   SKELETON & EMPTY STATES — Modern loading & no-data UI
+   ═══════════════════════════════════════════════════════════════ */
+function skeletonListView() {
+  return `
+    <div class="skeleton-stats">
+      ${Array.from({ length: 5 }).map(() => `
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-line thin" style="width: 60%;"></div>
+          <div class="skeleton skeleton-line thick" style="width: 40%; margin-top: 12px;"></div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="skeleton-card" style="height: 56px; margin-bottom: 12px;"></div>
+    <div class="skeleton-card" style="height: 44px; margin-bottom: 16px;"></div>
+    ${Array.from({ length: 4 }).map(() => `
+      <div class="skeleton-row">
+        <div class="left">
+          <div class="skeleton skeleton-line thick" style="width: 30%;"></div>
+          <div class="skeleton skeleton-line thin" style="width: 50%; margin-top: 6px;"></div>
+        </div>
+        <div class="skeleton skeleton-line" style="width: 90px; height: 28px;"></div>
+        <div class="skeleton skeleton-line" style="width: 90px; height: 28px;"></div>
+        <div class="skeleton skeleton-line" style="width: 110px; height: 12px;"></div>
+        <div class="right skeleton skeleton-line" style="width: 110px; height: 28px;"></div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function skeletonDashboard() {
+  return `
+    <div class="skeleton-card" style="height: 64px; margin-bottom: 18px; background: transparent; border: 0; padding: 0;">
+      <div class="skeleton skeleton-line thick" style="width: 280px;"></div>
+      <div class="skeleton skeleton-line thin" style="width: 360px; margin-top: 10px;"></div>
+    </div>
+    <div class="skeleton-stats">
+      ${Array.from({ length: 5 }).map(() => `
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-line thin" style="width: 50%;"></div>
+          <div class="skeleton skeleton-line thick" style="width: 30%; margin-top: 14px;"></div>
+          <div class="skeleton skeleton-line thin" style="width: 80%; margin-top: 14px;"></div>
+        </div>
+      `).join('')}
+    </div>
+    ${Array.from({ length: 3 }).map(() => `
+      <div class="skeleton-card" style="height: 280px; margin-bottom: 14px;"></div>
+    `).join('')}
+  `;
+}
+
+function showSkeletonList() {
+  const mv = document.getElementById('mainView');
+  if (mv) mv.innerHTML = skeletonListView();
+}
+
+function showSkeletonDashboard() {
+  const mv = document.getElementById('mainView');
+  if (mv) mv.innerHTML = skeletonDashboard();
+}
+
+/* Animate a number from 0 to target in the given element */
+function animateCount(el, target, duration = 900) {
+  if (!el) return;
+  // Respect reduced motion
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = target;
+    return;
+  }
+  const start = performance.now();
+  const startVal = 0;
+  const ease = (t) => 1 - Math.pow(1 - t, 3); // ease-out cubic
+  function step(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const val = Math.round(startVal + (target - startVal) * ease(t));
+    el.textContent = val;
+    if (t < 1) requestAnimationFrame(step);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(step);
+}
+
+/* Find all .count-up elements with data-target and animate them */
+function animateAllCounts(container = document) {
+  container.querySelectorAll('.count-up[data-target]').forEach(el => {
+    const target = parseFloat(el.dataset.target);
+    if (Number.isFinite(target)) animateCount(el, target);
+  });
+}
+
 function setSyncState(state, msg) {
   const indicator = document.getElementById('syncIndicator');
   const dot = document.getElementById('syncDot');
@@ -1899,11 +4041,11 @@ function renderList() {
 
   document.getElementById('mainView').innerHTML = `
     <div class="stats">
-      <div class="stat-card" style="--c: var(--primary)"><div class="stat-label">ผู้ป่วยทั้งหมด</div><div class="stat-value">${stats.total}<span class="unit">ราย</span></div></div>
-      <div class="stat-card" style="--c: var(--primary)"><div class="stat-label">กำลังรักษา</div><div class="stat-value">${stats.active}<span class="unit">ราย</span></div></div>
-      <div class="stat-card" style="--c: var(--success)"><div class="stat-label">รักษาหาย</div><div class="stat-value">${stats.cured}<span class="unit">ราย</span></div></div>
-      <div class="stat-card" style="--c: var(--warning)"><div class="stat-label">ขาดยา</div><div class="stat-value">${stats.lost}<span class="unit">ราย</span></div></div>
-      <div class="stat-card" style="--c: var(--accent)"><div class="stat-label">ต้องติดตาม</div><div class="stat-value">${stats.needsAttention}<span class="unit">ราย</span></div></div>
+      <div class="stat-card" style="--c: var(--primary)"><div class="stat-label">ผู้ป่วยทั้งหมด</div><div class="stat-value"><span class="count-up" data-target="${stats.total}">0</span><span class="unit">ราย</span></div></div>
+      <div class="stat-card" style="--c: var(--primary)"><div class="stat-label">กำลังรักษา</div><div class="stat-value"><span class="count-up" data-target="${stats.active}">0</span><span class="unit">ราย</span></div></div>
+      <div class="stat-card" style="--c: var(--success)"><div class="stat-label">รักษาหาย</div><div class="stat-value"><span class="count-up" data-target="${stats.cured}">0</span><span class="unit">ราย</span></div></div>
+      <div class="stat-card" style="--c: var(--warning)"><div class="stat-label">ขาดยา</div><div class="stat-value"><span class="count-up" data-target="${stats.lost}">0</span><span class="unit">ราย</span></div></div>
+      <div class="stat-card" style="--c: var(--accent)"><div class="stat-label">ต้องติดตาม</div><div class="stat-value"><span class="count-up" data-target="${stats.needsAttention}">0</span><span class="unit">ราย</span></div></div>
     </div>
 
     <div class="toolbar">
@@ -1923,11 +4065,19 @@ function renderList() {
     </div>
 
     ${filtered.length === 0 ? `
-      <div class="empty-state">
-        <div class="empty-state-icon">${ICON.empty}</div>
+      <div class="empty-state-modern">
+        <div class="empty-illust">
+          ${State.patients.length === 0
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M14 11h-6M11 8v6" opacity="0.4"/></svg>'}
+        </div>
         <h3>${State.patients.length === 0 ? 'ยังไม่มีผู้ป่วยในระบบ' : 'ไม่พบผู้ป่วยที่ค้นหา'}</h3>
-        <p>${State.patients.length === 0 ? 'เริ่มต้นด้วยการเพิ่มผู้ป่วยรายแรก' : 'ลองเปลี่ยนคำค้นหา หรือเลือกหมวดอื่น'}</p>
-        ${State.patients.length === 0 ? `<button class="btn btn-primary" onclick="openPatientModal()">${ICON.plus} เพิ่มผู้ป่วยใหม่</button>` : ''}
+        <p>${State.patients.length === 0
+          ? 'เริ่มต้นบันทึกผู้ป่วยรายแรกของหน่วยงานท่าน ระบบจะติดตามและสรุปผลโดยอัตโนมัติ'
+          : 'ลองเปลี่ยนคำค้นหา หรือเลือกหมวดอื่นจากตัวกรองด้านบน'}</p>
+        ${State.patients.length === 0
+          ? `<button class="btn btn-primary" onclick="openPatientModal()">${ICON.plus} เพิ่มผู้ป่วยรายแรก</button>`
+          : `<button class="btn btn-secondary" onclick="setFilter('all'); State.search=''; render();">${ICON.back} ดูทั้งหมด</button>`}
       </div>
     ` : `
       <div class="patient-list" id="patientList">
@@ -2007,8 +4157,20 @@ function renderPatientRow(p) {
         ` : `<span class="row-chip muted">ยังไม่เริ่ม</span>`}
       </div>
       <div class="row-visit">
-        <span>${visitText}${visits.length ? ` · ${visits.length} ครั้ง` : ''}</span>
-        ${attention ? `<span class="attention">${ICON.alert} ต้องติดตาม</span>` : ''}
+        ${(() => {
+          // Compute single unified visit badge
+          if (visits.length === 0) {
+            return `<span class="visit-badge vb-none"><span class="vb-dot"></span>ยังไม่เคยเยี่ยม</span>`;
+          }
+          const daysText = dsv === 0 ? 'วันนี้' : `${dsv} วันที่แล้ว`;
+          const cls = visits.length === 1 ? 'vb-low' : 'vb-ok';
+          return `<span class="visit-badge ${cls}">
+            <span class="vb-dot"></span>
+            <strong>${visits.length} ครั้ง</strong>
+            <span class="vb-sep">·</span>
+            <span class="vb-meta">${daysText}</span>
+          </span>`;
+        })()}
       </div>
       <div class="row-status"><span class="status status-${p.status || 'active'}">${STATUS_LABELS[p.status || 'active']}</span></div>
 
@@ -2018,6 +4180,817 @@ function renderPatientRow(p) {
         ${testResult ? `<span class="row-chip">${escapeHTML(testResult)}</span>` : ''}
       </div>
     </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   COVER PAGE — Landing / Welcome screen
+   ═══════════════════════════════════════════════════════════════ */
+function renderCover() {
+  const stats = getStats();
+  document.getElementById('mainView').innerHTML = `
+    <div class="cover">
+      <div class="cover-inner">
+        <div class="cover-logo-wrap">
+          <img src="./logo.png" alt="TB Care Trace">
+        </div>
+
+        <div class="cover-eyebrow">
+          <span class="live-dot"></span>
+          <span>ระบบออนไลน์ · พร้อมใช้งาน</span>
+        </div>
+
+        <h1 class="cover-title">
+          ระบบติดตามผู้ป่วย<span class="accent">วัณโรค</span><br>
+          และการ<span class="accent">เยี่ยมบ้าน</span>
+        </h1>
+        <div class="cover-brand">TB&nbsp;Care&nbsp;Trace</div>
+        <p class="cover-subtitle">
+          เครื่องมือดิจิทัลสำหรับเจ้าหน้าที่ <strong>รพ.สต.</strong> ใช้บันทึก ติดตาม และวิเคราะห์ผลการดูแลผู้ป่วยวัณโรค
+          ทั้งในและนอกเขตพื้นที่รับผิดชอบ พร้อมสรุปผลงานรายเขตแบบเรียลไทม์
+        </p>
+
+        <div class="cover-cta">
+          <button class="btn btn-primary" onclick="goView('list')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            เริ่มใช้งานระบบ
+          </button>
+          <button class="btn btn-secondary" onclick="goView('dashboard')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+            ดูสรุปผลการดำเนิน
+          </button>
+        </div>
+
+        <div class="cover-features">
+          <div class="cover-feature">
+            <div class="cover-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <h3>บันทึกผู้ป่วยครบทุกมิติ</h3>
+            <p>ข้อมูลส่วนบุคคล · ที่อยู่ · การวินิจฉัย · สูตรยา · ผู้สัมผัสร่วมบ้าน — ครบในที่เดียว</p>
+          </div>
+
+          <div class="cover-feature">
+            <div class="cover-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/></svg>
+            </div>
+            <h3>บันทึกการเยี่ยมบ้าน</h3>
+            <p>Vital signs · อาการ · การกินยา · อัพโหลดภาพประกอบขึ้น Google Drive อัตโนมัติ</p>
+          </div>
+
+          <div class="cover-feature">
+            <div class="cover-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+            </div>
+            <h3>สรุปผลแบบเรียลไทม์</h3>
+            <p>KPI · กราฟแนวโน้ม · สรุปรายเขต 201-209 · ติดตามผู้ป่วยที่ต้องเฝ้าระวัง</p>
+          </div>
+        </div>
+
+        <div class="cover-footer">
+          <span class="org">กลุ่มงานบริการด้านปฐมภูมิและองค์รวม</span>
+          <span class="divider">·</span>
+          <span>โรงพยาบาลทับคล้อ จ.พิจิตร</span>
+          <br>
+          <span>ผู้ป่วยในระบบ <span class="stat-strong">${stats.total}</span> ราย · กำลังรักษา <span class="stat-strong">${stats.active}</span> ราย</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DASHBOARD — Performance Summary
+   ═══════════════════════════════════════════════════════════════ */
+
+// Chart color palette (mapped to design tokens)
+const CHART_COLORS = {
+  primary:     '#2d4f3f',
+  primaryLite: '#5a8073',
+  success:     '#4a7a5a',
+  warning:     '#c89832',
+  danger:      '#b3463e',
+  accent:      '#c97560',
+  neutral:     '#a8b1ab',
+  blue:        '#4a6f8a'
+};
+
+function svgDonut(segments, opts = {}) {
+  const size = opts.size || 150;
+  const thickness = opts.thickness || 22;
+  const total = segments.reduce((a, b) => a + b.value, 0);
+  const r = (size - thickness) / 2;
+  const cx = size / 2, cy = size / 2;
+  const C = 2 * Math.PI * r;
+  if (total === 0) {
+    return `<svg viewBox="0 0 ${size} ${size}">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="${thickness}"/>
+      <text x="${cx}" y="${cy + 5}" text-anchor="middle" font-size="13" fill="var(--ink-500)">ไม่มีข้อมูล</text>
+    </svg>`;
+  }
+  let offset = 0;
+  const arcs = segments.filter(s => s.value > 0).map(s => {
+    const len = (s.value / total) * C;
+    const arc = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="${thickness}" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})" stroke-linecap="butt"/>`;
+    offset += len;
+    return arc;
+  }).join('');
+  return `<svg viewBox="0 0 ${size} ${size}">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--bg-elevated)" stroke-width="${thickness}"/>
+    ${arcs}
+    <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-family="var(--font-display)" font-size="24" font-weight="600" fill="var(--ink-900)">${total}</text>
+    <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="11" fill="var(--ink-500)" letter-spacing="0.5">${opts.centerLabel || 'ทั้งหมด'}</text>
+  </svg>`;
+}
+
+function svgBarVertical(items, opts = {}) {
+  const w = opts.width || 560;
+  const h = opts.height || 200;
+  const padL = 32, padR = 8, padT = 18, padB = 28;
+  const innerW = w - padL - padR;
+  const innerH = h - padT - padB;
+  const max = Math.max(1, ...items.map(it => it.value));
+  // Round max up to a nice number
+  const niceMax = Math.ceil(max * 1.15);
+  const gap = 0.32;
+  const slot = innerW / items.length;
+  const barW = slot * (1 - gap);
+  // gridlines (4 levels)
+  const gridLines = [0, 0.25, 0.5, 0.75, 1].map(t => {
+    const y = padT + innerH * (1 - t);
+    const val = Math.round(niceMax * t);
+    return `<line class="grid-line" x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}"/><text class="axis-label" x="${padL - 6}" y="${y + 3}" text-anchor="end">${val}</text>`;
+  }).join('');
+  const bars = items.map((it, i) => {
+    const x = padL + slot * i + (slot - barW) / 2;
+    const bh = (it.value / niceMax) * innerH;
+    const y = padT + innerH - bh;
+    const color = it.color || CHART_COLORS.primary;
+    return `
+      <g>
+        <rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="4" fill="${color}">
+          <title>${it.label}: ${it.value}</title>
+        </rect>
+        ${bh > 18 ? `<text x="${x + barW/2}" y="${y - 4}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink-700)">${it.value}</text>` : ''}
+        <text class="axis-label" x="${x + barW/2}" y="${padT + innerH + 16}" text-anchor="middle">${it.label}</text>
+      </g>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
+    ${gridLines}
+    ${bars}
+  </svg>`;
+}
+
+function svgBarHorizontal(items, opts = {}) {
+  const itemH = opts.itemH || 28;
+  const gap = 10;
+  const padL = 130, padR = 40, padT = 6, padB = 6;
+  const w = opts.width || 540;
+  const h = padT + padB + items.length * (itemH + gap) - gap;
+  const max = Math.max(1, ...items.map(it => it.value));
+  const innerW = w - padL - padR;
+  const rows = items.map((it, i) => {
+    const y = padT + i * (itemH + gap);
+    const bw = Math.max(2, (it.value / max) * innerW);
+    const color = it.color || CHART_COLORS.primary;
+    return `
+      <g>
+        <text x="${padL - 10}" y="${y + itemH/2 + 4}" text-anchor="end" font-size="12" fill="var(--ink-700)">${escapeHTML(it.label)}</text>
+        <rect x="${padL}" y="${y}" width="${innerW}" height="${itemH}" rx="6" fill="var(--bg-elevated)"/>
+        <rect x="${padL}" y="${y}" width="${bw}" height="${itemH}" rx="6" fill="${color}">
+          <title>${it.label}: ${it.value}</title>
+        </rect>
+        <text x="${padL + innerW + 8}" y="${y + itemH/2 + 4}" font-size="12" font-weight="600" fill="var(--ink-900)">${it.value}</text>
+      </g>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">${rows}</svg>`;
+}
+
+// Stacked horizontal bar — each row is one entity, segments stack left-to-right
+// rows: [{label, total, segments:[{value, color, name}]}]
+function svgStackedHBar(rows, opts = {}) {
+  const itemH = opts.itemH || 22;
+  const gap = 8;
+  const padL = 56, padR = 48, padT = 6, padB = 6;
+  const w = opts.width || 540;
+  const h = padT + padB + rows.length * (itemH + gap) - gap;
+  const max = Math.max(1, ...rows.map(r => r.total || r.segments.reduce((a, b) => a + b.value, 0)));
+  const innerW = w - padL - padR;
+  const items = rows.map((r, i) => {
+    const total = r.total != null ? r.total : r.segments.reduce((a, b) => a + b.value, 0);
+    const trackW = innerW;
+    const trackY = padT + i * (itemH + gap);
+    // Background track
+    let svg = `<rect x="${padL}" y="${trackY}" width="${trackW}" height="${itemH}" rx="6" fill="var(--bg-elevated)"/>`;
+    // Stack segments based on TOTAL (not max) — fill the bar proportional to total/max
+    let cursor = 0;
+    const filledW = (total / max) * trackW;
+    r.segments.forEach(s => {
+      if (s.value <= 0 || total === 0) return;
+      const segW = (s.value / total) * filledW;
+      svg += `<rect x="${padL + cursor}" y="${trackY}" width="${segW}" height="${itemH}" fill="${s.color}"><title>${s.name}: ${s.value}</title></rect>`;
+      cursor += segW;
+    });
+    // Round corners on the filled portion
+    if (filledW > 0) {
+      svg = svg.replace(/<rect x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)" fill="var\(--bg-elevated\)"\/>/, (m) => m);
+    }
+    // Label (left) and total (right)
+    svg += `<text x="${padL - 10}" y="${trackY + itemH/2 + 4}" text-anchor="end" font-size="12" font-weight="600" fill="var(--ink-700)">${escapeHTML(r.label)}</text>`;
+    svg += `<text x="${padL + trackW + 8}" y="${trackY + itemH/2 + 4}" font-size="12" font-weight="600" fill="var(--ink-900)">${total}</text>`;
+    return svg;
+  }).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" style="overflow:visible;">
+    <defs>
+      <clipPath id="rounded-${opts.id || 'sb'}">
+        <rect x="0" y="0" width="${w}" height="${h}" rx="6"/>
+      </clipPath>
+    </defs>
+    ${items}
+  </svg>`;
+}
+
+function svgLineChart(items, opts = {}) {
+  const w = opts.width || 720;
+  const h = opts.height || 210;
+  const padL = 32, padR = 14, padT = 18, padB = 28;
+  const innerW = w - padL - padR;
+  const innerH = h - padT - padB;
+  const max = Math.max(1, ...items.map(it => it.value));
+  const niceMax = Math.ceil(max * 1.2);
+  const stepX = items.length > 1 ? innerW / (items.length - 1) : 0;
+  const points = items.map((it, i) => {
+    const x = padL + stepX * i;
+    const y = padT + innerH - (it.value / niceMax) * innerH;
+    return [x, y, it];
+  });
+  const gridLines = [0, 0.25, 0.5, 0.75, 1].map(t => {
+    const y = padT + innerH * (1 - t);
+    const val = Math.round(niceMax * t);
+    return `<line class="grid-line" x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}"/><text class="axis-label" x="${padL - 6}" y="${y + 3}" text-anchor="end">${val}</text>`;
+  }).join('');
+  const linePath = 'M ' + points.map(p => `${p[0]} ${p[1]}`).join(' L ');
+  const areaPath = linePath + ` L ${points[points.length - 1][0]} ${padT + innerH} L ${points[0][0]} ${padT + innerH} Z`;
+  const dots = points.map(([x, y, it]) => `
+    <circle cx="${x}" cy="${y}" r="4" fill="white" stroke="${CHART_COLORS.primary}" stroke-width="2">
+      <title>${it.label}: ${it.value}</title>
+    </circle>
+    ${it.value > 0 ? `<text x="${x}" y="${y - 10}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink-900)">${it.value}</text>` : ''}
+  `).join('');
+  const xLabels = points.map(([x, _, it]) => `<text class="axis-label" x="${x}" y="${padT + innerH + 16}" text-anchor="middle">${it.label}</text>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <linearGradient id="lineFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${CHART_COLORS.primary}" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="${CHART_COLORS.primary}" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    ${gridLines}
+    <path d="${areaPath}" fill="url(#lineFill)"/>
+    <path d="${linePath}" fill="none" stroke="${CHART_COLORS.primary}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+    ${xLabels}
+  </svg>`;
+}
+
+function donutLegend(segments) {
+  const total = segments.reduce((a, b) => a + b.value, 0) || 1;
+  return `<div class="donut-legend">
+    ${segments.map(s => `
+      <div class="donut-legend-item">
+        <span class="dot" style="background:${s.color}"></span>
+        <span class="lbl">${escapeHTML(s.label)}</span>
+        <span class="val">${s.value}</span>
+        <span class="pct">${Math.round((s.value / total) * 100)}%</span>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+// Build last N months as [{label, key:'YYYY-MM'}]
+function lastMonths(n) {
+  const out = [];
+  const d = new Date();
+  d.setDate(1);
+  for (let i = n - 1; i >= 0; i--) {
+    const m = new Date(d.getFullYear(), d.getMonth() - i, 1);
+    const key = `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, '0')}`;
+    const thMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    out.push({ label: thMonths[m.getMonth()], key });
+  }
+  return out;
+}
+
+function ymOf(isoDate) {
+  if (!isoDate) return '';
+  const s = String(isoDate);
+  // Expect YYYY-MM-DD or any leading prefix
+  return s.length >= 7 ? s.slice(0, 7) : '';
+}
+
+function computeDashboard() {
+  const P = State.patients;
+  const V = State.visits;
+  const total = P.length;
+  const by = (s) => P.filter(p => p.status === s).length;
+  const active = by('active');
+  const cured = by('cured');
+  const complete = by('treatmentComplete');
+  const lost = by('lost');
+  const transferred = by('transferred');
+  const deceased = by('deceased');
+  const diagChange = by('diagnosisChange');
+
+  // Closed cases (for outcome rate calc) — exclude active
+  const closedCases = total - active;
+  const cureRate = closedCases > 0 ? Math.round(((cured + complete) / closedCases) * 100) : 0;
+  const lossRate = closedCases > 0 ? Math.round((lost / closedCases) * 100) : 0;
+
+  // Patients needing attention (active + no recent visit > 14d, or last visit had missed doses)
+  const attention = [];
+  P.forEach(p => {
+    if (p.status !== 'active') return;
+    const myVisits = V.filter(v => v.patientId === p.id).sort((a, b) => b.date.localeCompare(a.date));
+    if (myVisits.length === 0) {
+      attention.push({ p, reason: 'ยังไม่เคยเยี่ยม', urgent: true });
+      return;
+    }
+    const lastVisit = myVisits[0];
+    const days = daysSince(lastVisit.date);
+    if (days > 30) {
+      attention.push({ p, reason: `ไม่ได้เยี่ยม ${days} วัน`, urgent: true });
+    } else if (days > 14) {
+      attention.push({ p, reason: `ไม่ได้เยี่ยม ${days} วัน`, urgent: false });
+    } else if (lastVisit.medicationTaken === false) {
+      attention.push({ p, reason: `ขาดยา${lastVisit.missedDoses ? ' ' + lastVisit.missedDoses + ' มื้อ' : ''}`, urgent: true });
+    }
+  });
+  attention.sort((a, b) => Number(b.urgent) - Number(a.urgent));
+
+  // Patient type breakdown
+  const typeCount = {};
+  PATIENT_TYPES.forEach(t => typeCount[t] = 0);
+  P.forEach(p => { if (p.patientType) typeCount[p.patientType] = (typeCount[p.patientType] || 0) + 1; });
+
+  // TB class breakdown
+  const tbClassCount = { 'วัณโรคในปอด': 0, 'วัณโรคนอกปอด': 0, 'ไม่ระบุ': 0 };
+  P.forEach(p => {
+    if (p.tbClass === 'วัณโรคในปอด') tbClassCount['วัณโรคในปอด']++;
+    else if (p.tbClass === 'วัณโรคนอกปอด') tbClassCount['วัณโรคนอกปอด']++;
+    else tbClassCount['ไม่ระบุ']++;
+  });
+
+  // Area type
+  const areaCount = { 'ในเขต': 0, 'นอกเขต': 0, 'ไม่ระบุ': 0 };
+  P.forEach(p => {
+    if (p.areaType === 'ในเขต') areaCount['ในเขต']++;
+    else if (p.areaType === 'นอกเขต') areaCount['นอกเขต']++;
+    else areaCount['ไม่ระบุ']++;
+  });
+
+  // Monthly new patients (by treatmentStartDate, 6 months)
+  const months = lastMonths(6);
+  const newPerMonth = months.map(m => ({
+    label: m.label,
+    value: P.filter(p => ymOf(p.treatmentStartDate) === m.key).length
+  }));
+  // Visits per month (6 months)
+  const visitsPerMonth = months.map(m => ({
+    label: m.label,
+    value: V.filter(v => ymOf(v.date) === m.key).length
+  }));
+
+  // Test result breakdown (only non-empty)
+  const testCount = {};
+  TEST_RESULTS.forEach(t => testCount[t] = 0);
+  P.forEach(p => {
+    const t = p.testResult || p.afbResult;
+    if (t) testCount[t] = (testCount[t] || 0) + 1;
+  });
+
+  // Adherence (กินยา/ขาดยา) from all visits
+  let dosesTaken = 0, dosesMissed = 0;
+  V.forEach(v => {
+    if (v.medicationTaken === true) dosesTaken++;
+    else if (v.medicationTaken === false) dosesMissed++;
+  });
+  const adherenceRate = (dosesTaken + dosesMissed) > 0 ? Math.round((dosesTaken / (dosesTaken + dosesMissed)) * 100) : 0;
+
+  // Total visits, total household contacts
+  const totalVisits = V.length;
+  const totalContacts = P.reduce((sum, p) => sum + (Array.isArray(p.householdContacts) ? p.householdContacts.length : 0), 0);
+  // Avg visits per active patient
+  const visitsForActive = active > 0
+    ? Math.round((V.filter(v => P.find(p => p.id === v.patientId && p.status === 'active')).length / active) * 10) / 10
+    : 0;
+
+  // Per-zone breakdown (201-209)
+  const attentionByPatientId = new Set(attention.map(a => a.p.id));
+  const zoneStats = ZONES.map(z => {
+    const zp = P.filter(p => p.zone === z);
+    const zpIds = new Set(zp.map(p => p.id));
+    const zv = V.filter(v => zpIds.has(v.patientId));
+    const zActive   = zp.filter(p => p.status === 'active').length;
+    const zCured    = zp.filter(p => p.status === 'cured').length;
+    const zComplete = zp.filter(p => p.status === 'treatmentComplete').length;
+    const zLost     = zp.filter(p => p.status === 'lost').length;
+    const zTrans    = zp.filter(p => p.status === 'transferred').length;
+    const zDec      = zp.filter(p => p.status === 'deceased').length;
+    const zDiag     = zp.filter(p => p.status === 'diagnosisChange').length;
+    const zTotal    = zp.length;
+    const zClosed   = zTotal - zActive;
+    const zCureRate = zClosed > 0 ? Math.round(((zCured + zComplete) / zClosed) * 100) : null;
+    const zAttention = zp.filter(p => attentionByPatientId.has(p.id)).length;
+    return {
+      zone: z, total: zTotal,
+      active: zActive, cured: zCured, complete: zComplete,
+      lost: zLost, transferred: zTrans, deceased: zDec, diagChange: zDiag,
+      closed: zClosed, cureRate: zCureRate,
+      visits: zv.length, attention: zAttention
+    };
+  });
+
+  return {
+    total, active, cured, complete, lost, transferred, deceased, diagChange,
+    closedCases, cureRate, lossRate,
+    attention, typeCount, tbClassCount, areaCount,
+    newPerMonth, visitsPerMonth, testCount,
+    totalVisits, dosesTaken, dosesMissed, adherenceRate,
+    totalContacts, visitsForActive,
+    zoneStats
+  };
+}
+
+function renderDashboard() {
+  const d = computeDashboard();
+  const now = new Date();
+  const dateLabel = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Status donut segments
+  const statusSegs = [
+    { label: 'กำลังรักษา', value: d.active,       color: CHART_COLORS.primary },
+    { label: 'รักษาหาย',    value: d.cured,        color: CHART_COLORS.success },
+    { label: 'รักษาครบ',    value: d.complete,     color: CHART_COLORS.primaryLite },
+    { label: 'ขาดยา',       value: d.lost,         color: CHART_COLORS.danger },
+    { label: 'ส่งต่อ',      value: d.transferred,  color: CHART_COLORS.blue },
+    { label: 'เสียชีวิต',    value: d.deceased,     color: CHART_COLORS.neutral },
+    { label: 'เปลี่ยนวินิจฉัย', value: d.diagChange, color: CHART_COLORS.accent }
+  ].filter(s => s.value > 0);
+
+  // TB class donut
+  const tbClassSegs = [
+    { label: 'วัณโรคในปอด', value: d.tbClassCount['วัณโรคในปอด'], color: CHART_COLORS.primary },
+    { label: 'วัณโรคนอกปอด', value: d.tbClassCount['วัณโรคนอกปอด'], color: CHART_COLORS.accent },
+    { label: 'ไม่ระบุ',       value: d.tbClassCount['ไม่ระบุ'],     color: CHART_COLORS.neutral }
+  ].filter(s => s.value > 0);
+
+  // Patient type horizontal bar
+  const typeItems = PATIENT_TYPES.map((t, i) => ({
+    label: t,
+    value: d.typeCount[t] || 0,
+    color: [CHART_COLORS.primary, CHART_COLORS.primaryLite, CHART_COLORS.blue, CHART_COLORS.accent][i % 4]
+  }));
+
+  // Test results horizontal bar
+  const testItems = TEST_RESULTS.map((t, i) => ({
+    label: t,
+    value: d.testCount[t] || 0,
+    color: CHART_COLORS.primary
+  })).filter(it => it.value > 0);
+
+  document.getElementById('mainView').innerHTML = `
+    <div class="dash-head">
+      <div>
+        <h2>สรุปผลการดำเนินงาน</h2>
+        <p>ภาพรวมการติดตามผู้ป่วยวัณโรค · ${escapeHTML(dateLabel)}</p>
+      </div>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="kpi-grid">
+      <div class="kpi-card" style="--c: var(--primary); --c-soft: var(--primary-soft);">
+        <div class="kpi-top">
+          <span class="kpi-label">ผู้ป่วยทั้งหมด</span>
+          <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        </div>
+        <div class="kpi-value"><span class="count-up" data-target="${d.total}">0</span><span class="unit">ราย</span></div>
+        <div class="kpi-foot">ดำเนินการรักษาในปัจจุบัน <span class="pct">${d.active}</span> ราย</div>
+      </div>
+
+      <div class="kpi-card" style="--c: var(--success); --c-soft: #e2efe6;">
+        <div class="kpi-top">
+          <span class="kpi-label">อัตราการรักษาหาย</span>
+          <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></span>
+        </div>
+        <div class="kpi-value"><span class="count-up" data-target="${d.cureRate}">0</span><span class="unit">%</span></div>
+        <div class="kpi-foot">หาย/ครบ <span class="pct">${d.cured + d.complete}</span> จากเคสปิด ${d.closedCases} ราย</div>
+      </div>
+
+      <div class="kpi-card" style="--c: var(--danger); --c-soft: var(--danger-soft);">
+        <div class="kpi-top">
+          <span class="kpi-label">อัตราขาดยา</span>
+          <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
+        </div>
+        <div class="kpi-value"><span class="count-up" data-target="${d.lossRate}">0</span><span class="unit">%</span></div>
+        <div class="kpi-foot">ผู้ป่วยที่ขาดยา <span class="pct">${d.lost}</span> ราย</div>
+      </div>
+
+      <div class="kpi-card" style="--c: var(--accent); --c-soft: var(--accent-soft);">
+        <div class="kpi-top">
+          <span class="kpi-label">ต้องติดตาม</span>
+          <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+        </div>
+        <div class="kpi-value"><span class="count-up" data-target="${d.attention.length}">0</span><span class="unit">ราย</span></div>
+        <div class="kpi-foot">เร่งด่วน <span class="pct">${d.attention.filter(a => a.urgent).length}</span> · เฝ้าระวัง ${d.attention.filter(a => !a.urgent).length}</div>
+      </div>
+
+      <div class="kpi-card" style="--c: var(--primary); --c-soft: var(--primary-soft);">
+        <div class="kpi-top">
+          <span class="kpi-label">การเยี่ยมบ้าน</span>
+          <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+        </div>
+        <div class="kpi-value"><span class="count-up" data-target="${d.totalVisits}">0</span><span class="unit">ครั้ง</span></div>
+        <div class="kpi-foot">เฉลี่ย <span class="pct">${d.visitsForActive}</span> ครั้ง/รายที่กำลังรักษา</div>
+      </div>
+    </div>
+
+    <!-- CHART ROW 1 — status donut + new patients per month -->
+    <div class="dash-grid">
+      <div class="dash-card span-4">
+        <div class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">สถานะผู้ป่วย</h3>
+            <div class="dash-card-subtitle">การกระจายตามสถานะปัจจุบัน</div>
+          </div>
+        </div>
+        <div class="donut-wrap">
+          <div class="chart-wrap">${svgDonut(statusSegs, { centerLabel: 'ทั้งหมด' })}</div>
+          ${donutLegend(statusSegs.length ? statusSegs : [{ label: 'ยังไม่มีข้อมูล', value: 0, color: CHART_COLORS.neutral }])}
+        </div>
+      </div>
+
+      <div class="dash-card span-8">
+        <div class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">ผู้ป่วยใหม่รายเดือน</h3>
+            <div class="dash-card-subtitle">นับจากวันที่เริ่มรักษา · 6 เดือนล่าสุด</div>
+          </div>
+          <span class="dash-card-pill">รวม ${d.newPerMonth.reduce((a, b) => a + b.value, 0)} ราย</span>
+        </div>
+        <div class="chart-wrap">${svgBarVertical(d.newPerMonth, { width: 640, height: 220 })}</div>
+      </div>
+    </div>
+
+    <!-- CHART ROW 2 — type + tbClass + area -->
+    <div class="dash-grid">
+      <div class="dash-card span-6">
+        <div class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">ประเภทผู้ป่วย</h3>
+            <div class="dash-card-subtitle">รายใหม่ / กลับมาเป็นซ้ำ / รับโอน / โอนออก</div>
+          </div>
+        </div>
+        <div class="chart-wrap">${svgBarHorizontal(typeItems, { width: 540 })}</div>
+      </div>
+
+      <div class="dash-card span-6">
+        <div class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">จำแนกผู้ป่วย</h3>
+            <div class="dash-card-subtitle">วัณโรคในปอด vs นอกปอด</div>
+          </div>
+        </div>
+        <div class="donut-wrap">
+          <div class="chart-wrap">${svgDonut(tbClassSegs.length ? tbClassSegs : [{ label: '—', value: 0, color: CHART_COLORS.neutral }], { centerLabel: 'ทั้งหมด' })}</div>
+          ${donutLegend(tbClassSegs.length ? tbClassSegs : [{ label: 'ยังไม่มีข้อมูล', value: 0, color: CHART_COLORS.neutral }])}
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART ROW 3 — visits trend (full width) -->
+    <div class="dash-grid">
+      <div class="dash-card span-12">
+        <div class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">การเยี่ยมบ้านรายเดือน</h3>
+            <div class="dash-card-subtitle">จำนวนการเยี่ยม 6 เดือนล่าสุด</div>
+          </div>
+          <span class="dash-card-pill">รวม ${d.visitsPerMonth.reduce((a, b) => a + b.value, 0)} ครั้ง</span>
+        </div>
+        <div class="chart-wrap">${svgLineChart(d.visitsPerMonth, { width: 800, height: 220 })}</div>
+      </div>
+    </div>
+
+    <!-- CHART ROW 4 — test results + adherence insights -->
+    <div class="dash-grid">
+      <div class="dash-card span-6">
+        <div class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">ผลตรวจวินิจฉัย</h3>
+            <div class="dash-card-subtitle">การกระจายของผลตรวจล่าสุด</div>
+          </div>
+        </div>
+        <div class="chart-wrap">${testItems.length ? svgBarHorizontal(testItems, { width: 540 }) : '<div class="attention-empty">ยังไม่มีข้อมูลผลตรวจ</div>'}</div>
+      </div>
+
+      <div class="dash-card span-6">
+        <div class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">ตัวชี้วัดเชิงลึก</h3>
+            <div class="dash-card-subtitle">ข้อมูลเสริมสำหรับการบริหารจัดการ</div>
+          </div>
+        </div>
+        <div class="insight-row">
+          <div class="insight-card">
+            <div class="label">อัตรากินยาตรงเวลา</div>
+            <div class="value">${d.adherenceRate}<span style="font-size:13px;color:var(--ink-500);font-weight:400;margin-left:3px;">%</span></div>
+          </div>
+          <div class="insight-card">
+            <div class="label">มื้อยาบันทึก</div>
+            <div class="value">${d.dosesTaken + d.dosesMissed}<span style="font-size:13px;color:var(--ink-500);font-weight:400;margin-left:3px;">มื้อ</span></div>
+          </div>
+          <div class="insight-card">
+            <div class="label">ในเขต</div>
+            <div class="value">${d.areaCount['ในเขต']}<span style="font-size:13px;color:var(--ink-500);font-weight:400;margin-left:3px;">ราย</span></div>
+          </div>
+          <div class="insight-card">
+            <div class="label">นอกเขต</div>
+            <div class="value">${d.areaCount['นอกเขต']}<span style="font-size:13px;color:var(--ink-500);font-weight:400;margin-left:3px;">ราย</span></div>
+          </div>
+          <div class="insight-card">
+            <div class="label">ผู้สัมผัสร่วมบ้าน</div>
+            <div class="value">${d.totalContacts}<span style="font-size:13px;color:var(--ink-500);font-weight:400;margin-left:3px;">คน</span></div>
+          </div>
+          <div class="insight-card">
+            <div class="label">เคสปิดทั้งหมด</div>
+            <div class="value">${d.closedCases}<span style="font-size:13px;color:var(--ink-500);font-weight:400;margin-left:3px;">ราย</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE BREAKDOWN (201-209) -->
+    <div class="dash-grid">
+      <div class="dash-card span-12">
+        <div class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">สรุปผลแยกตามเขตพื้นที่รับผิดชอบ</h3>
+            <div class="dash-card-subtitle">การกระจายและผลลัพธ์การรักษาในแต่ละเขต (201-209)</div>
+          </div>
+          <span class="dash-card-pill">${ZONES.length} เขต · รวม ${d.zoneStats.reduce((a, z) => a + z.total, 0)} ราย</span>
+        </div>
+
+        <div class="seg-legend">
+          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.primary}"></span>กำลังรักษา</span>
+          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.success}"></span>รักษาหาย</span>
+          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.primaryLite}"></span>รักษาครบ</span>
+          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.danger}"></span>ขาดยา</span>
+          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.blue}"></span>ส่งต่อ</span>
+          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.neutral}"></span>เสียชีวิต</span>
+          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.accent}"></span>เปลี่ยนวินิจฉัย</span>
+        </div>
+
+        <div class="chart-wrap" style="margin-bottom: 18px;">
+          ${svgStackedHBar(d.zoneStats.map(z => ({
+            label: 'เขต ' + z.zone,
+            total: z.total,
+            segments: [
+              { value: z.active,      color: CHART_COLORS.primary,     name: 'กำลังรักษา' },
+              { value: z.cured,       color: CHART_COLORS.success,     name: 'รักษาหาย' },
+              { value: z.complete,    color: CHART_COLORS.primaryLite, name: 'รักษาครบ' },
+              { value: z.lost,        color: CHART_COLORS.danger,      name: 'ขาดยา' },
+              { value: z.transferred, color: CHART_COLORS.blue,        name: 'ส่งต่อ' },
+              { value: z.deceased,    color: CHART_COLORS.neutral,     name: 'เสียชีวิต' },
+              { value: z.diagChange,  color: CHART_COLORS.accent,      name: 'เปลี่ยนวินิจฉัย' }
+            ]
+          })), { width: 720, id: 'zone-stack' })}
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="zone-table">
+            <thead>
+              <tr>
+                <th>เขต</th>
+                <th class="num">ทั้งหมด</th>
+                <th class="num">กำลังรักษา</th>
+                <th class="num col-collapse">รักษาหาย</th>
+                <th class="num col-collapse">ขาดยา</th>
+                <th class="num col-collapse">เยี่ยม</th>
+                <th class="num">ติดตาม</th>
+                <th class="num">อัตราหาย</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${d.zoneStats.map(z => {
+                const isEmpty = z.total === 0;
+                return `
+                <tr class="${isEmpty ? 'empty-zone' : ''}">
+                  <td class="zone-cell"><span class="zone-chip">${z.zone}</span></td>
+                  <td class="num"><strong>${z.total}</strong></td>
+                  <td class="num">${z.active}</td>
+                  <td class="num col-collapse">${z.cured + z.complete}</td>
+                  <td class="num col-collapse">${z.lost}</td>
+                  <td class="num col-collapse">${z.visits}</td>
+                  <td class="num">
+                    ${z.attention > 0
+                      ? `<span class="alert-dot">${z.attention}</span>`
+                      : `<span class="alert-dot muted">0</span>`}
+                  </td>
+                  <td class="num">
+                    <span class="rate">
+                      <span class="rate-bar"><span style="width:${z.cureRate != null ? z.cureRate : 0}%; background:${z.cureRate != null && z.cureRate >= 75 ? CHART_COLORS.success : (z.cureRate != null && z.cureRate >= 50 ? CHART_COLORS.warning : CHART_COLORS.danger)};"></span></span>
+                      <span class="rate-val ${z.cureRate == null ? 'dim' : ''}">${z.cureRate != null ? z.cureRate + '%' : '—'}</span>
+                    </span>
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  `;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   THEME (Light / Dark Mode)
+   ═══════════════════════════════════════════════════════════════ */
+const THEME_KEY = 'tb_theme';
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  // Refresh chart palette from CSS variables
+  updateChartColors();
+  // Re-render dashboard so charts pick up new colors
+  if (State.view === 'dashboard') render();
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  applyTheme(next);
+}
+
+function updateChartColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const pick = (name, fallback) => (cs.getPropertyValue(name) || fallback).trim() || fallback;
+  CHART_COLORS.primary     = pick('--chart-primary',      '#2d4f3f');
+  CHART_COLORS.primaryLite = pick('--chart-primary-lite', '#5a8073');
+  CHART_COLORS.success     = pick('--chart-success',      '#4a7a5a');
+  CHART_COLORS.warning     = pick('--chart-warning',      '#c89832');
+  CHART_COLORS.danger      = pick('--chart-danger',       '#b3463e');
+  CHART_COLORS.accent      = pick('--chart-accent',       '#c97560');
+  CHART_COLORS.neutral     = pick('--chart-neutral',      '#a8b1ab');
+  CHART_COLORS.blue        = pick('--chart-blue',         '#4a6f8a');
+}
+
+// Auto-react to system theme changes (only if user hasn't manually picked)
+if (window.matchMedia) {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    try {
+      if (localStorage.getItem(THEME_KEY)) return; // user has a manual preference
+    } catch (err) {}
+    applyTheme(e.matches ? 'dark' : 'light');
+  });
+}
+
+/* Move action items between .header-actions (cover/detail) and .subnav-actions (list/dashboard) */
+function relocateHeaderActions(view) {
+  const headerActions = document.querySelector('.app-header .header-actions');
+  const subnavActions = document.getElementById('subnavActions');
+  if (!headerActions || !subnavActions) return;
+  const items = [
+    document.getElementById('syncIndicator'),
+    document.getElementById('themeToggle'),
+    document.getElementById('settingsBtn')
+  ].filter(Boolean);
+  const goesToSubnav = (view === 'list' || view === 'dashboard');
+  const target = goesToSubnav ? subnavActions : headerActions;
+  items.forEach(el => {
+    if (el.parentNode !== target) target.appendChild(el);
+  });
+}
+
+/* Move brand pill between header (cover/detail) and subnav (list/dashboard) */
+function relocateHeaderBrand(view) {
+  const brand = document.querySelector('.brand');
+  const headerInner = document.querySelector('.header-inner');
+  const subnavSlot = document.getElementById('subnavBrandSlot');
+  if (!brand || !headerInner || !subnavSlot) return;
+  const goesToSubnav = (view === 'list' || view === 'dashboard');
+  brand.classList.toggle('brand-in-subnav', goesToSubnav);
+  if (goesToSubnav) {
+    if (brand.parentNode !== subnavSlot) subnavSlot.appendChild(brand);
+  } else {
+    if (brand.parentNode !== headerInner) headerInner.insertBefore(brand, headerInner.firstChild);
+  }
+}
+
+function goView(v) {
+  State.view = v;
+  if (v !== 'detail') State.currentPatientId = null;
+  render();
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -2033,7 +5006,8 @@ function renderDetail() {
       <div class="detail-header">
         <div class="breadcrumb">
           <button onclick="goBack()">${ICON.back} กลับไปยังรายชื่อ</button>
-          <span>·</span><span>${STATUS_LABELS[p.status || 'active']}</span>
+          <span class="crumb-sep"></span>
+          <span class="crumb-current">${STATUS_LABELS[p.status || 'active']}</span>
         </div>
         <div class="detail-name">${escapeHTML(p.name || 'ไม่ระบุชื่อ')}</div>
         <div class="detail-subline">
@@ -2052,14 +5026,12 @@ function renderDetail() {
       <div class="tabs">
         <button class="tab ${State.currentTab === 'info' ? 'active' : ''}" onclick="setTab('info')">${ICON.user} ข้อมูลทั่วไป</button>
         <button class="tab ${State.currentTab === 'visits' ? 'active' : ''}" onclick="setTab('visits')">${ICON.calendar} การเยี่ยมบ้าน<span class="badge">${visits.length}</span></button>
-        <button class="tab ${State.currentTab === 'medication' ? 'active' : ''}" onclick="setTab('medication')">${ICON.pill} การกินยา</button>
         <button class="tab ${State.currentTab === 'symptoms' ? 'active' : ''}" onclick="setTab('symptoms')">${ICON.alert} ประวัติอาการ</button>
       </div>
 
       <div class="tab-panel">
         ${State.currentTab === 'info' ? renderInfoTab(p) : ''}
         ${State.currentTab === 'visits' ? renderVisitsTab(p, visits) : ''}
-        ${State.currentTab === 'medication' ? renderMedicationTab(p, visits) : ''}
         ${State.currentTab === 'symptoms' ? renderSymptomsTab(p, visits) : ''}
       </div>
     </div>`;
@@ -2080,12 +5052,18 @@ function renderInfoTab(p) {
     ['ผู้ดูแล / ผู้ติดต่อ', p.contactPerson],
     ['สถานะ', statusDisplay]
   ];
+  const tbClassDisplay = p.tbClass
+    ? (p.tbClass === 'วัณโรคนอกปอด' && p.tbClassDetail
+        ? `${p.tbClass} (${p.tbClassDetail})`
+        : p.tbClass)
+    : null;
   const treatment = [
     ['วันที่เริ่มรักษา', fmtDate(p.treatmentStartDate)],
     ['สูตรยา (Regimen)', p.regimen],
     ['ระยะเวลารักษา', p.regimenMonths ? p.regimenMonths + ' เดือน' : null],
     ['ผลตรวจ', p.testResult || p.afbResult],
-    ['ประเภทผู้ป่วย', p.patientType]
+    ['ประเภทผู้ป่วย', p.patientType],
+    ['จำแนกผู้ป่วย', tbClassDisplay]
   ];
 
   const contacts = Array.isArray(p.householdContacts) ? p.householdContacts : [];
@@ -2331,20 +5309,22 @@ function openPatientModal(id = null) {
           <button class="modal-close" onclick="closeModal()">${ICON.close}</button>
         </div>
         <div class="modal-body">
+          <div class="form-alert" id="patientFormAlert">${ICON.alert} <span>กรุณากรอกข้อมูลที่บังคับให้ครบ (มีเครื่องหมาย <span style="color:var(--danger);font-weight:700;">*</span>)</span></div>
           <div class="form-section" style="margin-top: 0; padding-top: 0; border: none;">
             <h4>ข้อมูลส่วนบุคคล</h4>
             <div class="form-row">
-              <div class="form-group" style="grid-column: span 2;"><label>ชื่อ-นามสกุล<span class="req">*</span></label><input class="input" id="f-name" value="${escapeHTML(p.name)}" placeholder="เช่น นายสมชาย ใจดี"></div>
-              <div class="form-group"><label>HN</label><input class="input" id="f-hn" value="${escapeHTML(p.hn)}" placeholder="HN12345"></div>
+              <div class="form-group" data-field="name" style="grid-column: span 2;"><label>ชื่อ-นามสกุล<span class="req">*</span></label><input class="input" id="f-name" value="${escapeHTML(p.name)}" placeholder="เช่น นายสมชาย ใจดี"><span class="field-error">${ICON.alert} กรุณากรอกชื่อ-นามสกุล</span></div>
+              <div class="form-group" data-field="hn"><label>HN<span class="req">*</span></label><input class="input" id="f-hn" value="${escapeHTML(p.hn)}" placeholder="HN12345"><span class="field-error">${ICON.alert} กรุณากรอก HN</span></div>
             </div>
             <div class="form-row">
-              <div class="form-group"><label>อายุ (ปี)</label><input class="input" id="f-age" type="number" value="${escapeHTML(p.age)}" placeholder="45"></div>
-              <div class="form-group"><label>เพศ</label>
+              <div class="form-group" data-field="age"><label>อายุ (ปี)<span class="req">*</span></label><input class="input" id="f-age" type="number" value="${escapeHTML(p.age)}" placeholder="45"><span class="field-error">${ICON.alert} กรุณากรอกอายุ</span></div>
+              <div class="form-group" data-field="gender"><label>เพศ<span class="req">*</span></label>
                 <select class="select" id="f-gender">
                   <option value="">—</option>
                   <option value="ชาย" ${p.gender === 'ชาย' ? 'selected' : ''}>ชาย</option>
                   <option value="หญิง" ${p.gender === 'หญิง' ? 'selected' : ''}>หญิง</option>
                 </select>
+                <span class="field-error">${ICON.alert} กรุณาเลือกเพศ</span>
               </div>
               <div class="form-group"><label>เบอร์โทร</label><input class="input" id="f-phone" value="${escapeHTML(p.phone)}" placeholder="08X-XXX-XXXX"></div>
             </div>
@@ -2353,26 +5333,28 @@ function openPatientModal(id = null) {
           <div class="form-section">
             <h4>ที่อยู่</h4>
             <div class="form-row">
-              <div class="form-group"><label>บ้านเลขที่</label><input class="input" id="f-addrNo" value="${escapeHTML(p.addrNo)}" placeholder="123/4"></div>
-              <div class="form-group"><label>หมู่</label><input class="input" id="f-addrMoo" value="${escapeHTML(p.addrMoo)}" placeholder="5"></div>
-              <div class="form-group"><label>ตำบล</label><input class="input" id="f-addrTambon" value="${escapeHTML(p.addrTambon)}" placeholder="ทับคล้อ"></div>
-              <div class="form-group"><label>อำเภอ</label><input class="input" id="f-addrAmphoe" value="${escapeHTML(p.addrAmphoe)}" placeholder="ทับคล้อ"></div>
-              <div class="form-group"><label>จังหวัด</label><input class="input" id="f-addrProvince" value="${escapeHTML(p.addrProvince)}" placeholder="พิจิตร"></div>
+              <div class="form-group" data-field="addrNo"><label>บ้านเลขที่<span class="req">*</span></label><input class="input" id="f-addrNo" value="${escapeHTML(p.addrNo)}" placeholder="123/4"><span class="field-error">${ICON.alert} กรุณากรอกบ้านเลขที่</span></div>
+              <div class="form-group" data-field="addrMoo"><label>หมู่<span class="req">*</span></label><input class="input" id="f-addrMoo" value="${escapeHTML(p.addrMoo)}" placeholder="5"><span class="field-error">${ICON.alert} กรุณากรอกหมู่</span></div>
+              <div class="form-group" data-field="addrTambon"><label>ตำบล<span class="req">*</span></label><input class="input" id="f-addrTambon" value="${escapeHTML(p.addrTambon)}" placeholder="ทับคล้อ"><span class="field-error">${ICON.alert} กรุณากรอกตำบล</span></div>
+              <div class="form-group" data-field="addrAmphoe"><label>อำเภอ<span class="req">*</span></label><input class="input" id="f-addrAmphoe" value="${escapeHTML(p.addrAmphoe)}" placeholder="ทับคล้อ"><span class="field-error">${ICON.alert} กรุณากรอกอำเภอ</span></div>
+              <div class="form-group" data-field="addrProvince"><label>จังหวัด<span class="req">*</span></label><input class="input" id="f-addrProvince" value="${escapeHTML(p.addrProvince)}" placeholder="พิจิตร"><span class="field-error">${ICON.alert} กรุณากรอกจังหวัด</span></div>
             </div>
             <div class="form-row">
-              <div class="form-group"><label>เขตพื้นที่รับผิดชอบ</label>
+              <div class="form-group" data-field="zone"><label>เขตพื้นที่รับผิดชอบ<span class="req">*</span></label>
                 <select class="select" id="f-zone">
                   <option value="">—</option>
                   ${ZONES.map(z => `<option value="${z}" ${p.zone === z ? 'selected' : ''}>${z}</option>`).join('')}
                 </select>
+                <span class="field-error">${ICON.alert} กรุณาเลือกเขตพื้นที่</span>
               </div>
-              <div class="form-group"><label>สถานะพื้นที่</label>
+              <div class="form-group" data-field="areaType"><label>สถานะพื้นที่<span class="req">*</span></label>
                 <div class="pill-group" id="f-areaType-group">
                   ${AREA_TYPES.map((a, i) => `
                     <input type="radio" name="f-areaType" id="f-areaType-${i}" value="${a}" ${p.areaType === a ? 'checked' : ''}>
                     <label for="f-areaType-${i}">${a}</label>
                   `).join('')}
                 </div>
+                <span class="field-error">${ICON.alert} กรุณาเลือกในเขต/นอกเขต</span>
               </div>
               <div class="form-group"><label>ผู้ดูแล / ผู้ติดต่อ</label><input class="input" id="f-contact" value="${escapeHTML(p.contactPerson)}" placeholder="ชื่อ - สกุล"></div>
             </div>
@@ -2381,22 +5363,39 @@ function openPatientModal(id = null) {
           <div class="form-section">
             <h4>ข้อมูลการรักษา</h4>
             <div class="form-row">
-              <div class="form-group"><label>วันที่เริ่มรักษา</label><input class="input" id="f-treatmentStartDate" type="date" value="${escapeHTML(p.treatmentStartDate)}"></div>
+              <div class="form-group" data-field="treatmentStartDate"><label>วันที่เริ่มรักษา<span class="req">*</span></label><input class="input" id="f-treatmentStartDate" type="date" value="${escapeHTML(p.treatmentStartDate)}"><span class="field-error">${ICON.alert} กรุณาเลือกวันที่</span></div>
               <div class="form-group"><label>ระยะเวลา (เดือน)</label><input class="input" id="f-regimenMonths" type="number" value="${escapeHTML(p.regimenMonths)}" placeholder="6"></div>
               <div class="form-group"><label>สูตรยา (Regimen)</label><input class="input" id="f-regimen" value="${escapeHTML(p.regimen)}" placeholder="2HRZE / 4HR"></div>
             </div>
             <div class="form-row">
-              <div class="form-group"><label>ผลตรวจ</label>
+              <div class="form-group full" data-field="tbClass">
+                <label>จำแนกผู้ป่วย<span class="req">*</span></label>
+                <div class="pill-group" id="f-tbClass-group">
+                  ${TB_CLASSES.map((t, i) => `
+                    <input type="radio" name="f-tbClass" id="f-tbClass-${i}" value="${t}" ${p.tbClass === t ? 'checked' : ''} onchange="toggleTbClassDetail()">
+                    <label for="f-tbClass-${i}">${t}</label>
+                  `).join('')}
+                </div>
+                <span class="field-error">${ICON.alert} กรุณาเลือกวัณโรคในปอด/นอกปอด</span>
+              </div>
+            </div>
+            <div class="form-row" id="tbClassDetailRow" style="display:${p.tbClass === 'วัณโรคนอกปอด' ? 'grid' : 'none'};">
+              <div class="form-group full" data-field="tbClassDetail"><label>ระบุตำแหน่ง / ชนิดของวัณโรคนอกปอด<span class="req">*</span></label><input class="input" id="f-tbClassDetail" value="${escapeHTML(p.tbClassDetail)}" placeholder="เช่น ต่อมน้ำเหลือง, เยื่อหุ้มสมอง, กระดูก, ลำไส้, ไต ฯลฯ"><span class="field-error">${ICON.alert} กรุณาระบุตำแหน่ง/ชนิด</span></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group" data-field="testResult"><label>ผลตรวจ<span class="req">*</span></label>
                 <select class="select" id="f-testResult">
                   <option value="">—</option>
                   ${TEST_RESULTS.map(t => `<option value="${t}" ${(p.testResult || p.afbResult) === t ? 'selected' : ''}>${t}</option>`).join('')}
                 </select>
+                <span class="field-error">${ICON.alert} กรุณาเลือกผลตรวจ</span>
               </div>
-              <div class="form-group"><label>ประเภทผู้ป่วย</label>
+              <div class="form-group" data-field="patientType"><label>ประเภทผู้ป่วย<span class="req">*</span></label>
                 <select class="select" id="f-patientType">
                   <option value="">—</option>
                   ${PATIENT_TYPES.map(t => `<option value="${t}" ${p.patientType === t ? 'selected' : ''}>${t}</option>`).join('')}
                 </select>
+                <span class="field-error">${ICON.alert} กรุณาเลือกประเภทผู้ป่วย</span>
               </div>
               <div class="form-group"><label>สถานะ</label>
                 <select class="select" id="f-status" onchange="toggleTransferTo()">
@@ -2498,10 +5497,65 @@ function toggleTransferTo() {
   if (status && row) row.style.display = (status.value === 'transferred') ? 'grid' : 'none';
 }
 
+function toggleTbClassDetail() {
+  const checked = document.querySelector('input[name="f-tbClass"]:checked');
+  const row = document.getElementById('tbClassDetailRow');
+  if (!row) return;
+  const isExtra = checked && checked.value === 'วัณโรคนอกปอด';
+  row.style.display = isExtra ? 'grid' : 'none';
+  if (!isExtra) {
+    const detail = document.getElementById('f-tbClassDetail');
+    if (detail) detail.value = '';
+  }
+}
+
 async function savePatient(id) {
   const get = (k) => document.getElementById('f-' + k).value.trim();
+
+  // Clear previous errors
+  document.querySelectorAll('.modal-body .form-group.has-error').forEach(el => el.classList.remove('has-error'));
+  const alertBox = document.getElementById('patientFormAlert');
+  if (alertBox) alertBox.classList.remove('show');
+
+  // Validate required fields
+  const tbClassChecked = (document.querySelector('input[name="f-tbClass"]:checked') || {}).value;
+  const areaTypeChecked = (document.querySelector('input[name="f-areaType"]:checked') || {}).value;
+  const required = [
+    { field: 'name',                value: get('name'),                label: 'ชื่อ-นามสกุล' },
+    { field: 'hn',                  value: get('hn'),                  label: 'HN' },
+    { field: 'age',                 value: get('age'),                 label: 'อายุ' },
+    { field: 'gender',              value: get('gender'),              label: 'เพศ' },
+    { field: 'addrNo',              value: get('addrNo'),              label: 'บ้านเลขที่' },
+    { field: 'addrMoo',             value: get('addrMoo'),             label: 'หมู่' },
+    { field: 'addrTambon',          value: get('addrTambon'),          label: 'ตำบล' },
+    { field: 'addrAmphoe',          value: get('addrAmphoe'),          label: 'อำเภอ' },
+    { field: 'addrProvince',        value: get('addrProvince'),        label: 'จังหวัด' },
+    { field: 'zone',                value: get('zone'),                label: 'เขตพื้นที่' },
+    { field: 'areaType',            value: areaTypeChecked,            label: 'สถานะพื้นที่' },
+    { field: 'treatmentStartDate',  value: get('treatmentStartDate'),  label: 'วันที่เริ่มรักษา' },
+    { field: 'tbClass',             value: tbClassChecked,             label: 'จำแนกผู้ป่วย' },
+    { field: 'testResult',          value: get('testResult'),          label: 'ผลตรวจ' },
+    { field: 'patientType',         value: get('patientType'),         label: 'ประเภทผู้ป่วย' }
+  ];
+  // Conditional: tbClassDetail required when tbClass = "วัณโรคนอกปอด"
+  if (tbClassChecked === 'วัณโรคนอกปอด') {
+    required.push({ field: 'tbClassDetail', value: get('tbClassDetail'), label: 'ระบุตำแหน่ง/ชนิด' });
+  }
+  const missing = required.filter(r => !r.value);
+  if (missing.length > 0) {
+    missing.forEach(m => {
+      const el = document.querySelector(`.form-group[data-field="${m.field}"]`);
+      if (el) el.classList.add('has-error');
+    });
+    if (alertBox) alertBox.classList.add('show');
+    toast(`กรุณากรอกข้อมูลที่บังคับให้ครบ (${missing.length} ช่อง)`, 'error', 3500);
+    // Scroll to first missing field
+    const firstEl = document.querySelector('.form-group.has-error');
+    if (firstEl) firstEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
   const name = get('name');
-  if (!name) { toast('กรุณากรอกชื่อผู้ป่วย', 'error'); document.getElementById('f-name').focus(); return; }
 
   const status = get('status') || 'active';
   const cleanedContacts = householdContacts
@@ -2524,10 +5578,16 @@ async function savePatient(id) {
     treatmentStartDate: get('treatmentStartDate'),
     regimen: get('regimen'), regimenMonths: parseInt(get('regimenMonths')) || 6,
     testResult: get('testResult'), patientType: get('patientType'),
+    tbClass: (document.querySelector('input[name="f-tbClass"]:checked') || {}).value || '',
+    tbClassDetail: '',
     status, transferTo: status === 'transferred' ? get('transferTo') : '',
     householdContacts: cleanedContacts,
     notes: get('notes')
   };
+  // Only keep tbClassDetail when classification is "นอกปอด"
+  if (data.tbClass === 'วัณโรคนอกปอด') {
+    data.tbClassDetail = get('tbClassDetail');
+  }
   // Build combined address string for backward compatibility (legacy 'address' column)
   data.address = fullAddress(data);
   // Keep legacy 'afbResult' in sync with new testResult (backward compat for old rows/columns)
@@ -2598,12 +5658,13 @@ function openVisitModal(id = null) {
           <button class="modal-close" onclick="closeModal()">${ICON.close}</button>
         </div>
         <div class="modal-body">
+          <div class="form-alert" id="visitFormAlert">${ICON.alert} <span>กรุณากรอกข้อมูลที่บังคับให้ครบ (มีเครื่องหมาย <span style="color:var(--danger);font-weight:700;">*</span>)</span></div>
           <div class="form-section" style="margin-top: 0; padding-top: 0; border: none;">
             <h4>ข้อมูลการเยี่ยม</h4>
             <div class="form-row">
-              <div class="form-group"><label>วันที่เยี่ยม<span class="req">*</span></label><input class="input" id="v-date" type="date" value="${escapeHTML(v.date)}"></div>
+              <div class="form-group" data-field="date"><label>วันที่เยี่ยม<span class="req">*</span></label><input class="input" id="v-date" type="date" value="${escapeHTML(v.date)}"><span class="field-error">${ICON.alert} กรุณาเลือกวันที่</span></div>
               <div class="form-group"><label>เวลาที่เยี่ยม</label><input class="input" id="v-visitTime" type="time" value="${escapeHTML(v.visitTime)}"></div>
-              <div class="form-group"><label>ผู้เยี่ยม</label><input class="input" id="v-visitorName" value="${escapeHTML(v.visitorName)}" placeholder="ชื่อเจ้าหน้าที่"></div>
+              <div class="form-group" data-field="visitorName"><label>ผู้เยี่ยม<span class="req">*</span></label><input class="input" id="v-visitorName" value="${escapeHTML(v.visitorName)}" placeholder="ชื่อเจ้าหน้าที่"><span class="field-error">${ICON.alert} กรุณากรอกชื่อผู้เยี่ยม</span></div>
               <div class="form-group"><label>ตำแหน่ง</label><input class="input" id="v-visitorRole" value="${escapeHTML(v.visitorRole)}" placeholder="พยาบาลวิชาชีพ"></div>
             </div>
             <div class="form-row">
@@ -2660,12 +5721,16 @@ function openVisitModal(id = null) {
           </div>
 
           <div class="form-section">
-            <h4>รูปภาพประกอบ (อัพโหลดขึ้น Google Drive)</h4>
+            <h4>รูปภาพประกอบ</h4>
             <label class="photo-uploader">
               <input type="file" id="v-photo-input" accept="image/*" multiple onchange="handlePhotoUpload(event)">
-              <div class="icon">${ICON.upload}</div>
-              <p><strong>คลิกเพื่อเลือกรูปภาพ</strong></p>
-              <p style="font-size: 11px; margin-top: 4px;">รูปจะถูกอัพโหลดตอนกดบันทึก · รพ.สต. อื่นจะเห็นรูปเดียวกัน</p>
+              <div class="upload-icon">${ICON.upload}</div>
+              <p class="upload-title">คลิกเพื่อ<span class="accent">เลือกรูปภาพ</span></p>
+              <p class="upload-sub">อัพโหลดขึ้น Google Drive ตอนกดบันทึก</p>
+              <div class="upload-chips">
+                <span class="upload-chip">JPG / PNG</span>
+                <span class="upload-chip">หลายไฟล์ได้</span>
+              </div>
             </label>
             <div class="photo-preview-grid" id="v-photo-preview"></div>
           </div>
@@ -2728,8 +5793,31 @@ function removePhoto(i) { visitPhotos.splice(i, 1); refreshPhotoPreview(); }
 
 async function saveVisit(id) {
   const get = (k) => document.getElementById('v-' + k).value.trim();
+
+  // Clear previous errors
+  document.querySelectorAll('.modal-body .form-group.has-error').forEach(el => el.classList.remove('has-error'));
+  const alertBox = document.getElementById('visitFormAlert');
+  if (alertBox) alertBox.classList.remove('show');
+
+  // Validate required fields
+  const required = [
+    { field: 'date',         value: get('date'),         label: 'วันที่เยี่ยม' },
+    { field: 'visitorName',  value: get('visitorName'),  label: 'ผู้เยี่ยม' }
+  ];
+  const missing = required.filter(r => !r.value);
+  if (missing.length > 0) {
+    missing.forEach(m => {
+      const el = document.querySelector(`.form-group[data-field="${m.field}"]`);
+      if (el) el.classList.add('has-error');
+    });
+    if (alertBox) alertBox.classList.add('show');
+    toast(`กรุณากรอกข้อมูลที่บังคับให้ครบ (${missing.length} ช่อง)`, 'error', 3500);
+    const firstEl = document.querySelector('.form-group.has-error');
+    if (firstEl) firstEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
   const date = get('date');
-  if (!date) { toast('กรุณาเลือกวันที่เยี่ยม', 'error'); return; }
 
   const generalSymptoms = {};
   document.querySelectorAll('#v-generalSymptoms .check-item').forEach(el => {
@@ -3010,7 +6098,13 @@ async function loadAll(silent = false) {
   if (State.syncing) return;
   State.syncing = true;
   setSyncState('syncing', 'กำลัง sync...');
-  if (!silent) showLoading('กำลังโหลดข้อมูล...');
+  // Use skeleton on list/dashboard for modern perceived-perf; overlay for other views
+  let usingSkeleton = false;
+  if (!silent) {
+    if (State.view === 'list') { showSkeletonList(); usingSkeleton = true; }
+    else if (State.view === 'dashboard') { showSkeletonDashboard(); usingSkeleton = true; }
+    else { showLoading('กำลังโหลดข้อมูล...'); }
+  }
   try {
     const [patients, visits] = await Promise.all([API.listPatients(), API.listVisits()]);
     State.patients = (patients || []).map(normalizePatient);
@@ -3022,7 +6116,9 @@ async function loadAll(silent = false) {
     if (!silent) toast('ดึงข้อมูลไม่สำเร็จ: ' + err.message, 'error', 4000);
   } finally {
     State.syncing = false;
-    if (!silent) hideLoading();
+    if (!silent && !usingSkeleton) hideLoading();
+    // If skeleton was shown, re-render to replace it with actual content
+    if (usingSkeleton) render();
   }
 }
 
@@ -3038,14 +6134,36 @@ async function refreshData() {
 function render() {
   if (!API.url && !State.demo) { renderSetup(); return; }
   document.getElementById('settingsBtn').style.display = State.demo ? 'none' : 'grid';
-  if (State.view === 'detail' && State.currentPatientId) renderDetail();
+  // Set body data-view for view-specific styling (e.g. list bg image)
+  document.body.dataset.view = State.view;
+  // Show subnav only on list/dashboard views (hide on cover/detail)
+  const subnav = document.getElementById('subnav');
+  const navTabs = document.getElementById('navTabs');
+  const showNav = State.view !== 'detail' && State.view !== 'cover';
+  if (subnav) subnav.style.display = showNav ? 'block' : 'none';
+  if (navTabs) {
+    navTabs.querySelectorAll('.nav-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.view === State.view);
+    });
+  }
+  // Move brand + action items between header (cover/detail) and subnav (list/dashboard)
+  relocateHeaderBrand(State.view);
+  relocateHeaderActions(State.view);
+  if (State.view === 'cover') renderCover();
+  else if (State.view === 'detail' && State.currentPatientId) renderDetail();
+  else if (State.view === 'dashboard') renderDashboard();
   else renderList();
+  // Trigger count-up animation on any KPI numbers in the new view
+  requestAnimationFrame(() => animateAllCounts());
 }
 
 /* ════════════════════════════════════════════════════════════════
    BOOT
    ═══════════════════════════════════════════════════════════════ */
 (async function init() {
+  // Initialize chart palette from current theme's CSS variables
+  updateChartColors();
+
   // Demo mode: ?demo=1 — preview the UI without backend (read-only, in-memory data)
   const isDemo = /[?&]demo=1\b/.test(location.search);
   if (isDemo) {
