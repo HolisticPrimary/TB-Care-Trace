@@ -1577,15 +1577,16 @@
 /* ════════════════════════════════════════════════════════════════
    API LAYER — ติดต่อกับ Google Apps Script Web App
    ═══════════════════════════════════════════════════════════════ */
+// Hard-coded Web App URL — locked, ผู้ใช้ปลายทางใช้งานได้ทันทีโดยไม่ต้องตั้งค่า
+const EMBEDDED_API_URL = 'https://script.google.com/macros/s/AKfycbzW1RMkfBenZxmPG3kDZffBmMEZal01AxhHW4XQtKY08Mx2N9utMu562UZffHyluYDj1w/exec';
 const API_URL_KEY = 'tb_api_url';
 
 const API = {
-  url: localStorage.getItem(API_URL_KEY) || '',
+  url: EMBEDDED_API_URL,
 
-  setUrl(url) {
-    this.url = (url || '').trim();
-    if (this.url) localStorage.setItem(API_URL_KEY, this.url);
-    else localStorage.removeItem(API_URL_KEY);
+  setUrl(_url) {
+    // URL is locked to embedded value — ignore any attempts to change it
+    this.url = EMBEDDED_API_URL;
   },
 
   async call(method, action, payload = {}) {
@@ -2923,36 +2924,28 @@ function renderSetup(errorMsg = '') {
     <div class="full-screen">
       <div class="setup-card">
         <div style="color: var(--primary); margin-bottom: 16px;">${ICON.cloud}</div>
-        <h2>เชื่อมต่อกับ Google Apps Script</h2>
-        <p>วาง Web App URL เพื่อเริ่มใช้งาน — รพ.สต. ทุกแห่งที่ใช้ URL เดียวกันจะเห็นข้อมูลร่วมกัน</p>
+        <h2>เชื่อมต่อระบบ</h2>
+        <p>ระบบจะเชื่อมต่อกับฐานข้อมูลกลางโดยอัตโนมัติ</p>
         ${errorMsg ? `<div style="background: var(--danger-soft); color: var(--danger); padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;">${escapeHTML(errorMsg)}</div>` : ''}
-        <div class="form-group" style="margin-bottom: 16px;">
-          <label>Web App URL</label>
-          <input class="input" id="setupUrl" value="${escapeHTML(API.url)}" placeholder="https://script.google.com/macros/s/.../exec" style="font-family: var(--font-mono); font-size: 12px;">
-        </div>
-        <button class="btn btn-primary" id="setupBtn" onclick="connectAndLoad()" style="width: 100%; justify-content: center; padding: 12px;">เชื่อมต่อ</button>
+        <button class="btn btn-primary" id="setupBtn" onclick="connectAndLoad()" style="width: 100%; justify-content: center; padding: 12px;">ลองเชื่อมต่ออีกครั้ง</button>
 
         <div class="setup-steps">
-          <strong>ขั้นตอนติดตั้ง:</strong><br>
-          1. เข้า <code>script.google.com</code> → New project<br>
-          2. Paste <code>Code.gs</code> → กด Save<br>
-          3. รัน function <code>setup</code> ครั้งเดียว<br>
-          4. Deploy → New deployment → Web app → Anyone<br>
-          5. Copy Web app URL มาวางที่นี่
+          <strong>หากเชื่อมต่อไม่ได้:</strong><br>
+          1. ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต<br>
+          2. รีเฟรชหน้านี้ (กด <code>F5</code> หรือดึงลงเพื่อรีเฟรช)<br>
+          3. หากยังไม่ได้ ติดต่อผู้ดูแลระบบ
         </div>
       </div>
     </div>`;
 }
 
 async function connectAndLoad() {
-  const url = document.getElementById('setupUrl').value.trim();
-  if (!url) { toast('กรุณาวาง URL', 'error'); return; }
-
   const btn = document.getElementById('setupBtn');
-  btn.disabled = true;
-  btn.textContent = 'กำลังทดสอบการเชื่อมต่อ...';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'กำลังเชื่อมต่อ...';
+  }
 
-  API.setUrl(url);
   try {
     const result = await API.ping();
     State.user = result.user;
@@ -2961,8 +2954,10 @@ async function connectAndLoad() {
     State.view = 'list';
     render();
   } catch (err) {
-    btn.disabled = false;
-    btn.textContent = 'เชื่อมต่อ';
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'ลองเชื่อมต่ออีกครั้ง';
+    }
     renderSetup(err.message);
   }
 }
@@ -2976,47 +2971,24 @@ function openSettings() {
           <button class="modal-close" onclick="closeModal()">${ICON.close}</button>
         </div>
         <div class="modal-body">
-          <div class="form-group">
-            <label>Apps Script Web App URL</label>
-            <input class="input" id="settingsUrl" value="${escapeHTML(API.url)}" style="font-family: var(--font-mono); font-size: 12px;">
-          </div>
-          <div style="margin-top: 16px; padding: 14px; background: var(--bg-elevated); border-radius: 8px; font-size: 13px; color: var(--ink-700); line-height: 1.6;">
+          <div style="padding: 14px; background: var(--bg-elevated); border-radius: 8px; font-size: 13px; color: var(--ink-700); line-height: 1.6;">
             <strong>ข้อมูลระบบ:</strong><br>
             ผู้ป่วยทั้งหมด: ${State.patients.length} ราย<br>
             บันทึกการเยี่ยม: ${State.visits.length} ครั้ง<br>
             ${State.lastSync ? 'Sync ล่าสุด: ' + fmtDate(State.lastSync) + ' ' + State.lastSync.toLocaleTimeString('th-TH') : ''}
           </div>
         </div>
-        <div class="modal-footer" style="justify-content: space-between;">
-          <button class="btn btn-danger" onclick="disconnect()">ตัดการเชื่อมต่อ</button>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
-            <button class="btn btn-primary" onclick="saveSettings()">บันทึก</button>
-          </div>
+        <div class="modal-footer" style="justify-content: flex-end;">
+          <button class="btn btn-secondary" onclick="refreshData(); closeModal();">รีเฟรชข้อมูล</button>
+          <button class="btn btn-primary" onclick="closeModal()">ปิด</button>
         </div>
       </div>
     </div>`;
 }
 
 async function saveSettings() {
-  const url = document.getElementById('settingsUrl').value.trim();
-  if (url !== API.url) {
-    API.setUrl(url);
-    closeModal();
-    showLoading('กำลังเชื่อมต่อ...');
-    try {
-      await API.ping();
-      await loadAll();
-      hideLoading();
-      render();
-      toast('เปลี่ยน URL สำเร็จ', 'success');
-    } catch (err) {
-      hideLoading();
-      renderSetup(err.message);
-    }
-  } else {
-    closeModal();
-  }
+  // URL is locked — settings modal no longer edits URL
+  closeModal();
 }
 
 function disconnect() {
