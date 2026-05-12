@@ -341,6 +341,137 @@
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
   }
+  /* Row layout */
+  .patient-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .patient-row-header {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.7fr) 110px 110px 140px minmax(170px, 1.1fr) 120px;
+    gap: 14px;
+    padding: 12px 18px;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--ink-500);
+  }
+  .patient-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.7fr) 110px 110px 140px minmax(170px, 1.1fr) 120px;
+    gap: 14px;
+    align-items: center;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: background .15s;
+    border-bottom: 1px solid var(--border);
+  }
+  .patient-row:last-child { border-bottom: none; }
+  .patient-row:hover { background: var(--bg-elevated); }
+  .patient-row-name .name {
+    font-family: var(--font-display);
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--ink-900);
+    margin-bottom: 4px;
+    letter-spacing: -0.1px;
+  }
+  .patient-row-name .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink-500);
+  }
+  .patient-row-name .meta .sep {
+    width: 3px; height: 3px;
+    background: var(--ink-300);
+    border-radius: 50%;
+  }
+  .row-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    background: var(--bg-elevated);
+    color: var(--ink-700);
+    border: 1px solid var(--border);
+    letter-spacing: 0.2px;
+    line-height: 1.4;
+  }
+  .row-chip.zone-in { background: var(--primary-soft); color: var(--primary-dark); border-color: transparent; }
+  .row-chip.zone-out { background: #fef3c7; color: #92400e; border-color: transparent; }
+  .row-chip.muted { color: var(--ink-500); }
+  .row-mini-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 11.5px;
+    color: var(--ink-500);
+  }
+  .row-mini-progress .nums { font-variant-numeric: tabular-nums; }
+  .row-mini-progress .nums strong { color: var(--ink-900); font-weight: 600; }
+  .row-mini-progress .bar {
+    height: 5px;
+    background: var(--bg);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .row-mini-progress .fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+    border-radius: 999px;
+  }
+  .row-visit {
+    font-size: 12.5px;
+    color: var(--ink-500);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    line-height: 1.4;
+  }
+  .row-visit .count { font-size: 11px; color: var(--ink-500); }
+  .row-visit .attention {
+    color: var(--accent);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .row-status { display: flex; justify-content: flex-end; }
+  @media (max-width: 980px) {
+    .patient-row-header { display: none; }
+    .patient-row {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        'name status'
+        'chips chips'
+        'progress progress'
+        'visit visit';
+      gap: 10px;
+    }
+    .patient-row-name { grid-area: name; }
+    .patient-row .row-status { grid-area: status; align-self: start; }
+    .patient-row .row-chips { grid-area: chips; display: flex; flex-wrap: wrap; gap: 6px; }
+    .patient-row .row-mini-progress { grid-area: progress; }
+    .patient-row .row-visit { grid-area: visit; }
+    .patient-row .col-type,
+    .patient-row .col-test { display: none; }
+  }
+  @media (min-width: 981px) {
+    .row-chips { display: none; }
+  }
   .patient-card-top {
     display: flex;
     justify-content: space-between;
@@ -1798,7 +1929,17 @@ function renderList() {
         ${State.patients.length === 0 ? `<button class="btn btn-primary" onclick="openPatientModal()">${ICON.plus} เพิ่มผู้ป่วยใหม่</button>` : ''}
       </div>
     ` : `
-      <div class="patient-grid">${filtered.map(renderPatientCard).join('')}</div>
+      <div class="patient-list" id="patientList">
+        <div class="patient-row-header">
+          <div>ชื่อ / HN / อายุ / เพศ</div>
+          <div>ประเภท</div>
+          <div>ผลตรวจ</div>
+          <div>การรักษา</div>
+          <div>การเยี่ยมล่าสุด</div>
+          <div style="text-align:right;">สถานะ</div>
+        </div>
+        ${filtered.map(renderPatientRow).join('')}
+      </div>
     `}
   `;
 
@@ -1806,20 +1947,24 @@ function renderList() {
   if (si) {
     si.addEventListener('input', (e) => {
       State.search = e.target.value;
-      const cards = document.querySelector('.patient-grid');
-      if (cards) {
+      const list = document.getElementById('patientList');
+      if (list) {
         const q = State.search.toLowerCase();
-        const list = State.patients.filter(p => {
+        const filteredNow = State.patients.filter(p => {
           if (State.filter !== 'all' && p.status !== State.filter) return false;
           return !q || (p.name || '').toLowerCase().includes(q) || (p.hn || '').toLowerCase().includes(q);
         });
-        cards.innerHTML = list.map(renderPatientCard).join('');
+        // keep header, replace rows
+        const header = list.querySelector('.patient-row-header');
+        list.innerHTML = '';
+        if (header) list.appendChild(header);
+        list.insertAdjacentHTML('beforeend', filteredNow.map(renderPatientRow).join(''));
       }
     });
   }
 }
 
-function renderPatientCard(p) {
+function renderPatientRow(p) {
   const visits = State.visits.filter(v => v.patientId === p.id).sort((a, b) => b.date.localeCompare(a.date));
   const lastVisit = visits[0];
   const dsv = lastVisit ? daysSince(lastVisit.date) : null;
@@ -1831,33 +1976,45 @@ function renderPatientCard(p) {
     progress = { days: Math.max(0, days), total: totalDays, percent: Math.min(100, Math.max(0, (days / totalDays) * 100)) };
   }
   const meta = [p.age ? `${p.age} ปี` : null, p.gender || null].filter(Boolean);
+  const areaClass = p.areaType === 'ในเขต' ? 'zone-in' : (p.areaType === 'นอกเขต' ? 'zone-out' : 'muted');
+  const visitText = lastVisit ? (dsv === 0 ? 'เยี่ยมวันนี้' : `${dsv} วันที่แล้ว`) : 'ยังไม่เคยเยี่ยม';
+  const testResult = p.testResult || p.afbResult || '';
 
   return `
-    <div class="patient-card" onclick="openDetail('${p.id}')">
-      <div class="patient-card-top">
-        <div>
-          <div class="patient-name">${escapeHTML(p.name || 'ไม่ระบุชื่อ')}</div>
-          <div class="patient-meta">
-            ${p.hn ? `<span class="hn">${escapeHTML(p.hn)}</span>` : ''}
-            ${meta.map(m => `<span>${escapeHTML(m)}</span>`).join('<span class="sep"></span>')}
-          </div>
+    <div class="patient-row" onclick="openDetail('${p.id}')">
+      <div class="patient-row-name">
+        <div class="name">${escapeHTML(p.name || 'ไม่ระบุชื่อ')}</div>
+        <div class="meta">
+          ${p.hn ? `<span class="hn">${escapeHTML(p.hn)}</span>` : ''}
+          ${meta.map(m => `<span>${escapeHTML(m)}</span>`).join('<span class="sep"></span>')}
+          ${p.zone ? `<span class="sep"></span><span>เขต ${escapeHTML(p.zone)}</span>` : ''}
+          ${p.areaType ? `<span class="row-chip ${areaClass}" style="margin-left:4px;">${escapeHTML(p.areaType)}</span>` : ''}
         </div>
-        <span class="status status-${p.status || 'active'}">${STATUS_LABELS[p.status || 'active']}</span>
       </div>
-      ${progress ? `
-        <div class="treatment-progress">
-          <div class="progress-label">
-            <span>การรักษา</span>
-            <span><strong>${progress.days}</strong> / ${progress.total} วัน</span>
+      <div class="col-type">
+        ${p.patientType ? `<span class="row-chip">${escapeHTML(p.patientType)}</span>` : `<span class="row-chip muted">—</span>`}
+      </div>
+      <div class="col-test">
+        ${testResult ? `<span class="row-chip">${escapeHTML(testResult)}</span>` : `<span class="row-chip muted">—</span>`}
+      </div>
+      <div>
+        ${progress ? `
+          <div class="row-mini-progress">
+            <div class="nums"><strong>${progress.days}</strong> / ${progress.total} วัน</div>
+            <div class="bar"><div class="fill" style="width:${progress.percent}%"></div></div>
           </div>
-          <div class="progress-bar"><div class="progress-fill" style="width: ${progress.percent}%"></div></div>
-        </div>` : ''}
-      <div class="patient-footer">
-        <span class="last-visit-tag">
-          ${ICON.calendar}
-          ${lastVisit ? `เยี่ยมล่าสุด ${dsv === 0 ? 'วันนี้' : dsv + ' วันที่แล้ว'}` : 'ยังไม่มีการเยี่ยมบ้าน'}
-        </span>
-        ${attention ? `<span class="alert-tag">${ICON.alert} ต้องติดตาม</span>` : `<span class="text-muted">${visits.length} ครั้ง</span>`}
+        ` : `<span class="row-chip muted">ยังไม่เริ่ม</span>`}
+      </div>
+      <div class="row-visit">
+        <span>${visitText}${visits.length ? ` · ${visits.length} ครั้ง` : ''}</span>
+        ${attention ? `<span class="attention">${ICON.alert} ต้องติดตาม</span>` : ''}
+      </div>
+      <div class="row-status"><span class="status status-${p.status || 'active'}">${STATUS_LABELS[p.status || 'active']}</span></div>
+
+      <!-- Mobile-only chips group -->
+      <div class="row-chips">
+        ${p.patientType ? `<span class="row-chip">${escapeHTML(p.patientType)}</span>` : ''}
+        ${testResult ? `<span class="row-chip">${escapeHTML(testResult)}</span>` : ''}
       </div>
     </div>`;
 }
