@@ -1,0 +1,2480 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบติดตามผู้ป่วยวัณโรค | TB Patient Tracking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f3ec;
+    --bg-elevated: #fdfbf6;
+    --surface: #ffffff;
+    --ink-900: #1a2620;
+    --ink-700: #3d4d44;
+    --ink-500: #6b7770;
+    --ink-300: #a8b1ab;
+    --ink-200: #d4d8d3;
+    --border: #e6e2d8;
+    --border-strong: #cfcabd;
+
+    --primary: #2d4f3f;
+    --primary-soft: #e4ede7;
+    --primary-dark: #1d3a2c;
+
+    --accent: #c97560;
+    --accent-soft: #f5e4dd;
+
+    --warning: #c89832;
+    --warning-soft: #f5ecd5;
+
+    --danger: #b3463e;
+    --danger-soft: #f5dcd9;
+
+    --success: #4a7a5a;
+    --success-soft: #dfeae1;
+
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 22px;
+
+    --shadow-sm: 0 1px 2px rgba(26, 38, 32, 0.04), 0 1px 3px rgba(26, 38, 32, 0.06);
+    --shadow: 0 4px 12px rgba(26, 38, 32, 0.06), 0 1px 2px rgba(26, 38, 32, 0.04);
+    --shadow-lg: 0 12px 32px rgba(26, 38, 32, 0.12), 0 4px 8px rgba(26, 38, 32, 0.06);
+
+    --font-thai: "IBM Plex Sans Thai", system-ui, sans-serif;
+    --font-display: "Outfit", "IBM Plex Sans Thai", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink-900);
+    font-family: var(--font-thai);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image:
+      radial-gradient(ellipse 1200px 600px at 0% 0%, rgba(45, 79, 63, 0.04), transparent 60%),
+      radial-gradient(ellipse 800px 500px at 100% 100%, rgba(201, 117, 96, 0.04), transparent 60%);
+  }
+
+  button { font-family: inherit; font-size: inherit; cursor: pointer; border: none; background: none; }
+  input, textarea, select { font-family: inherit; font-size: inherit; color: inherit; }
+
+  /* ── HEADER ────────────────────────────────────────────────── */
+  .app-header {
+    background: linear-gradient(180deg, var(--bg-elevated) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 0 20px;
+    margin-bottom: 20px;
+  }
+  .header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--primary);
+    display: grid;
+    place-items: center;
+    color: #f7f3ec;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 20px;
+    box-shadow: var(--shadow);
+  }
+  .brand-text h1 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .brand-text p {
+    font-size: 13px;
+    color: var(--ink-500);
+    margin-top: 2px;
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sync-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink-500);
+    padding: 6px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  .sync-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 2s infinite;
+  }
+  .sync-dot.syncing { background: var(--warning); animation: spin 0.7s linear infinite; }
+  .sync-dot.error { background: var(--danger); animation: none; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .sync-indicator button {
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border-left: 1px solid var(--border);
+    padding-left: 8px;
+    margin-left: 4px;
+    transition: color 0.15s;
+  }
+  .sync-indicator button:hover { color: var(--primary-dark); }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    color: var(--ink-500);
+    display: grid;
+    place-items: center;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .icon-btn:hover { background: var(--bg-elevated); color: var(--ink-900); }
+
+  /* ── MAIN LAYOUT ───────────────────────────────────────────── */
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+
+  /* ── STATS GRID ────────────────────────────────────────────── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .stat-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--c, var(--primary));
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--ink-500);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--ink-900);
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+  .stat-value .unit {
+    font-size: 13px;
+    color: var(--ink-500);
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  /* ── TOOLBAR ───────────────────────────────────────────────── */
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 260px;
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 11px 14px 11px 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+  .search-box input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(45, 79, 63, 0.1);
+  }
+  .search-box svg {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-300);
+  }
+
+  .btn {
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--primary); color: #f7f3ec; }
+  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--ink-700);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--border-strong); background: var(--bg-elevated); }
+  .btn-ghost {
+    color: var(--ink-700);
+    padding: 8px 12px;
+  }
+  .btn-ghost:hover { background: var(--primary-soft); color: var(--primary-dark); }
+  .btn-danger {
+    background: var(--surface);
+    color: var(--danger);
+    border: 1px solid var(--danger-soft);
+  }
+  .btn-danger:hover { background: var(--danger-soft); }
+
+  /* ── FILTER TABS ───────────────────────────────────────────── */
+  .filters {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    padding: 4px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow-x: auto;
+  }
+  .filter-btn {
+    padding: 8px 14px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--ink-700);
+    transition: all 0.15s;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .filter-btn:hover { color: var(--primary-dark); }
+  .filter-btn.active {
+    background: var(--surface);
+    color: var(--primary-dark);
+    box-shadow: var(--shadow-sm);
+  }
+  .filter-btn .count {
+    margin-left: 6px;
+    font-size: 11px;
+    color: var(--ink-500);
+    font-variant-numeric: tabular-nums;
+  }
+  .filter-btn.active .count { color: var(--primary); }
+
+  /* ── PATIENT LIST ──────────────────────────────────────────── */
+  .patient-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 14px;
+  }
+  .patient-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .patient-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .patient-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .patient-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink-900);
+    letter-spacing: -0.2px;
+    margin-bottom: 3px;
+  }
+  .patient-meta {
+    display: flex;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--ink-500);
+    align-items: center;
+  }
+  .patient-meta .sep {
+    width: 3px;
+    height: 3px;
+    background: var(--ink-300);
+    border-radius: 50%;
+  }
+  .hn {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-700);
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+  }
+
+  .status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .status-active { background: var(--primary-soft); color: var(--primary-dark); }
+  .status-cured { background: var(--success-soft); color: var(--success); }
+  .status-lost { background: var(--warning-soft); color: var(--warning); }
+  .status-transferred { background: #e8e3f0; color: #5d4a8a; }
+  .status-died { background: #ebe7e4; color: #5a4a44; }
+
+  .treatment-progress {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--ink-500);
+    margin-bottom: 6px;
+  }
+  .progress-label strong { color: var(--ink-900); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .progress-bar {
+    height: 6px;
+    background: var(--bg);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .patient-footer {
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--ink-500);
+  }
+  .last-visit-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .alert-tag { color: var(--accent); font-weight: 600; }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--ink-500);
+  }
+  .empty-state-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border-radius: 16px;
+    background: var(--bg-elevated);
+    display: grid;
+    place-items: center;
+    color: var(--ink-300);
+  }
+  .empty-state h3 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--ink-700);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .empty-state p { font-size: 14px; max-width: 320px; margin: 0 auto 20px; }
+
+  /* ── DETAIL VIEW ───────────────────────────────────────────── */
+  .detail-view { animation: slideIn 0.25s ease; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .detail-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .detail-header::before {
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, var(--primary-soft) 0%, transparent 70%);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-500);
+    margin-bottom: 12px;
+  }
+  .breadcrumb button {
+    color: var(--primary);
+    font-weight: 500;
+    padding: 4px 8px;
+    margin: -4px -8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .breadcrumb button:hover { background: var(--primary-soft); }
+
+  .detail-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .detail-subline {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--ink-500);
+    font-size: 14px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .detail-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+    overflow-x: auto;
+    background: var(--surface);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    padding: 6px 6px 0;
+  }
+  .tab {
+    padding: 12px 18px;
+    font-size: 14px;
+    color: var(--ink-500);
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    font-weight: 500;
+    white-space: nowrap;
+    position: relative;
+    margin-bottom: -1px;
+  }
+  .tab:hover { color: var(--ink-900); }
+  .tab.active {
+    color: var(--primary-dark);
+    border-bottom-color: var(--primary);
+  }
+  .tab .badge {
+    display: inline-block;
+    min-width: 18px;
+    padding: 1px 6px;
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+    text-align: center;
+  }
+  .tab-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: 24px 28px;
+    min-height: 320px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px 28px;
+    margin-bottom: 24px;
+  }
+  .info-item { display: flex; flex-direction: column; gap: 3px; }
+  .info-item .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--ink-500);
+    font-weight: 500;
+  }
+  .info-item .value {
+    font-size: 15px;
+    color: var(--ink-900);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .info-item .value.empty {
+    color: var(--ink-300);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    margin-top: 24px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-title h3 {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title h3 .num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-500);
+    font-weight: 400;
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .visit-list { display: flex; flex-direction: column; gap: 12px; }
+  .visit-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    position: relative;
+    transition: border-color 0.15s;
+  }
+  .visit-card:hover { border-color: var(--border-strong); }
+  .visit-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+  .visit-date { display: flex; flex-direction: column; }
+  .visit-date .date {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .visit-date .who {
+    font-size: 12px;
+    color: var(--ink-500);
+    margin-top: 2px;
+  }
+  .visit-status-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .pill {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--ink-700);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .pill-ok { background: var(--success-soft); color: var(--success); }
+  .pill-warn { background: var(--warning-soft); color: var(--warning); }
+  .pill-bad { background: var(--danger-soft); color: var(--danger); }
+
+  .symptom-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
+  }
+  .visit-notes {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 14px;
+    color: var(--ink-700);
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .photo-strip {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .photo-thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bg);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .photo-thumb:hover { transform: scale(1.05); }
+
+  /* DOT Calendar */
+  .dot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .dot-day {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--bg);
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    color: var(--ink-500);
+    cursor: pointer;
+    transition: all 0.12s;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid transparent;
+    font-weight: 500;
+  }
+  .dot-day:hover { border-color: var(--border-strong); transform: scale(1.05); }
+  .dot-day.taken { background: var(--success); color: white; }
+  .dot-day.missed { background: var(--danger); color: white; }
+  .dot-day.today { border-color: var(--primary); border-width: 2px; }
+  .dot-day.future { opacity: 0.35; cursor: not-allowed; }
+
+  .dot-legend {
+    display: flex;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--ink-500);
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+  .timeline {
+    position: relative;
+    padding-left: 20px;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--border);
+  }
+  .timeline-item { position: relative; padding-bottom: 18px; }
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -18px;
+    top: 6px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+  .timeline-item.warn::before { background: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .timeline-date {
+    font-size: 12px;
+    color: var(--ink-500);
+    margin-bottom: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .timeline-content { font-size: 14px; }
+
+  /* ── MODAL ─────────────────────────────────────────────────── */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 38, 32, 0.5);
+    backdrop-filter: blur(4px);
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    z-index: 100;
+    animation: fadeIn 0.18s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    max-width: 720px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: modalIn 0.22s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.97) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-header {
+    padding: 24px 28px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 10;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .modal-title small {
+    display: block;
+    font-size: 13px;
+    color: var(--ink-500);
+    font-weight: 400;
+    margin-top: 2px;
+    font-family: var(--font-thai);
+    letter-spacing: 0;
+  }
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    color: var(--ink-500);
+    display: grid;
+    place-items: center;
+    transition: all 0.15s;
+  }
+  .modal-close:hover { background: var(--bg); color: var(--ink-900); }
+  .modal-body { padding: 24px 28px; }
+  .modal-footer {
+    padding: 16px 28px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  }
+
+  /* ── FORMS ─────────────────────────────────────────────────── */
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-700);
+    letter-spacing: 0.2px;
+  }
+  .form-group label .req { color: var(--accent); margin-left: 2px; }
+  .input, .textarea, .select {
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .input:focus, .textarea:focus, .select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(45, 79, 63, 0.08);
+    background: var(--surface);
+  }
+  .textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+    line-height: 1.5;
+  }
+
+  .form-section {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--border);
+  }
+  .form-section h4 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--ink-500);
+    margin-bottom: 12px;
+  }
+
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 6px;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 14px;
+  }
+  .check-item:hover { border-color: var(--border-strong); }
+  .check-item.checked {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .check-item input { display: none; }
+  .check-item .box {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+  .check-item.checked .box {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .check-item.checked .box::after {
+    content: "✓";
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .toggle-group {
+    display: flex;
+    gap: 8px;
+    padding: 4px;
+    background: var(--bg);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .toggle-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-500);
+    transition: all 0.15s;
+  }
+  .toggle-btn.active.taken { background: var(--success); color: white; }
+  .toggle-btn.active.missed { background: var(--danger); color: white; }
+
+  .photo-uploader {
+    border: 2px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg-elevated);
+  }
+  .photo-uploader:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+  .photo-uploader p {
+    font-size: 13px;
+    color: var(--ink-500);
+    margin-top: 8px;
+  }
+  .photo-uploader .icon { color: var(--ink-300); }
+  .photo-uploader:hover .icon { color: var(--primary); }
+  .photo-uploader input { display: none; }
+
+  .photo-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .photo-preview {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .photo-preview.uploading::after {
+    content: "อัพโหลด...";
+    position: absolute;
+    inset: 0;
+    background: rgba(45, 79, 63, 0.7);
+    color: white;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .photo-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(26, 38, 32, 0.7);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+  }
+  .photo-remove:hover { background: var(--danger); }
+
+  .image-viewer {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    display: grid;
+    place-items: center;
+    z-index: 200;
+    padding: 40px;
+    cursor: zoom-out;
+  }
+  .image-viewer img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+  .image-viewer-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+  }
+  .image-viewer-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink-900);
+    color: #fdfbf6;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    box-shadow: var(--shadow-lg);
+    z-index: 300;
+    animation: toastIn 0.25s ease;
+    max-width: 90vw;
+  }
+  .toast.error { background: var(--danger); }
+  .toast.success { background: var(--success); }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* ── LOADING / SETUP SCREENS ───────────────────────────────── */
+  .full-screen {
+    min-height: 70vh;
+    display: grid;
+    place-items: center;
+    padding: 40px 20px;
+  }
+  .setup-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 40px;
+    max-width: 540px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+  }
+  .setup-card h2 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  .setup-card p {
+    color: var(--ink-500);
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .setup-steps {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--ink-700);
+    line-height: 1.8;
+  }
+  .setup-steps strong { color: var(--ink-900); }
+  .setup-steps code {
+    font-family: var(--font-mono);
+    background: var(--bg);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--primary-dark);
+  }
+
+  .spinner-big {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(247, 243, 236, 0.75);
+    backdrop-filter: blur(2px);
+    display: grid;
+    place-items: center;
+    z-index: 500;
+    animation: fadeIn 0.15s ease;
+  }
+  .loading-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 20px 28px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .loading-card .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  .loading-card span {
+    font-size: 14px;
+    color: var(--ink-700);
+  }
+
+  /* Util */
+  .row-flex {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .text-muted { color: var(--ink-500); }
+
+  @media (max-width: 640px) {
+    .container, .header-inner { padding-left: 16px; padding-right: 16px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stat-value { font-size: 22px; }
+    .modal-body { padding: 20px; }
+    .modal-header { padding: 20px 20px 14px; }
+    .modal-footer { padding: 14px 20px 20px; }
+    .tab-panel { padding: 18px 16px; }
+    .detail-header { padding: 18px 20px; }
+    .detail-name { font-size: 22px; }
+    .setup-card { padding: 28px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">TB</div>
+      <div class="brand-text">
+        <h1>ระบบติดตามผู้ป่วยวัณโรค</h1>
+        <p>TB Patient Tracking · รพ.สต.</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="sync-indicator" id="syncIndicator" style="display:none">
+        <span class="sync-dot" id="syncDot"></span>
+        <span id="syncText">เชื่อมต่อแล้ว</span>
+        <button onclick="refreshData()">รีเฟรช</button>
+      </div>
+      <button class="icon-btn" id="settingsBtn" onclick="openSettings()" style="display:none" title="ตั้งค่า">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div id="mainView"></div>
+</main>
+
+<div id="modalRoot"></div>
+<div id="viewerRoot"></div>
+<div id="toastRoot"></div>
+<div id="loadingRoot"></div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   API LAYER — ติดต่อกับ Google Apps Script Web App
+   ═══════════════════════════════════════════════════════════════ */
+const API_URL_KEY = 'tb_api_url';
+
+const API = {
+  url: localStorage.getItem(API_URL_KEY) || '',
+
+  setUrl(url) {
+    this.url = (url || '').trim();
+    if (this.url) localStorage.setItem(API_URL_KEY, this.url);
+    else localStorage.removeItem(API_URL_KEY);
+  },
+
+  async call(method, action, payload = {}) {
+    if (!this.url) throw new Error('ยังไม่ได้ตั้งค่า API URL');
+    let response;
+    try {
+      if (method === 'GET') {
+        const url = new URL(this.url);
+        url.searchParams.set('action', action);
+        Object.entries(payload).forEach(([k, v]) => {
+          if (v != null && v !== '') url.searchParams.set(k, v);
+        });
+        response = await fetch(url.toString());
+      } else {
+        response = await fetch(this.url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action, ...payload })
+        });
+      }
+    } catch (err) {
+      throw new Error('เชื่อมต่อ Apps Script ไม่ได้ ตรวจสอบ URL หรือ network');
+    }
+    let data;
+    try { data = await response.json(); }
+    catch (e) { throw new Error('Apps Script ตอบกลับไม่ใช่ JSON (อาจเพราะ permission ผิด)'); }
+    if (!data.ok) throw new Error(data.error || 'API error');
+    // ping returns top-level {message, time, user}; others wrap in {data: ...}
+    return data.data !== undefined ? data.data : data;
+  },
+
+  ping()                              { return this.call('GET', 'ping'); },
+  getConfig()                         { return this.call('GET', 'getConfig'); },
+  listPatients()                      { return this.call('GET', 'listPatients'); },
+  addPatient(data)                    { return this.call('POST', 'addPatient', { data }); },
+  updatePatient(id, data)             { return this.call('POST', 'updatePatient', { id, data }); },
+  deletePatient(id)                   { return this.call('POST', 'deletePatient', { id }); },
+  listVisits(patientId)               { return this.call('GET', 'listVisits', { patientId }); },
+  addVisit(data)                      { return this.call('POST', 'addVisit', { data }); },
+  deleteVisit(id)                     { return this.call('POST', 'deleteVisit', { id }); },
+  uploadPhoto(filename, base64, pid)  { return this.call('POST', 'uploadPhoto', { filename, base64, patientId: pid }); }
+};
+
+/* ════════════════════════════════════════════════════════════════
+   APP STATE
+   ═══════════════════════════════════════════════════════════════ */
+const State = {
+  patients: [],
+  visits: [],
+  view: 'list',
+  currentPatientId: null,
+  currentTab: 'info',
+  filter: 'all',
+  search: '',
+  lastSync: null,
+  syncing: false,
+  user: null
+};
+
+/* ════════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+const STATUS_LABELS = {
+  active: 'กำลังรักษา',
+  cured: 'รักษาหาย',
+  lost: 'ขาดยา',
+  transferred: 'ส่งต่อ',
+  died: 'เสียชีวิต'
+};
+const SYMPTOM_LABELS = {
+  cough: 'ไอเรื้อรัง',
+  fever: 'ไข้',
+  weightLoss: 'น้ำหนักลด',
+  nightSweats: 'เหงื่อออกกลางคืน',
+  hemoptysis: 'ไอเป็นเลือด',
+  chestPain: 'เจ็บหน้าอก',
+  fatigue: 'อ่อนเพลีย',
+  appetiteLoss: 'เบื่ออาหาร'
+};
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
+}
+function daysBetween(a, b) {
+  return Math.floor((new Date(b) - new Date(a)) / (1000 * 60 * 60 * 24));
+}
+function daysSince(iso) {
+  return iso ? daysBetween(iso, new Date()) : null;
+}
+function todayISO() { return new Date().toISOString().slice(0, 10); }
+function toISODateOnly(d) {
+  if (!d) return '';
+  if (typeof d === 'string') return d.slice(0, 10);
+  if (d instanceof Date) return d.toISOString().slice(0, 10);
+  return String(d).slice(0, 10);
+}
+function escapeHTML(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function safeJSON(str, fallback) {
+  if (str == null || str === '') return fallback;
+  if (typeof str === 'object') return str;
+  try { return JSON.parse(str); } catch (e) { return fallback; }
+}
+
+// Normalize visit from API (parse JSON strings from Sheet)
+function normalizeVisit(v) {
+  return {
+    ...v,
+    date: toISODateOnly(v.date),
+    symptoms: safeJSON(v.symptoms, {}),
+    photos: safeJSON(v.photos, []),
+    medicationTaken: v.medicationTaken === true || v.medicationTaken === 'TRUE' || v.medicationTaken === 'true' ? true
+                  : (v.medicationTaken === false || v.medicationTaken === 'FALSE' || v.medicationTaken === 'false' ? false : null)
+  };
+}
+
+// Normalize patient from API
+function normalizePatient(p) {
+  return {
+    ...p,
+    diagnosisDate: toISODateOnly(p.diagnosisDate),
+    treatmentStartDate: toISODateOnly(p.treatmentStartDate),
+    regimenMonths: parseInt(p.regimenMonths) || 6
+  };
+}
+
+/* ════════════════════════════════════════════════════════════════
+   IMAGE COMPRESSION
+   ═══════════════════════════════════════════════════════════════ */
+function compressImage(file, maxWidth = 1000, quality = 0.75) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════
+   UI FEEDBACK
+   ═══════════════════════════════════════════════════════════════ */
+function toast(msg, type = '', ms = 2800) {
+  const root = document.getElementById('toastRoot');
+  root.innerHTML = `<div class="toast ${type}">${escapeHTML(msg)}</div>`;
+  setTimeout(() => { if (root.firstChild) root.innerHTML = ''; }, ms);
+}
+
+function showLoading(msg = 'กำลังโหลด...') {
+  document.getElementById('loadingRoot').innerHTML = `
+    <div class="loading-overlay">
+      <div class="loading-card">
+        <div class="spinner"></div>
+        <span>${escapeHTML(msg)}</span>
+      </div>
+    </div>`;
+}
+function hideLoading() {
+  document.getElementById('loadingRoot').innerHTML = '';
+}
+
+function setSyncState(state, msg) {
+  const indicator = document.getElementById('syncIndicator');
+  const dot = document.getElementById('syncDot');
+  const text = document.getElementById('syncText');
+  if (!indicator) return;
+  indicator.style.display = 'flex';
+  dot.className = 'sync-dot ' + (state === 'ok' ? '' : state);
+  text.textContent = msg;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ICONS
+   ═══════════════════════════════════════════════════════════════ */
+const ICON = {
+  search: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+  plus: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  back: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+  close: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  edit: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
+  trash: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  calendar: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  pill: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>',
+  user: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  upload: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>',
+  empty: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9h.01M15 9h.01M9 15c1 1 1.5 1.5 3 1.5s2-.5 3-1.5"/></svg>',
+  alert: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>',
+  cloud: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 1 0 0-9c-.07 0-.13.01-.19.01A6.5 6.5 0 0 0 5.5 11a4.5 4.5 0 0 0-1 8.91"/><path d="M12 12v9M8 17l4 4 4-4"/></svg>'
+};
+
+/* ════════════════════════════════════════════════════════════════
+   STATS
+   ═══════════════════════════════════════════════════════════════ */
+function getStats() {
+  const by = (s) => State.patients.filter(p => p.status === s).length;
+  const needsAttention = State.patients.filter(p => {
+    if (p.status !== 'active') return false;
+    const visits = State.visits.filter(v => v.patientId === p.id);
+    if (visits.length === 0) return true;
+    const last = visits.map(v => v.date).sort().pop();
+    return daysSince(last) > 14;
+  }).length;
+  return {
+    total: State.patients.length,
+    active: by('active'),
+    cured: by('cured'),
+    lost: by('lost'),
+    needsAttention
+  };
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LIST VIEW
+   ═══════════════════════════════════════════════════════════════ */
+function renderList() {
+  const stats = getStats();
+  const filtered = State.patients.filter(p => {
+    if (State.filter !== 'all' && p.status !== State.filter) return false;
+    if (State.search) {
+      const q = State.search.toLowerCase();
+      return (p.name || '').toLowerCase().includes(q) || (p.hn || '').toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  document.getElementById('mainView').innerHTML = `
+    <div class="stats">
+      <div class="stat-card" style="--c: var(--primary)"><div class="stat-label">ผู้ป่วยทั้งหมด</div><div class="stat-value">${stats.total}<span class="unit">ราย</span></div></div>
+      <div class="stat-card" style="--c: var(--primary)"><div class="stat-label">กำลังรักษา</div><div class="stat-value">${stats.active}<span class="unit">ราย</span></div></div>
+      <div class="stat-card" style="--c: var(--success)"><div class="stat-label">รักษาหาย</div><div class="stat-value">${stats.cured}<span class="unit">ราย</span></div></div>
+      <div class="stat-card" style="--c: var(--warning)"><div class="stat-label">ขาดยา</div><div class="stat-value">${stats.lost}<span class="unit">ราย</span></div></div>
+      <div class="stat-card" style="--c: var(--accent)"><div class="stat-label">ต้องติดตาม</div><div class="stat-value">${stats.needsAttention}<span class="unit">ราย</span></div></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        ${ICON.search}
+        <input type="text" id="searchInput" placeholder="ค้นหาด้วยชื่อ หรือ HN..." value="${escapeHTML(State.search)}">
+      </div>
+      <button class="btn btn-primary" onclick="openPatientModal()">${ICON.plus} เพิ่มผู้ป่วยใหม่</button>
+    </div>
+
+    <div class="filters">
+      ${['all','active','cured','lost','transferred','died'].map(f => {
+        const count = f === 'all' ? State.patients.length : State.patients.filter(p => p.status === f).length;
+        const label = f === 'all' ? 'ทั้งหมด' : STATUS_LABELS[f];
+        return `<button class="filter-btn ${State.filter === f ? 'active' : ''}" onclick="setFilter('${f}')">${label}<span class="count">${count}</span></button>`;
+      }).join('')}
+    </div>
+
+    ${filtered.length === 0 ? `
+      <div class="empty-state">
+        <div class="empty-state-icon">${ICON.empty}</div>
+        <h3>${State.patients.length === 0 ? 'ยังไม่มีผู้ป่วยในระบบ' : 'ไม่พบผู้ป่วยที่ค้นหา'}</h3>
+        <p>${State.patients.length === 0 ? 'เริ่มต้นด้วยการเพิ่มผู้ป่วยรายแรก' : 'ลองเปลี่ยนคำค้นหา หรือเลือกหมวดอื่น'}</p>
+        ${State.patients.length === 0 ? `<button class="btn btn-primary" onclick="openPatientModal()">${ICON.plus} เพิ่มผู้ป่วยใหม่</button>` : ''}
+      </div>
+    ` : `
+      <div class="patient-grid">${filtered.map(renderPatientCard).join('')}</div>
+    `}
+  `;
+
+  const si = document.getElementById('searchInput');
+  if (si) {
+    si.addEventListener('input', (e) => {
+      State.search = e.target.value;
+      const cards = document.querySelector('.patient-grid');
+      if (cards) {
+        const q = State.search.toLowerCase();
+        const list = State.patients.filter(p => {
+          if (State.filter !== 'all' && p.status !== State.filter) return false;
+          return !q || (p.name || '').toLowerCase().includes(q) || (p.hn || '').toLowerCase().includes(q);
+        });
+        cards.innerHTML = list.map(renderPatientCard).join('');
+      }
+    });
+  }
+}
+
+function renderPatientCard(p) {
+  const visits = State.visits.filter(v => v.patientId === p.id).sort((a, b) => b.date.localeCompare(a.date));
+  const lastVisit = visits[0];
+  const dsv = lastVisit ? daysSince(lastVisit.date) : null;
+  const attention = p.status === 'active' && (dsv === null || dsv > 14);
+  let progress = null;
+  if (p.treatmentStartDate && p.regimenMonths) {
+    const totalDays = p.regimenMonths * 30;
+    const days = daysBetween(p.treatmentStartDate, todayISO());
+    progress = { days: Math.max(0, days), total: totalDays, percent: Math.min(100, Math.max(0, (days / totalDays) * 100)) };
+  }
+  const meta = [p.age ? `${p.age} ปี` : null, p.gender || null].filter(Boolean);
+
+  return `
+    <div class="patient-card" onclick="openDetail('${p.id}')">
+      <div class="patient-card-top">
+        <div>
+          <div class="patient-name">${escapeHTML(p.name || 'ไม่ระบุชื่อ')}</div>
+          <div class="patient-meta">
+            ${p.hn ? `<span class="hn">${escapeHTML(p.hn)}</span>` : ''}
+            ${meta.map(m => `<span>${escapeHTML(m)}</span>`).join('<span class="sep"></span>')}
+          </div>
+        </div>
+        <span class="status status-${p.status || 'active'}">${STATUS_LABELS[p.status || 'active']}</span>
+      </div>
+      ${progress ? `
+        <div class="treatment-progress">
+          <div class="progress-label">
+            <span>การรักษา</span>
+            <span><strong>${progress.days}</strong> / ${progress.total} วัน</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width: ${progress.percent}%"></div></div>
+        </div>` : ''}
+      <div class="patient-footer">
+        <span class="last-visit-tag">
+          ${ICON.calendar}
+          ${lastVisit ? `เยี่ยมล่าสุด ${dsv === 0 ? 'วันนี้' : dsv + ' วันที่แล้ว'}` : 'ยังไม่มีการเยี่ยมบ้าน'}
+        </span>
+        ${attention ? `<span class="alert-tag">${ICON.alert} ต้องติดตาม</span>` : `<span class="text-muted">${visits.length} ครั้ง</span>`}
+      </div>
+    </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DETAIL VIEW
+   ═══════════════════════════════════════════════════════════════ */
+function renderDetail() {
+  const p = State.patients.find(p => p.id === State.currentPatientId);
+  if (!p) { State.view = 'list'; render(); return; }
+  const visits = State.visits.filter(v => v.patientId === p.id).sort((a, b) => b.date.localeCompare(a.date));
+
+  document.getElementById('mainView').innerHTML = `
+    <div class="detail-view">
+      <div class="detail-header">
+        <div class="breadcrumb">
+          <button onclick="goBack()">${ICON.back} กลับไปยังรายชื่อ</button>
+          <span>·</span><span>${STATUS_LABELS[p.status || 'active']}</span>
+        </div>
+        <div class="detail-name">${escapeHTML(p.name || 'ไม่ระบุชื่อ')}</div>
+        <div class="detail-subline">
+          ${p.hn ? `<span class="hn">${escapeHTML(p.hn)}</span>` : ''}
+          ${p.age ? `<span>${p.age} ปี</span>` : ''}
+          ${p.gender ? `<span>${escapeHTML(p.gender)}</span>` : ''}
+          <span class="status status-${p.status || 'active'}">${STATUS_LABELS[p.status || 'active']}</span>
+        </div>
+        <div class="detail-actions">
+          <button class="btn btn-secondary" onclick="openPatientModal('${p.id}')">${ICON.edit} แก้ไขข้อมูล</button>
+          <button class="btn btn-primary" onclick="openVisitModal()">${ICON.plus} บันทึกการเยี่ยมบ้าน</button>
+          <button class="btn btn-danger" onclick="deletePatient('${p.id}')">${ICON.trash} ลบผู้ป่วย</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab ${State.currentTab === 'info' ? 'active' : ''}" onclick="setTab('info')">${ICON.user} ข้อมูลทั่วไป</button>
+        <button class="tab ${State.currentTab === 'visits' ? 'active' : ''}" onclick="setTab('visits')">${ICON.calendar} การเยี่ยมบ้าน<span class="badge">${visits.length}</span></button>
+        <button class="tab ${State.currentTab === 'medication' ? 'active' : ''}" onclick="setTab('medication')">${ICON.pill} การกินยา</button>
+        <button class="tab ${State.currentTab === 'symptoms' ? 'active' : ''}" onclick="setTab('symptoms')">${ICON.alert} ประวัติอาการ</button>
+      </div>
+
+      <div class="tab-panel">
+        ${State.currentTab === 'info' ? renderInfoTab(p) : ''}
+        ${State.currentTab === 'visits' ? renderVisitsTab(p, visits) : ''}
+        ${State.currentTab === 'medication' ? renderMedicationTab(p, visits) : ''}
+        ${State.currentTab === 'symptoms' ? renderSymptomsTab(p, visits) : ''}
+      </div>
+    </div>`;
+}
+
+function renderInfoTab(p) {
+  const fields = [
+    ['ชื่อ-นามสกุล', p.name],
+    ['HN', p.hn],
+    ['อายุ', p.age ? p.age + ' ปี' : null],
+    ['เพศ', p.gender],
+    ['เบอร์โทร', p.phone],
+    ['ที่อยู่', p.address],
+    ['ผู้ดูแล / ผู้ติดต่อ', p.contactPerson],
+    ['สถานะ', STATUS_LABELS[p.status || 'active']]
+  ];
+  const treatment = [
+    ['วันที่วินิจฉัย', fmtDate(p.diagnosisDate)],
+    ['วันที่เริ่มรักษา', fmtDate(p.treatmentStartDate)],
+    ['สูตรยา (Regimen)', p.regimen],
+    ['ระยะเวลารักษา', p.regimenMonths ? p.regimenMonths + ' เดือน' : null],
+    ['ผลเสมหะ AFB', p.afbResult],
+    ['ประเภทผู้ป่วย', p.patientType]
+  ];
+
+  return `
+    <div class="section-title"><h3>ข้อมูลส่วนบุคคล</h3></div>
+    <div class="info-grid">
+      ${fields.map(([l, v]) => `
+        <div class="info-item">
+          <span class="label">${l}</span>
+          <span class="value ${!v ? 'empty' : ''}">${v ? escapeHTML(v) : '— ยังไม่ระบุ —'}</span>
+        </div>`).join('')}
+    </div>
+    <div class="section-title"><h3>ข้อมูลการรักษา</h3></div>
+    <div class="info-grid">
+      ${treatment.map(([l, v]) => `
+        <div class="info-item">
+          <span class="label">${l}</span>
+          <span class="value ${!v || v === '—' ? 'empty' : ''}">${v && v !== '—' ? escapeHTML(v) : '— ยังไม่ระบุ —'}</span>
+        </div>`).join('')}
+    </div>
+    ${p.notes ? `
+      <div class="section-title"><h3>หมายเหตุ</h3></div>
+      <div style="background: var(--bg-elevated); padding: 16px; border-radius: 10px; white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: var(--ink-700); border: 1px solid var(--border);">${escapeHTML(p.notes)}</div>
+    ` : ''}
+    ${p.createdBy ? `<div style="margin-top: 18px; font-size: 12px; color: var(--ink-500);">บันทึกโดย ${escapeHTML(p.createdBy)} · อัพเดทล่าสุด ${fmtDate(p.updatedAt)}</div>` : ''}`;
+}
+
+function renderVisitsTab(p, visits) {
+  if (visits.length === 0) {
+    return `
+      <div class="empty-state" style="padding: 60px 20px;">
+        <div class="empty-state-icon">${ICON.calendar}</div>
+        <h3>ยังไม่มีบันทึกการเยี่ยมบ้าน</h3>
+        <p>เริ่มบันทึกการเยี่ยมบ้านครั้งแรกเพื่อติดตามการรักษา</p>
+        <button class="btn btn-primary" onclick="openVisitModal()">${ICON.plus} บันทึกการเยี่ยมบ้าน</button>
+      </div>`;
+  }
+  return `
+    <div class="section-title">
+      <h3>ประวัติการเยี่ยมบ้าน <span class="num">${visits.length} ครั้ง</span></h3>
+      <button class="btn btn-primary" onclick="openVisitModal()" style="padding: 7px 12px; font-size: 13px;">${ICON.plus} เพิ่ม</button>
+    </div>
+    <div class="visit-list">${visits.map(renderVisitCard).join('')}</div>`;
+}
+
+function renderVisitCard(v) {
+  const symptoms = Object.entries(v.symptoms || {}).filter(([_, val]) => val).map(([k]) => SYMPTOM_LABELS[k]).filter(Boolean);
+  const photos = v.photos || [];
+  return `
+    <div class="visit-card">
+      <div class="visit-head">
+        <div class="visit-date">
+          <span class="date">${fmtDate(v.date)}</span>
+          <span class="who">โดย ${escapeHTML(v.visitorName || '—')} ${v.visitorRole ? '· ' + escapeHTML(v.visitorRole) : ''}</span>
+        </div>
+        <div class="visit-status-row">
+          ${v.medicationTaken === true ? '<span class="pill pill-ok">✓ กินยาครบ</span>' : ''}
+          ${v.medicationTaken === false ? `<span class="pill pill-bad">✗ ขาดยา${v.missedDoses ? ' ' + v.missedDoses + ' มื้อ' : ''}</span>` : ''}
+          ${symptoms.length > 0 ? `<span class="pill pill-warn">${symptoms.length} อาการ</span>` : '<span class="pill pill-ok">ไม่มีอาการผิดปกติ</span>'}
+          <button class="btn-ghost" style="padding: 2px 6px; font-size: 12px;" onclick="deleteVisit('${v.id}')" title="ลบ">${ICON.trash}</button>
+        </div>
+      </div>
+      ${(v.weight || v.bloodPressure || v.temperature) ? `
+        <div class="row-flex" style="margin-top: 8px; font-size: 13px; color: var(--ink-700);">
+          ${v.weight ? `<span><strong>น้ำหนัก</strong> ${escapeHTML(v.weight)} kg</span>` : ''}
+          ${v.bloodPressure ? `<span><strong>BP</strong> ${escapeHTML(v.bloodPressure)}</span>` : ''}
+          ${v.temperature ? `<span><strong>T</strong> ${escapeHTML(v.temperature)}°C</span>` : ''}
+        </div>` : ''}
+      ${symptoms.length > 0 ? `<div class="symptom-chips">${symptoms.map(s => `<span class="pill pill-warn">${escapeHTML(s)}</span>`).join('')}</div>` : ''}
+      ${v.sideEffects ? `<div style="margin-top: 8px; font-size: 13px; color: var(--ink-700);"><strong>ผลข้างเคียง:</strong> ${escapeHTML(v.sideEffects)}</div>` : ''}
+      ${v.notes ? `<div class="visit-notes">${escapeHTML(v.notes)}</div>` : ''}
+      ${photos.length > 0 ? `
+        <div class="photo-strip">
+          ${photos.map((ph, i) => `<div class="photo-thumb" style="background-image: url('${ph.url || ph}')" onclick="viewImage('${v.id}', ${i})" title="${escapeHTML(ph.name || '')}"></div>`).join('')}
+        </div>` : ''}
+      ${v.createdBy ? `<div style="margin-top: 10px; font-size: 11px; color: var(--ink-500);">บันทึกโดย ${escapeHTML(v.createdBy)}</div>` : ''}
+    </div>`;
+}
+
+function renderMedicationTab(p, visits) {
+  if (!p.treatmentStartDate) {
+    return `
+      <div class="empty-state" style="padding: 60px 20px;">
+        <div class="empty-state-icon">${ICON.pill}</div>
+        <h3>ยังไม่มีข้อมูลการรักษา</h3>
+        <p>กรุณาระบุวันที่เริ่มรักษาในข้อมูลผู้ป่วย</p>
+        <button class="btn btn-primary" onclick="openPatientModal('${p.id}')">${ICON.edit} แก้ไขข้อมูล</button>
+      </div>`;
+  }
+  const medStatus = {};
+  visits.forEach(v => {
+    if (v.medicationTaken === true) medStatus[v.date] = 'taken';
+    else if (v.medicationTaken === false) medStatus[v.date] = 'missed';
+  });
+  const startDate = new Date(p.treatmentStartDate);
+  const months = p.regimenMonths || 6;
+  const totalDays = months * 30;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  startDate.setHours(0, 0, 0, 0);
+  let takenCount = 0, missedCount = 0, recordedDays = 0;
+  const days = [];
+  for (let i = 0; i < totalDays; i++) {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + i);
+    const iso = d.toISOString().slice(0, 10);
+    const status = medStatus[iso];
+    const isFuture = d > today;
+    const isToday = d.getTime() === today.getTime();
+    days.push({ iso, day: d.getDate(), status, isFuture, isToday });
+    if (status === 'taken') takenCount++;
+    if (status === 'missed') missedCount++;
+    if (status) recordedDays++;
+  }
+  const adherence = recordedDays > 0 ? Math.round((takenCount / recordedDays) * 100) : 0;
+  const daysSinceStart = Math.max(0, daysBetween(p.treatmentStartDate, todayISO()));
+
+  return `
+    <div class="section-title"><h3>การกินยา (DOT) <span class="num">${months} เดือน</span></h3></div>
+    <div class="stats" style="margin-bottom: 18px;">
+      <div class="stat-card" style="--c: var(--success)"><div class="stat-label">กินยา</div><div class="stat-value">${takenCount}<span class="unit">มื้อ</span></div></div>
+      <div class="stat-card" style="--c: var(--danger)"><div class="stat-label">ขาดยา</div><div class="stat-value">${missedCount}<span class="unit">มื้อ</span></div></div>
+      <div class="stat-card" style="--c: var(--primary)"><div class="stat-label">รักษามาแล้ว</div><div class="stat-value">${daysSinceStart}<span class="unit">วัน</span></div></div>
+      <div class="stat-card" style="--c: var(--accent)"><div class="stat-label">Adherence</div><div class="stat-value">${adherence}<span class="unit">%</span></div></div>
+    </div>
+    <div style="background: var(--bg-elevated); padding: 18px; border-radius: 12px; border: 1px solid var(--border);">
+      <div style="font-size: 13px; color: var(--ink-500); margin-bottom: 12px;">
+        ตารางบันทึก ${months} เดือน · เริ่ม ${fmtDate(p.treatmentStartDate)} (กดที่ช่องเพื่อบันทึก)
+      </div>
+      <div class="dot-grid">
+        ${days.map(d => `<div class="dot-day ${d.status || ''} ${d.isToday ? 'today' : ''} ${d.isFuture ? 'future' : ''}" onclick="${d.isFuture ? '' : `toggleDotDay('${d.iso}')`}" title="${fmtDate(d.iso)}${d.status ? ' · ' + (d.status === 'taken' ? 'กินยา' : 'ขาดยา') : ''}">${d.day}</div>`).join('')}
+      </div>
+      <div class="dot-legend">
+        <span class="legend-item"><span class="legend-dot" style="background: var(--success)"></span>กินยา</span>
+        <span class="legend-item"><span class="legend-dot" style="background: var(--danger)"></span>ขาดยา</span>
+        <span class="legend-item"><span class="legend-dot" style="background: var(--bg); border: 1px solid var(--border-strong);"></span>ยังไม่บันทึก</span>
+        <span class="legend-item"><span class="legend-dot" style="background: transparent; border: 2px solid var(--primary)"></span>วันนี้</span>
+      </div>
+    </div>`;
+}
+
+function renderSymptomsTab(p, visits) {
+  const events = [];
+  visits.forEach(v => {
+    const syms = Object.entries(v.symptoms || {}).filter(([_, val]) => val).map(([k]) => SYMPTOM_LABELS[k]).filter(Boolean);
+    if (syms.length > 0 || v.sideEffects) {
+      events.push({
+        date: v.date, symptoms: syms, sideEffects: v.sideEffects,
+        warn: syms.includes('ไอเป็นเลือด') || syms.includes('เจ็บหน้าอก')
+      });
+    }
+  });
+  events.sort((a, b) => b.date.localeCompare(a.date));
+  const freq = {};
+  visits.forEach(v => {
+    Object.entries(v.symptoms || {}).forEach(([k, val]) => {
+      if (val) freq[k] = (freq[k] || 0) + 1;
+    });
+  });
+  const freqSorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+
+  return `
+    <div class="section-title"><h3>สรุปอาการที่พบ</h3></div>
+    ${freqSorted.length === 0 ? `
+      <div style="padding: 24px; background: var(--success-soft); border-radius: 10px; color: var(--success); display: flex; align-items: center; gap: 10px;">✓ ไม่พบอาการผิดปกติจากการเยี่ยมบ้าน</div>
+    ` : `
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+        ${freqSorted.map(([k, count]) => `<div style="background: var(--bg-elevated); padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;"><span style="font-size: 14px;">${SYMPTOM_LABELS[k] || k}</span><span style="font-family: var(--font-mono); font-weight: 600; color: var(--accent);">${count}×</span></div>`).join('')}
+      </div>
+    `}
+    <div class="section-title" style="margin-top: 28px;"><h3>Timeline อาการ</h3></div>
+    ${events.length === 0 ? `<div class="text-muted" style="padding: 30px; text-align: center;">— ยังไม่มีบันทึกอาการ —</div>` : `
+      <div class="timeline">
+        ${events.map(e => `
+          <div class="timeline-item ${e.warn ? 'warn' : ''}">
+            <div class="timeline-date">${fmtDate(e.date)}</div>
+            <div class="timeline-content">
+              ${e.symptoms.length > 0 ? `<div class="symptom-chips" style="margin-top: 4px;">${e.symptoms.map(s => `<span class="pill pill-warn">${escapeHTML(s)}</span>`).join('')}</div>` : ''}
+              ${e.sideEffects ? `<div style="margin-top: 6px; font-size: 13px; color: var(--ink-700);"><em>ผลข้างเคียง:</em> ${escapeHTML(e.sideEffects)}</div>` : ''}
+            </div>
+          </div>`).join('')}
+      </div>
+    `}`;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PATIENT MODAL
+   ═══════════════════════════════════════════════════════════════ */
+function openPatientModal(id = null) {
+  const isEdit = !!id;
+  const p = isEdit ? State.patients.find(x => x.id === id) : {
+    name: '', hn: '', age: '', gender: '', phone: '', address: '',
+    contactPerson: '', diagnosisDate: '', treatmentStartDate: '',
+    regimen: '2HRZE / 4HR', regimenMonths: 6, status: 'active',
+    afbResult: '', patientType: '', notes: ''
+  };
+
+  document.getElementById('modalRoot').innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this) closeModal()">
+      <div class="modal">
+        <div class="modal-header">
+          <div><div class="modal-title">${isEdit ? 'แก้ไขข้อมูลผู้ป่วย' : 'เพิ่มผู้ป่วยใหม่'}<small>${isEdit ? escapeHTML(p.name) : 'กรอกข้อมูลผู้ป่วยวัณโรครายใหม่'}</small></div></div>
+          <button class="modal-close" onclick="closeModal()">${ICON.close}</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-section" style="margin-top: 0; padding-top: 0; border: none;">
+            <h4>ข้อมูลส่วนบุคคล</h4>
+            <div class="form-row">
+              <div class="form-group" style="grid-column: span 2;"><label>ชื่อ-นามสกุล<span class="req">*</span></label><input class="input" id="f-name" value="${escapeHTML(p.name)}" placeholder="เช่น นายสมชาย ใจดี"></div>
+              <div class="form-group"><label>HN</label><input class="input" id="f-hn" value="${escapeHTML(p.hn)}" placeholder="HN12345"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>อายุ (ปี)</label><input class="input" id="f-age" type="number" value="${escapeHTML(p.age)}" placeholder="45"></div>
+              <div class="form-group"><label>เพศ</label>
+                <select class="select" id="f-gender">
+                  <option value="">—</option>
+                  <option value="ชาย" ${p.gender === 'ชาย' ? 'selected' : ''}>ชาย</option>
+                  <option value="หญิง" ${p.gender === 'หญิง' ? 'selected' : ''}>หญิง</option>
+                </select>
+              </div>
+              <div class="form-group"><label>เบอร์โทร</label><input class="input" id="f-phone" value="${escapeHTML(p.phone)}" placeholder="08X-XXX-XXXX"></div>
+            </div>
+            <div class="form-row"><div class="form-group full"><label>ที่อยู่</label><input class="input" id="f-address" value="${escapeHTML(p.address)}" placeholder="บ้านเลขที่ หมู่ ตำบล อำเภอ จังหวัด"></div></div>
+            <div class="form-row"><div class="form-group full"><label>ผู้ดูแล / ผู้ติดต่อ</label><input class="input" id="f-contact" value="${escapeHTML(p.contactPerson)}" placeholder="ชื่อ - ความสัมพันธ์ - เบอร์โทร"></div></div>
+          </div>
+          <div class="form-section">
+            <h4>ข้อมูลการรักษา</h4>
+            <div class="form-row">
+              <div class="form-group"><label>วันที่วินิจฉัย</label><input class="input" id="f-diagnosisDate" type="date" value="${escapeHTML(p.diagnosisDate)}"></div>
+              <div class="form-group"><label>วันที่เริ่มรักษา</label><input class="input" id="f-treatmentStartDate" type="date" value="${escapeHTML(p.treatmentStartDate)}"></div>
+              <div class="form-group"><label>ระยะเวลา (เดือน)</label><input class="input" id="f-regimenMonths" type="number" value="${escapeHTML(p.regimenMonths)}" placeholder="6"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>สูตรยา (Regimen)</label><input class="input" id="f-regimen" value="${escapeHTML(p.regimen)}" placeholder="2HRZE / 4HR"></div>
+              <div class="form-group"><label>ผล AFB</label>
+                <select class="select" id="f-afbResult">
+                  <option value="">—</option>
+                  <option ${p.afbResult === 'Positive' ? 'selected' : ''}>Positive</option>
+                  <option ${p.afbResult === 'Negative' ? 'selected' : ''}>Negative</option>
+                  <option ${p.afbResult === 'Not done' ? 'selected' : ''}>Not done</option>
+                </select>
+              </div>
+              <div class="form-group"><label>ประเภทผู้ป่วย</label>
+                <select class="select" id="f-patientType">
+                  <option value="">—</option>
+                  <option ${p.patientType === 'New' ? 'selected' : ''}>New (รายใหม่)</option>
+                  <option ${p.patientType === 'Relapse' ? 'selected' : ''}>Relapse (กลับเป็นซ้ำ)</option>
+                  <option ${p.patientType === 'Treatment after failure' ? 'selected' : ''}>Treatment after failure</option>
+                  <option ${p.patientType === 'Treatment after default' ? 'selected' : ''}>Treatment after default</option>
+                  <option ${p.patientType === 'Other' ? 'selected' : ''}>Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>สถานะ</label>
+                <select class="select" id="f-status">
+                  ${Object.entries(STATUS_LABELS).map(([k, v]) => `<option value="${k}" ${p.status === k ? 'selected' : ''}>${v}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="form-section">
+            <h4>หมายเหตุ</h4>
+            <div class="form-group"><textarea class="textarea" id="f-notes" placeholder="โรคประจำตัว / แพ้ยา / อื่นๆ">${escapeHTML(p.notes)}</textarea></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+          <button class="btn btn-primary" id="savePatientBtn" onclick="savePatient('${id || ''}')">${isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มผู้ป่วย'}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function savePatient(id) {
+  const get = (k) => document.getElementById('f-' + k).value.trim();
+  const name = get('name');
+  if (!name) { toast('กรุณากรอกชื่อผู้ป่วย', 'error'); document.getElementById('f-name').focus(); return; }
+
+  const data = {
+    name, hn: get('hn'), age: get('age'), gender: get('gender'),
+    phone: get('phone'), address: get('address'), contactPerson: get('contact'),
+    diagnosisDate: get('diagnosisDate'), treatmentStartDate: get('treatmentStartDate'),
+    regimen: get('regimen'), regimenMonths: parseInt(get('regimenMonths')) || 6,
+    afbResult: get('afbResult'), patientType: get('patientType'),
+    status: get('status') || 'active', notes: get('notes')
+  };
+
+  const btn = document.getElementById('savePatientBtn');
+  btn.disabled = true;
+  btn.textContent = 'กำลังบันทึก...';
+
+  try {
+    if (id) {
+      const updated = await API.updatePatient(id, data);
+      const idx = State.patients.findIndex(p => p.id === id);
+      if (idx >= 0) State.patients[idx] = normalizePatient(updated);
+      toast('บันทึกการแก้ไขแล้ว', 'success');
+    } else {
+      const created = await API.addPatient(data);
+      State.patients.unshift(normalizePatient(created));
+      State.currentPatientId = created.id;
+      State.view = 'detail';
+      State.currentTab = 'info';
+      toast('เพิ่มผู้ป่วยเรียบร้อย', 'success');
+    }
+    closeModal();
+    render();
+  } catch (err) {
+    toast('บันทึกไม่สำเร็จ: ' + err.message, 'error', 4000);
+    btn.disabled = false;
+    btn.textContent = id ? 'บันทึกการแก้ไข' : 'เพิ่มผู้ป่วย';
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   VISIT MODAL
+   ═══════════════════════════════════════════════════════════════ */
+let visitPhotos = []; // { base64?: string, url?: string, name: string, isNew?: boolean }
+
+function openVisitModal(id = null) {
+  const isEdit = !!id;
+  const v = isEdit ? State.visits.find(x => x.id === id) : {
+    date: todayISO(), visitorName: '', visitorRole: '',
+    medicationTaken: null, missedDoses: 0,
+    symptoms: {}, sideEffects: '',
+    weight: '', bloodPressure: '', temperature: '',
+    notes: '', photos: []
+  };
+  visitPhotos = (v.photos || []).map(p => ({ ...p, isNew: false }));
+
+  document.getElementById('modalRoot').innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this) closeModal()">
+      <div class="modal">
+        <div class="modal-header">
+          <div><div class="modal-title">${isEdit ? 'แก้ไขการเยี่ยมบ้าน' : 'บันทึกการเยี่ยมบ้าน'}<small>เจ้าหน้าที่ รพ.สต. เยี่ยมบ้านผู้ป่วย</small></div></div>
+          <button class="modal-close" onclick="closeModal()">${ICON.close}</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-section" style="margin-top: 0; padding-top: 0; border: none;">
+            <h4>ข้อมูลการเยี่ยม</h4>
+            <div class="form-row">
+              <div class="form-group"><label>วันที่เยี่ยม<span class="req">*</span></label><input class="input" id="v-date" type="date" value="${escapeHTML(v.date)}"></div>
+              <div class="form-group"><label>ผู้เยี่ยม</label><input class="input" id="v-visitorName" value="${escapeHTML(v.visitorName)}" placeholder="ชื่อเจ้าหน้าที่"></div>
+              <div class="form-group"><label>ตำแหน่ง</label><input class="input" id="v-visitorRole" value="${escapeHTML(v.visitorRole)}" placeholder="พยาบาลวิชาชีพ / อสม."></div>
+            </div>
+          </div>
+          <div class="form-section">
+            <h4>การกินยา</h4>
+            <div class="toggle-group">
+              <button type="button" class="toggle-btn taken ${v.medicationTaken === true ? 'active' : ''}" id="v-med-taken" onclick="setMedStatus(true)">✓ กินยาครบ</button>
+              <button type="button" class="toggle-btn missed ${v.medicationTaken === false ? 'active' : ''}" id="v-med-missed" onclick="setMedStatus(false)">✗ ขาดยา</button>
+              <button type="button" class="toggle-btn ${v.medicationTaken == null ? 'active' : ''}" id="v-med-none" onclick="setMedStatus(null)" style="background: ${v.medicationTaken == null ? 'var(--bg-elevated)' : 'transparent'}; color: var(--ink-700);">— ไม่ทราบ</button>
+            </div>
+            <div id="v-missed-doses-wrap" style="margin-top: 10px; ${v.medicationTaken === false ? '' : 'display:none;'}">
+              <div class="form-group"><label>จำนวนมื้อที่ขาด (โดยประมาณ)</label><input class="input" id="v-missedDoses" type="number" min="0" value="${escapeHTML(v.missedDoses || 0)}" style="max-width: 200px;"></div>
+            </div>
+          </div>
+          <div class="form-section">
+            <h4>อาการที่พบ</h4>
+            <div class="check-grid" id="v-symptoms">
+              ${Object.entries(SYMPTOM_LABELS).map(([k, l]) => `<label class="check-item ${v.symptoms?.[k] ? 'checked' : ''}" data-sym="${k}" onclick="toggleSymptom('${k}')"><span class="box"></span><span>${l}</span></label>`).join('')}
+            </div>
+            <div class="form-group" style="margin-top: 10px;"><label>ผลข้างเคียงจากยา</label><input class="input" id="v-sideEffects" value="${escapeHTML(v.sideEffects)}" placeholder="เช่น ตับอักเสบ คลื่นไส้ ผื่น"></div>
+          </div>
+          <div class="form-section">
+            <h4>สัญญาณชีพ (ถ้ามี)</h4>
+            <div class="form-row">
+              <div class="form-group"><label>น้ำหนัก (kg)</label><input class="input" id="v-weight" value="${escapeHTML(v.weight)}" placeholder="55"></div>
+              <div class="form-group"><label>ความดัน (mmHg)</label><input class="input" id="v-bloodPressure" value="${escapeHTML(v.bloodPressure)}" placeholder="120/80"></div>
+              <div class="form-group"><label>อุณหภูมิ (°C)</label><input class="input" id="v-temperature" value="${escapeHTML(v.temperature)}" placeholder="37.0"></div>
+            </div>
+          </div>
+          <div class="form-section">
+            <h4>บันทึกเพิ่มเติม</h4>
+            <div class="form-group"><textarea class="textarea" id="v-notes" placeholder="บันทึกการเยี่ยมบ้าน สภาพแวดล้อม คำแนะนำที่ให้...">${escapeHTML(v.notes)}</textarea></div>
+          </div>
+          <div class="form-section">
+            <h4>รูปภาพประกอบ (อัพโหลดขึ้น Google Drive)</h4>
+            <label class="photo-uploader">
+              <input type="file" id="v-photo-input" accept="image/*" multiple onchange="handlePhotoUpload(event)">
+              <div class="icon">${ICON.upload}</div>
+              <p><strong>คลิกเพื่อเลือกรูปภาพ</strong></p>
+              <p style="font-size: 11px; margin-top: 4px;">รูปจะถูกอัพโหลดตอนกดบันทึก · รพ.สต. อื่นจะเห็นรูปเดียวกัน</p>
+            </label>
+            <div class="photo-preview-grid" id="v-photo-preview"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+          <button class="btn btn-primary" id="saveVisitBtn" onclick="saveVisit('${id || ''}')">${isEdit ? 'บันทึกการแก้ไข' : 'บันทึกการเยี่ยม'}</button>
+        </div>
+      </div>
+    </div>`;
+  refreshPhotoPreview();
+}
+
+function setMedStatus(s) {
+  document.getElementById('v-med-taken').classList.toggle('active', s === true);
+  document.getElementById('v-med-missed').classList.toggle('active', s === false);
+  document.getElementById('v-med-none').classList.toggle('active', s === null);
+  document.getElementById('v-missed-doses-wrap').style.display = s === false ? 'block' : 'none';
+}
+
+function toggleSymptom(key) {
+  const el = document.querySelector(`[data-sym="${key}"]`);
+  if (el) el.classList.toggle('checked');
+}
+
+async function handlePhotoUpload(e) {
+  const files = Array.from(e.target.files || []);
+  if (files.length === 0) return;
+  toast(`กำลังเตรียม ${files.length} รูป...`);
+  for (const f of files) {
+    try {
+      const compressed = await compressImage(f, 1000, 0.75);
+      visitPhotos.push({ base64: compressed, name: f.name, isNew: true });
+    } catch (err) { console.error(err); }
+  }
+  refreshPhotoPreview();
+  e.target.value = '';
+}
+
+function refreshPhotoPreview() {
+  const grid = document.getElementById('v-photo-preview');
+  if (!grid) return;
+  grid.innerHTML = visitPhotos.map((p, i) => {
+    const src = p.url || p.base64;
+    return `<div class="photo-preview" style="background-image: url('${src}')"><button type="button" class="photo-remove" onclick="removePhoto(${i})" title="ลบ">${ICON.close}</button></div>`;
+  }).join('');
+}
+
+function removePhoto(i) { visitPhotos.splice(i, 1); refreshPhotoPreview(); }
+
+async function saveVisit(id) {
+  const get = (k) => document.getElementById('v-' + k).value.trim();
+  const date = get('date');
+  if (!date) { toast('กรุณาเลือกวันที่เยี่ยม', 'error'); return; }
+
+  const symptoms = {};
+  document.querySelectorAll('#v-symptoms .check-item').forEach(el => {
+    if (el.classList.contains('checked')) symptoms[el.dataset.sym] = true;
+  });
+
+  let medicationTaken = null;
+  if (document.getElementById('v-med-taken').classList.contains('active')) medicationTaken = true;
+  else if (document.getElementById('v-med-missed').classList.contains('active')) medicationTaken = false;
+
+  const btn = document.getElementById('saveVisitBtn');
+  btn.disabled = true;
+
+  // Step 1: Upload new photos
+  const newPhotos = visitPhotos.filter(p => p.isNew && p.base64);
+  const existingPhotos = visitPhotos.filter(p => !p.isNew);
+  const uploadedPhotos = [];
+
+  if (newPhotos.length > 0) {
+    btn.textContent = `อัพโหลดรูป 1/${newPhotos.length}...`;
+    for (let i = 0; i < newPhotos.length; i++) {
+      btn.textContent = `อัพโหลดรูป ${i + 1}/${newPhotos.length}...`;
+      try {
+        const result = await API.uploadPhoto(newPhotos[i].name, newPhotos[i].base64, State.currentPatientId);
+        uploadedPhotos.push({ fileId: result.fileId, url: result.url, name: result.name });
+      } catch (err) {
+        toast(`อัพโหลดรูปที่ ${i + 1} ไม่สำเร็จ: ${err.message}`, 'error', 4000);
+        btn.disabled = false;
+        btn.textContent = id ? 'บันทึกการแก้ไข' : 'บันทึกการเยี่ยม';
+        return;
+      }
+    }
+  }
+
+  btn.textContent = 'บันทึก...';
+  const allPhotos = [...existingPhotos, ...uploadedPhotos];
+
+  const data = {
+    patientId: State.currentPatientId,
+    date,
+    visitorName: get('visitorName'),
+    visitorRole: get('visitorRole'),
+    medicationTaken,
+    missedDoses: parseInt(get('missedDoses')) || 0,
+    symptoms,
+    sideEffects: get('sideEffects'),
+    weight: get('weight'),
+    bloodPressure: get('bloodPressure'),
+    temperature: get('temperature'),
+    notes: get('notes'),
+    photos: allPhotos
+  };
+
+  try {
+    const created = await API.addVisit(data);
+    State.visits.unshift(normalizeVisit(created));
+    toast('บันทึกการเยี่ยมบ้านเรียบร้อย', 'success');
+    visitPhotos = [];
+    closeModal();
+    render();
+  } catch (err) {
+    toast('บันทึกไม่สำเร็จ: ' + err.message, 'error', 4000);
+    btn.disabled = false;
+    btn.textContent = id ? 'บันทึกการแก้ไข' : 'บันทึกการเยี่ยม';
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ACTIONS
+   ═══════════════════════════════════════════════════════════════ */
+function closeModal() {
+  document.getElementById('modalRoot').innerHTML = '';
+  visitPhotos = [];
+}
+
+function openDetail(id) {
+  State.currentPatientId = id;
+  State.view = 'detail';
+  State.currentTab = 'info';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function goBack() { State.view = 'list'; State.currentPatientId = null; render(); }
+function setTab(t) { State.currentTab = t; render(); }
+function setFilter(f) { State.filter = f; render(); }
+
+async function deletePatient(id) {
+  const p = State.patients.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm(`ลบ "${p.name}" และข้อมูลการเยี่ยมบ้านทั้งหมด?\nไม่สามารถย้อนกลับได้`)) return;
+  showLoading('กำลังลบ...');
+  try {
+    await API.deletePatient(id);
+    State.patients = State.patients.filter(x => x.id !== id);
+    State.visits = State.visits.filter(v => v.patientId !== id);
+    State.view = 'list';
+    toast('ลบผู้ป่วยเรียบร้อย', 'success');
+    render();
+  } catch (err) {
+    toast('ลบไม่สำเร็จ: ' + err.message, 'error', 4000);
+  } finally { hideLoading(); }
+}
+
+async function deleteVisit(id) {
+  if (!confirm('ลบบันทึกการเยี่ยมบ้านนี้?')) return;
+  showLoading('กำลังลบ...');
+  try {
+    await API.deleteVisit(id);
+    State.visits = State.visits.filter(v => v.id !== id);
+    toast('ลบแล้ว', 'success');
+    render();
+  } catch (err) {
+    toast('ลบไม่สำเร็จ: ' + err.message, 'error', 4000);
+  } finally { hideLoading(); }
+}
+
+// Quick DOT toggle — saves as a minimal visit record
+async function toggleDotDay(iso) {
+  const existing = State.visits.find(v => v.patientId === State.currentPatientId && v.date === iso);
+  showLoading('บันทึก...');
+  try {
+    if (existing) {
+      // Cycle: taken → missed → no record (delete)
+      if (existing.medicationTaken === true) {
+        // Need to update — for simplicity, delete and re-add as missed
+        await API.deleteVisit(existing.id);
+        State.visits = State.visits.filter(v => v.id !== existing.id);
+        const created = await API.addVisit({
+          patientId: State.currentPatientId, date: iso, medicationTaken: false,
+          symptoms: {}, photos: [], visitorName: '(quick entry)'
+        });
+        State.visits.push(normalizeVisit(created));
+      } else if (existing.medicationTaken === false) {
+        await API.deleteVisit(existing.id);
+        State.visits = State.visits.filter(v => v.id !== existing.id);
+      } else {
+        // null → taken
+        await API.deleteVisit(existing.id);
+        State.visits = State.visits.filter(v => v.id !== existing.id);
+        const created = await API.addVisit({
+          patientId: State.currentPatientId, date: iso, medicationTaken: true,
+          symptoms: {}, photos: [], visitorName: '(quick entry)'
+        });
+        State.visits.push(normalizeVisit(created));
+      }
+    } else {
+      const created = await API.addVisit({
+        patientId: State.currentPatientId, date: iso, medicationTaken: true,
+        symptoms: {}, photos: [], visitorName: '(quick entry)'
+      });
+      State.visits.push(normalizeVisit(created));
+    }
+    render();
+  } catch (err) {
+    toast('บันทึกไม่สำเร็จ: ' + err.message, 'error', 3000);
+  } finally { hideLoading(); }
+}
+
+function viewImage(visitId, idx) {
+  const v = State.visits.find(x => x.id === visitId);
+  if (!v || !v.photos || !v.photos[idx]) return;
+  const src = v.photos[idx].url || v.photos[idx];
+  document.getElementById('viewerRoot').innerHTML = `
+    <div class="image-viewer" onclick="closeViewer()">
+      <button class="image-viewer-close">${ICON.close}</button>
+      <img src="${src}" alt="">
+    </div>`;
+}
+function closeViewer() { document.getElementById('viewerRoot').innerHTML = ''; }
+
+/* ════════════════════════════════════════════════════════════════
+   SETUP SCREEN & SETTINGS
+   ═══════════════════════════════════════════════════════════════ */
+function renderSetup(errorMsg = '') {
+  document.getElementById('mainView').innerHTML = `
+    <div class="full-screen">
+      <div class="setup-card">
+        <div style="color: var(--primary); margin-bottom: 16px;">${ICON.cloud}</div>
+        <h2>เชื่อมต่อกับ Google Apps Script</h2>
+        <p>วาง Web App URL เพื่อเริ่มใช้งาน — รพ.สต. ทุกแห่งที่ใช้ URL เดียวกันจะเห็นข้อมูลร่วมกัน</p>
+        ${errorMsg ? `<div style="background: var(--danger-soft); color: var(--danger); padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;">${escapeHTML(errorMsg)}</div>` : ''}
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label>Web App URL</label>
+          <input class="input" id="setupUrl" value="${escapeHTML(API.url)}" placeholder="https://script.google.com/macros/s/.../exec" style="font-family: var(--font-mono); font-size: 12px;">
+        </div>
+        <button class="btn btn-primary" id="setupBtn" onclick="connectAndLoad()" style="width: 100%; justify-content: center; padding: 12px;">เชื่อมต่อ</button>
+
+        <div class="setup-steps">
+          <strong>ขั้นตอนติดตั้ง:</strong><br>
+          1. เข้า <code>script.google.com</code> → New project<br>
+          2. Paste <code>Code.gs</code> → กด Save<br>
+          3. รัน function <code>setup</code> ครั้งเดียว<br>
+          4. Deploy → New deployment → Web app → Anyone<br>
+          5. Copy Web app URL มาวางที่นี่
+        </div>
+      </div>
+    </div>`;
+}
+
+async function connectAndLoad() {
+  const url = document.getElementById('setupUrl').value.trim();
+  if (!url) { toast('กรุณาวาง URL', 'error'); return; }
+
+  const btn = document.getElementById('setupBtn');
+  btn.disabled = true;
+  btn.textContent = 'กำลังทดสอบการเชื่อมต่อ...';
+
+  API.setUrl(url);
+  try {
+    const result = await API.ping();
+    State.user = result.user;
+    toast('เชื่อมต่อสำเร็จ', 'success');
+    await loadAll();
+    State.view = 'list';
+    render();
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'เชื่อมต่อ';
+    renderSetup(err.message);
+  }
+}
+
+function openSettings() {
+  document.getElementById('modalRoot').innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this) closeModal()">
+      <div class="modal" style="max-width: 480px;">
+        <div class="modal-header">
+          <div><div class="modal-title">การตั้งค่า<small>${State.user ? 'login เป็น ' + escapeHTML(State.user) : ''}</small></div></div>
+          <button class="modal-close" onclick="closeModal()">${ICON.close}</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Apps Script Web App URL</label>
+            <input class="input" id="settingsUrl" value="${escapeHTML(API.url)}" style="font-family: var(--font-mono); font-size: 12px;">
+          </div>
+          <div style="margin-top: 16px; padding: 14px; background: var(--bg-elevated); border-radius: 8px; font-size: 13px; color: var(--ink-700); line-height: 1.6;">
+            <strong>ข้อมูลระบบ:</strong><br>
+            ผู้ป่วยทั้งหมด: ${State.patients.length} ราย<br>
+            บันทึกการเยี่ยม: ${State.visits.length} ครั้ง<br>
+            ${State.lastSync ? 'Sync ล่าสุด: ' + fmtDate(State.lastSync) + ' ' + State.lastSync.toLocaleTimeString('th-TH') : ''}
+          </div>
+        </div>
+        <div class="modal-footer" style="justify-content: space-between;">
+          <button class="btn btn-danger" onclick="disconnect()">ตัดการเชื่อมต่อ</button>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+            <button class="btn btn-primary" onclick="saveSettings()">บันทึก</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function saveSettings() {
+  const url = document.getElementById('settingsUrl').value.trim();
+  if (url !== API.url) {
+    API.setUrl(url);
+    closeModal();
+    showLoading('กำลังเชื่อมต่อ...');
+    try {
+      await API.ping();
+      await loadAll();
+      hideLoading();
+      render();
+      toast('เปลี่ยน URL สำเร็จ', 'success');
+    } catch (err) {
+      hideLoading();
+      renderSetup(err.message);
+    }
+  } else {
+    closeModal();
+  }
+}
+
+function disconnect() {
+  if (!confirm('ตัดการเชื่อมต่อ? ข้อมูลใน Google Sheet จะไม่ถูกลบ — แค่ลบ URL ที่บันทึกไว้ในเบราว์เซอร์นี้')) return;
+  API.setUrl('');
+  State.patients = [];
+  State.visits = [];
+  State.user = null;
+  closeModal();
+  document.getElementById('syncIndicator').style.display = 'none';
+  document.getElementById('settingsBtn').style.display = 'none';
+  renderSetup();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DATA LOADING
+   ═══════════════════════════════════════════════════════════════ */
+async function loadAll(silent = false) {
+  if (State.syncing) return;
+  State.syncing = true;
+  setSyncState('syncing', 'กำลัง sync...');
+  if (!silent) showLoading('กำลังโหลดข้อมูล...');
+  try {
+    const [patients, visits] = await Promise.all([API.listPatients(), API.listVisits()]);
+    State.patients = (patients || []).map(normalizePatient);
+    State.visits = (visits || []).map(normalizeVisit);
+    State.lastSync = new Date();
+    setSyncState('ok', `Sync ${State.lastSync.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`);
+  } catch (err) {
+    setSyncState('error', 'Sync ล้มเหลว');
+    if (!silent) toast('ดึงข้อมูลไม่สำเร็จ: ' + err.message, 'error', 4000);
+  } finally {
+    State.syncing = false;
+    if (!silent) hideLoading();
+  }
+}
+
+async function refreshData() {
+  await loadAll();
+  render();
+  toast('รีเฟรชข้อมูลแล้ว', 'success', 1800);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ROUTER
+   ═══════════════════════════════════════════════════════════════ */
+function render() {
+  if (!API.url) { renderSetup(); return; }
+  document.getElementById('settingsBtn').style.display = 'grid';
+  if (State.view === 'detail' && State.currentPatientId) renderDetail();
+  else renderList();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════════════ */
+(async function init() {
+  if (!API.url) { renderSetup(); return; }
+  document.getElementById('settingsBtn').style.display = 'grid';
+
+  showLoading('กำลังเชื่อมต่อ Google Apps Script...');
+  try {
+    const ping = await API.ping();
+    State.user = ping.user;
+    await loadAll(true);
+    hideLoading();
+    render();
+  } catch (err) {
+    hideLoading();
+    renderSetup(err.message);
+  }
+
+  // Auto-refresh when tab becomes visible (after >30s away)
+  let hiddenAt = null;
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) hiddenAt = Date.now();
+    else if (hiddenAt && Date.now() - hiddenAt > 30000) {
+      loadAll(true).then(() => render());
+    }
+  });
+
+  // Background poll every 60s
+  setInterval(() => {
+    if (!document.hidden && API.url) loadAll(true).then(() => {
+      if (State.view === 'list') renderList();
+    });
+  }, 60000);
+})();
+</script>
+</body>
+</html>
