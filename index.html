@@ -4841,32 +4841,6 @@ function renderDashboard() {
           <span class="dash-card-pill">${ZONES.length} เขต · รวม ${d.zoneStats.reduce((a, z) => a + z.total, 0)} ราย</span>
         </div>
 
-        <div class="seg-legend">
-          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.primary}"></span>กำลังรักษา</span>
-          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.success}"></span>รักษาหาย</span>
-          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.primaryLite}"></span>รักษาครบ</span>
-          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.danger}"></span>ขาดยา</span>
-          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.blue}"></span>ส่งต่อ</span>
-          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.neutral}"></span>เสียชีวิต</span>
-          <span class="seg-legend-item"><span class="dot" style="background:${CHART_COLORS.accent}"></span>เปลี่ยนวินิจฉัย</span>
-        </div>
-
-        <div class="chart-wrap" style="margin-bottom: 18px;">
-          ${svgStackedHBar(d.zoneStats.map(z => ({
-            label: 'เขต ' + z.zone,
-            total: z.total,
-            segments: [
-              { value: z.active,      color: CHART_COLORS.primary,     name: 'กำลังรักษา' },
-              { value: z.cured,       color: CHART_COLORS.success,     name: 'รักษาหาย' },
-              { value: z.complete,    color: CHART_COLORS.primaryLite, name: 'รักษาครบ' },
-              { value: z.lost,        color: CHART_COLORS.danger,      name: 'ขาดยา' },
-              { value: z.transferred, color: CHART_COLORS.blue,        name: 'ส่งต่อ' },
-              { value: z.deceased,    color: CHART_COLORS.neutral,     name: 'เสียชีวิต' },
-              { value: z.diagChange,  color: CHART_COLORS.accent,      name: 'เปลี่ยนวินิจฉัย' }
-            ]
-          })), { width: 720, id: 'zone-stack' })}
-        </div>
-
         <div style="overflow-x: auto;">
           <table class="zone-table">
             <thead>
