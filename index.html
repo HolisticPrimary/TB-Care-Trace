@@ -9,8 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f7f3ec;
-    --bg-elevated: #fdfbf6;
+    --bg: #e8e3d4;          /* warm beige, darker for richer contrast against cards */
+    --bg-elevated: #f3efe2;
     --surface: #ffffff;
     --ink-900: #1a2620;
     --ink-700: #3d4d44;
@@ -247,17 +247,17 @@
     position: sticky;
     top: 0;
     z-index: 50;
-    /* Cool steel-blue gradient — premium healthcare/corporate look */
+    /* Cool steel-blue gradient — richer for contrast against warm bg */
     background:
       linear-gradient(180deg,
-        #eaf0f8 0%,
-        #f5f8fc 60%,
-        #fbfcfe 100%);
-    border-bottom: 1px solid #d9e2ee;
+        #dde6f2 0%,
+        #e8eef5 50%,
+        #f1f4f9 100%);
+    border-bottom: 1px solid #c9d4e3;
     margin-bottom: 20px;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 2px 14px rgba(13, 37, 66, 0.07);
+    box-shadow: 0 4px 18px rgba(13, 37, 66, 0.10);
   }
   /* Top accent line — navy gradient bar (visual continuity with header) */
   .subnav::before {
@@ -3156,8 +3156,9 @@
   .login-footer .org { font-weight: 700; color: var(--ink-700); }
 
   /* ════════════════════════════════════════════════════════════════
-     USER BADGE (header)
+     USER BADGE (in header navy OR subnav light)
      ═══════════════════════════════════════════════════════════════ */
+  /* Default: navy header style (glass) */
   .user-badge {
     display: inline-flex;
     align-items: center;
@@ -3168,7 +3169,7 @@
     border-radius: 999px;
     cursor: pointer;
     position: relative;
-    transition: background .15s, border-color .15s;
+    transition: background .15s, border-color .15s, box-shadow .15s;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }
@@ -3176,6 +3177,27 @@
     background: rgba(255, 255, 255, 0.16);
     border-color: rgba(255, 255, 255, 0.32);
   }
+  /* Light subnav variant — when badge lives inside .subnav-actions */
+  .subnav-actions .user-badge {
+    background: #ffffff;
+    border: 1px solid #d9e2ee;
+    box-shadow: 0 2px 8px rgba(13, 37, 66, 0.06);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .subnav-actions .user-badge:hover {
+    background: #eaf0f8;
+    border-color: #b8c5d8;
+    box-shadow: 0 4px 14px rgba(13, 37, 66, 0.10);
+  }
+  [data-theme="dark"] .subnav-actions .user-badge {
+    background: rgba(40, 50, 70, 0.6);
+    border-color: rgba(80, 120, 180, 0.22);
+  }
+  [data-theme="dark"] .subnav-actions .user-badge:hover {
+    background: rgba(80, 120, 180, 0.22);
+  }
+
   .user-badge-avatar {
     width: 30px;
     height: 30px;
@@ -3200,6 +3222,7 @@
     line-height: 1.1;
     min-width: 0;
   }
+  /* Navy header default */
   .user-badge-name {
     font-size: 12.5px;
     font-weight: 700;
@@ -3214,13 +3237,30 @@
     margin-top: 1px;
     white-space: nowrap;
   }
+  /* Light subnav variant */
+  .subnav-actions .user-badge-name {
+    color: #0d2542;
+    text-shadow: none;
+  }
+  .subnav-actions .user-badge-role {
+    color: var(--ink-500);
+    font-weight: 600;
+  }
+  .subnav-actions .user-badge--field .user-badge-role { color: var(--primary); font-weight: 700; }
+  .subnav-actions .user-badge--admin .user-badge-role { color: #2960c4; font-weight: 700; }
+  [data-theme="dark"] .subnav-actions .user-badge-name { color: #e7eaee; }
+  [data-theme="dark"] .subnav-actions .user-badge--admin .user-badge-role { color: #6ba3f5; }
+
+  /* Avatar color tweaks for admin/field on subnav */
   .user-badge--field .user-badge-role { color: #6fd3a0; font-weight: 700; }
   .user-badge--admin .user-badge-role { color: #93c0fa; font-weight: 700; }
+
   .user-badge-chev {
     color: rgba(255, 255, 255, 0.70);
     transition: transform .2s;
     flex-shrink: 0;
   }
+  .subnav-actions .user-badge-chev { color: var(--ink-500); }
   .user-badge:has(.user-menu:not([hidden])) .user-badge-chev { transform: rotate(180deg); }
 
   /* User menu dropdown */
@@ -5022,7 +5062,7 @@ function renderLogin(errorMsg = '') {
             <label for="loginUser">ชื่อผู้ใช้</label>
             <div class="login-input-wrap">
               <svg class="login-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <input type="text" id="loginUser" class="login-input" placeholder="เช่น TB201" autocomplete="username" autocapitalize="none" autocorrect="off" required>
+              <input type="text" id="loginUser" class="login-input" placeholder="ชื่อผู้ใช้" autocomplete="username" autocapitalize="none" autocorrect="off" required>
             </div>
           </div>
 
@@ -5044,17 +5084,6 @@ function renderLogin(errorMsg = '') {
             เข้าสู่ระบบ
           </button>
         </form>
-
-        <div class="login-hint">
-          <div class="login-hint-line">
-            <span class="hint-pill hint-field">เจ้าหน้าที่ รพ.สต.</span>
-            <span>ใช้ <code>TB201–TB209</code> ตามเขตที่รับผิดชอบ</span>
-          </div>
-          <div class="login-hint-line">
-            <span class="hint-pill hint-admin">ผู้ดูแลระบบ (รพ.)</span>
-            <span>ติดต่อหัวหน้างานเพื่อขอรหัส</span>
-          </div>
-        </div>
 
         <div class="login-footer">
           <span class="org">กลุ่มงานบริการด้านปฐมภูมิและองค์รวม</span> · โรงพยาบาลทับคล้อ จ.พิจิตร
@@ -5559,7 +5588,8 @@ function renderList() {
 
     <div class="filters">
       ${['all','active','cured','lost','transferred','died'].map(f => {
-        const count = f === 'all' ? State.patients.length : State.patients.filter(p => p.status === f).length;
+        // Counts respect zone scope so they always match the visible rows
+        const count = f === 'all' ? scopedPatients.length : scopedPatients.filter(p => p.status === f).length;
         const label = f === 'all' ? 'ทั้งหมด' : STATUS_LABELS[f];
         return `<button class="filter-btn ${State.filter === f ? 'active' : ''}" onclick="setFilter('${f}')">${label}<span class="count">${count}</span></button>`;
       }).join('')}
@@ -6448,7 +6478,8 @@ function relocateHeaderActions(view) {
   const items = [
     document.getElementById('syncIndicator'),
     document.getElementById('themeToggle'),
-    document.getElementById('settingsBtn')
+    document.getElementById('settingsBtn'),
+    document.getElementById('userBadge')  // Include user badge so it follows the actions
   ].filter(Boolean);
   const goesToSubnav = (view === 'list' || view === 'dashboard');
   const target = goesToSubnav ? subnavActions : headerActions;
