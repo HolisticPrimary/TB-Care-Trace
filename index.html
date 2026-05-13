@@ -372,20 +372,53 @@
     border-color: rgba(120, 160, 220, 0.35);
   }
   /* Mobile responsive: stack subnav vertically */
+  /* ── MOBILE SUBNAV (≤ 980px) — 2-row layout ─────────────────── */
   @media (max-width: 980px) {
     .subnav-inner {
-      grid-template-columns: 1fr;
+      grid-template-areas:
+        "brand brand"
+        "nav   actions";
+      grid-template-columns: 1fr auto;
       gap: 10px;
+      padding: 12px clamp(16px, 4vw, 24px);
     }
-    .subnav-brand-slot, .subnav .nav-tabs, .subnav-actions {
-      justify-self: stretch;
-    }
-    .subnav .nav-tabs { justify-content: center; }
-    .subnav-actions { justify-content: flex-end; }
-    .brand.brand-in-subnav .brand-text h1 { max-width: none; font-size: 14px; }
+    .subnav-brand-slot { grid-area: brand; justify-self: stretch; justify-content: center; }
+    .subnav .nav-tabs  { grid-area: nav; justify-self: start; }
+    .subnav-actions    { grid-area: actions; justify-self: end; gap: 6px; }
+    .brand.brand-in-subnav { justify-content: center; }
+    .brand.brand-in-subnav .brand-text h1 { max-width: none; font-size: 14px; text-align: left; }
+    /* Compact zone dropdown */
+    .zone-trigger { min-width: 140px; padding: 0 10px; height: 38px; font-size: 12.5px; }
+    .zone-trigger-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
+    /* Compact icon buttons */
+    .subnav-actions .icon-btn { width: 34px; height: 34px; }
+    .subnav-actions .sync-indicator { padding: 5px 4px 5px 10px; font-size: 11px; }
+    .subnav-actions .sync-indicator button { padding: 3px 9px; font-size: 10.5px; }
   }
-  @media (max-width: 640px) {
-    .brand.brand-in-subnav .brand-text h1 { white-space: normal; }
+  /* ── VERY SMALL MOBILE (≤ 560px) — stack actions vertically ─── */
+  @media (max-width: 560px) {
+    .subnav-inner {
+      grid-template-areas:
+        "brand"
+        "nav"
+        "actions";
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .subnav-brand-slot { justify-content: center; }
+    .brand.brand-in-subnav {
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+    .subnav .nav-tabs, .subnav-actions {
+      justify-self: stretch !important;
+      justify-content: center;
+    }
+    .brand.brand-in-subnav .brand-text h1 { white-space: normal; font-size: 13.5px; line-height: 1.3; }
+    .brand.brand-in-subnav .brand-mark.has-logo { width: 36px; height: 36px; }
+    .zone-trigger-label { max-width: none; }
   }
   /* Sync indicator inside subnav — steel-blue theme */
   .subnav-actions .sync-indicator {
@@ -2597,6 +2630,39 @@
     font-size: 18px;
   }
   .image-viewer-close:hover { background: rgba(255, 255, 255, 0.2); }
+  /* Open original link (top-left) */
+  .image-viewer-open {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.10);
+    color: white;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: background .15s, transform .15s;
+    cursor: pointer;
+    z-index: 1;
+  }
+  .image-viewer-open:hover { background: rgba(255, 255, 255, 0.22); transform: translateY(-1px); }
+  /* Error state */
+  .image-viewer-error {
+    flex-direction: column;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    text-align: center;
+    padding: 24px;
+  }
+  .image-viewer-error p { margin: 0; }
 
   .toast {
     position: fixed;
@@ -2838,6 +2904,454 @@
 
   /* ── COUNT-UP ANIMATION ──────────────────────────────────── */
   .count-up { display: inline-block; font-variant-numeric: tabular-nums; }
+
+  /* ════════════════════════════════════════════════════════════════
+     LOGIN PAGE
+     ═══════════════════════════════════════════════════════════════ */
+  body[data-view="login"] .app-header,
+  body[data-view="login"] .subnav { display: none !important; }
+  body[data-view="login"] main { min-height: 100vh; }
+
+  .login-page {
+    min-height: calc(100vh - 0px);
+    display: grid;
+    place-items: center;
+    padding: 32px 20px;
+    background:
+      radial-gradient(ellipse 800px 500px at 20% 10%, rgba(41, 96, 196, 0.08), transparent 60%),
+      radial-gradient(ellipse 600px 400px at 80% 90%, rgba(95, 174, 138, 0.08), transparent 60%),
+      var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .login-page::before {
+    content: "";
+    position: absolute;
+    top: -120px; left: -120px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(41, 96, 196, 0.10), transparent 70%);
+    filter: blur(60px);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .login-page::after {
+    content: "";
+    position: absolute;
+    bottom: -140px; right: -140px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(95, 174, 138, 0.10), transparent 70%);
+    filter: blur(60px);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .login-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 36px 32px 28px;
+    box-shadow:
+      0 24px 60px rgba(13, 37, 66, 0.10),
+      0 8px 20px rgba(0, 0, 0, 0.04);
+    animation: anim-scaleIn .5s cubic-bezier(.22, .61, .36, 1) both;
+  }
+  [data-theme="dark"] .login-card {
+    box-shadow:
+      0 24px 60px rgba(0, 0, 0, 0.50),
+      0 8px 20px rgba(0, 0, 0, 0.30);
+  }
+  .login-logo {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 18px;
+    border-radius: 22px;
+    background: #ffffff;
+    display: grid;
+    place-items: center;
+    padding: 10px;
+    box-shadow:
+      0 10px 28px rgba(41, 96, 196, 0.15),
+      0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  .login-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .login-title {
+    font-family: var(--font-formal);
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--ink-900);
+    text-align: center;
+    letter-spacing: -0.3px;
+    margin: 0 0 6px;
+    padding-bottom: 2px;
+  }
+  .login-subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-500);
+    margin: 0 0 28px;
+    font-weight: 500;
+  }
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .login-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-700);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .login-input-wrap {
+    position: relative;
+  }
+  .login-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-300);
+    pointer-events: none;
+    transition: color .2s;
+  }
+  .login-input {
+    width: 100%;
+    padding: 12px 14px 12px 44px;
+    background: var(--bg-elevated);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink-900);
+    outline: none;
+    transition: border-color .2s, box-shadow .25s, background .2s;
+  }
+  .login-input:focus {
+    border-color: #2960c4;
+    background: var(--surface);
+    box-shadow: 0 0 0 4px rgba(41, 96, 196, 0.10);
+  }
+  .login-input:focus + .login-toggle-pw,
+  .login-input-wrap:focus-within .login-input-icon {
+    color: #2960c4;
+  }
+  .login-toggle-pw {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: transparent;
+    border: 0;
+    color: var(--ink-500);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background .15s, color .15s;
+  }
+  .login-toggle-pw:hover {
+    background: var(--bg-elevated);
+    color: var(--ink-900);
+  }
+  .login-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--danger-soft);
+    color: var(--danger);
+    border: 1px solid rgba(179, 70, 62, 0.20);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    animation: anim-fadeUp .3s ease both;
+  }
+  [data-theme="dark"] .login-error {
+    background: rgba(224, 128, 121, 0.14);
+    border-color: rgba(224, 128, 121, 0.30);
+    color: #e08079;
+  }
+  .login-submit {
+    width: 100%;
+    padding: 13px 22px !important;
+    margin-top: 6px;
+    font-weight: 700 !important;
+    font-size: 14.5px !important;
+    background: linear-gradient(135deg, #1a3a5e 0%, #2960c4 100%) !important;
+    color: #fff !important;
+    border: 0 !important;
+    box-shadow:
+      0 6px 20px rgba(26, 58, 94, 0.30),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  }
+  .login-submit:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 10px 28px rgba(26, 58, 94, 0.40),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+  }
+  .login-hint {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink-500);
+  }
+  .login-hint-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .login-hint code {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    background: var(--bg-elevated);
+    color: var(--ink-900);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .hint-pill {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.3px;
+  }
+  .hint-pill.hint-field {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+  .hint-pill.hint-admin {
+    background: rgba(41, 96, 196, 0.12);
+    color: #1a3a5e;
+  }
+  [data-theme="dark"] .hint-pill.hint-admin {
+    background: rgba(107, 163, 245, 0.15);
+    color: #93c0fa;
+  }
+  .login-footer {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-500);
+    line-height: 1.6;
+  }
+  .login-footer .org { font-weight: 700; color: var(--ink-700); }
+
+  /* ════════════════════════════════════════════════════════════════
+     USER BADGE (header)
+     ═══════════════════════════════════════════════════════════════ */
+  .user-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px 5px 5px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    cursor: pointer;
+    position: relative;
+    transition: background .15s, border-color .15s;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .user-badge:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.32);
+  }
+  .user-badge-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0;
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.20);
+  }
+  .user-badge--admin .user-badge-avatar {
+    background: linear-gradient(135deg, #1a3a5e, #2960c4);
+    font-size: 16px;
+  }
+  .user-badge-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    min-width: 0;
+  }
+  .user-badge-name {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.20);
+    white-space: nowrap;
+  }
+  .user-badge-role {
+    font-size: 10.5px;
+    color: rgba(255, 255, 255, 0.78);
+    font-weight: 500;
+    margin-top: 1px;
+    white-space: nowrap;
+  }
+  .user-badge--field .user-badge-role { color: #6fd3a0; font-weight: 700; }
+  .user-badge--admin .user-badge-role { color: #93c0fa; font-weight: 700; }
+  .user-badge-chev {
+    color: rgba(255, 255, 255, 0.70);
+    transition: transform .2s;
+    flex-shrink: 0;
+  }
+  .user-badge:has(.user-menu:not([hidden])) .user-badge-chev { transform: rotate(180deg); }
+
+  /* User menu dropdown */
+  .user-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 230px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow:
+      0 12px 32px rgba(13, 37, 66, 0.14),
+      0 4px 12px rgba(0, 0, 0, 0.06);
+    z-index: 100;
+    animation: anim-scaleIn .2s cubic-bezier(.34, 1.56, .64, 1) both;
+    transform-origin: top right;
+    color: var(--ink-900);
+  }
+  .user-menu[hidden] { display: none; }
+  [data-theme="dark"] .user-menu {
+    background: #1f2932;
+    border-color: rgba(80, 120, 180, 0.22);
+    box-shadow:
+      0 12px 36px rgba(0, 0, 0, 0.55),
+      0 4px 14px rgba(0, 0, 0, 0.32);
+  }
+  .user-menu-head {
+    padding: 12px 12px 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 6px;
+  }
+  .user-menu-name {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink-900);
+    line-height: 1.3;
+  }
+  .user-menu-meta {
+    display: block;
+    font-size: 11.5px;
+    color: var(--ink-500);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    padding: 9px 10px;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    color: var(--ink-700);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: background .15s, color .15s;
+  }
+  .user-menu-item:hover {
+    background: var(--bg-elevated);
+    color: var(--ink-900);
+  }
+  .user-menu-logout {
+    color: var(--danger);
+  }
+  .user-menu-logout:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+  [data-theme="dark"] .user-menu-logout:hover {
+    background: rgba(224, 128, 121, 0.14);
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     ROLE RESTRICTIONS UI
+     ═══════════════════════════════════════════════════════════════ */
+  /* Zone-fixed pill (shown to field staff in toolbar) */
+  .zone-pill-fixed {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 44px;
+    background: linear-gradient(135deg, rgba(26, 58, 94, 0.08), rgba(41, 96, 196, 0.08));
+    color: #1a3a5e;
+    border: 1px solid rgba(41, 96, 196, 0.22);
+    border-radius: var(--radius);
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: default;
+  }
+  .zone-pill-fixed svg { color: #2960c4; }
+  [data-theme="dark"] .zone-pill-fixed {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(107, 163, 245, 0.10));
+    color: #93c0fa;
+    border-color: rgba(107, 163, 245, 0.25);
+  }
+  [data-theme="dark"] .zone-pill-fixed svg { color: #6ba3f5; }
+
+  /* Read-only tag on locked form sections */
+  .readonly-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 10px;
+    padding: 2px 9px;
+    background: var(--bg-elevated);
+    color: var(--ink-500);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    text-transform: none;
+  }
+  .form-section.medical-locked input:disabled,
+  .form-section.medical-locked select:disabled {
+    background: var(--bg-elevated);
+    color: var(--ink-500);
+    cursor: not-allowed;
+    opacity: 0.85;
+  }
+  .form-section.medical-locked label {
+    color: var(--ink-500);
+  }
 
   /* ── PRINT STYLESHEET ──────────────────────────────────────── */
   @media print {
@@ -4155,8 +4669,15 @@
 
   @media (max-width: 640px) {
     .container, .header-inner { padding-left: 16px; padding-right: 16px; }
-    .stats { grid-template-columns: repeat(2, 1fr); }
+    /* 5-card stats: first card spans 2 cols (hero), then 4 cards in 2x2 grid */
+    .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stats .stat-card:first-child { grid-column: span 2; }
     .stat-value { font-size: 22px; }
+    /* KPI grid (dashboard) — same hero pattern */
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .kpi-grid .kpi-card:first-child { grid-column: span 2; }
+    .kpi-grid .kpi-card:nth-child(5) { grid-column: span 2; }
+    .kpi-card .kpi-value { font-size: 24px; }
     .modal-body { padding: 20px; }
     .modal-header { padding: 20px 20px 14px; }
     .modal-footer { padding: 14px 20px 20px; }
@@ -4164,7 +4685,11 @@
     .detail-header { padding: 18px 20px; }
     .detail-name { font-size: 22px; }
     .setup-card { padding: 28px 22px; }
-    .kpi-card .kpi-value { font-size: 24px; }
+    /* Toolbar wrap nicely */
+    .toolbar { gap: 10px; }
+    .search-box { min-width: 100%; }
+    .zone-dropdown { width: 100%; }
+    .zone-trigger { width: 100%; }
   }
 </style>
 <script>
@@ -4207,6 +4732,24 @@
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
       </button>
+      <div class="user-badge" id="userBadge" style="display:none" onclick="toggleUserMenu(event)" title="คลิกเพื่อดูเมนูผู้ใช้">
+        <span class="user-badge-avatar" id="userBadgeAvatar">?</span>
+        <div class="user-badge-info">
+          <span class="user-badge-name" id="userBadgeName">—</span>
+          <span class="user-badge-role" id="userBadgeRole">—</span>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="user-badge-chev"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="user-menu" id="userMenu" hidden>
+          <div class="user-menu-head">
+            <span class="user-menu-name" id="userMenuName">—</span>
+            <span class="user-menu-meta" id="userMenuMeta">—</span>
+          </div>
+          <button type="button" class="user-menu-item user-menu-logout" onclick="confirmLogout()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            ออกจากระบบ
+          </button>
+        </div>
+      </div>
       <button class="icon-btn" id="settingsBtn" onclick="openSettings()" style="display:none" title="ตั้งค่า">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
@@ -4316,6 +4859,7 @@ const State = {
   lastSync: null,
   syncing: false,
   user: null,
+  currentUser: null,  // Logged-in user object {username, role, zone, name}
   demo: false
 };
 
@@ -4358,6 +4902,226 @@ const TEST_RESULTS = ['AFB','AFB Post','TB Lamp Post','X-pert Detect','CT','Film
 const PATIENT_TYPES = ['รายใหม่','กลับมาเป็นซ้ำ','รับโอนจากที่อื่น','โอนออกไปที่อื่น'];
 const TB_CLASSES = ['วัณโรคในปอด','วัณโรคนอกปอด'];
 const VISIT_TYPES = ['เยี่ยมโดย รพ.สต.','เยี่ยมร่วมกับโรงพยาบาล'];
+const VISITOR_ROLES = ['นักวิชาการสาธารณสุข','พยาบาลวิชาชีพ'];
+
+/* ════════════════════════════════════════════════════════════════
+   USERS & PERMISSIONS — Role-based access control
+   ═══════════════════════════════════════════════════════════════ */
+const USERS = [
+  // Field staff — one per zone, sees only their zone
+  { username: 'TB201', password: 'TB@201', role: 'field', zone: '201', name: 'เจ้าหน้าที่ รพ.สต. เขต 201' },
+  { username: 'TB202', password: 'TB@202', role: 'field', zone: '202', name: 'เจ้าหน้าที่ รพ.สต. เขต 202' },
+  { username: 'TB203', password: 'TB@203', role: 'field', zone: '203', name: 'เจ้าหน้าที่ รพ.สต. เขต 203' },
+  { username: 'TB204', password: 'TB@204', role: 'field', zone: '204', name: 'เจ้าหน้าที่ รพ.สต. เขต 204' },
+  { username: 'TB205', password: 'TB@205', role: 'field', zone: '205', name: 'เจ้าหน้าที่ รพ.สต. เขต 205' },
+  { username: 'TB206', password: 'TB@206', role: 'field', zone: '206', name: 'เจ้าหน้าที่ รพ.สต. เขต 206' },
+  { username: 'TB207', password: 'TB@207', role: 'field', zone: '207', name: 'เจ้าหน้าที่ รพ.สต. เขต 207' },
+  { username: 'TB208', password: 'TB@208', role: 'field', zone: '208', name: 'เจ้าหน้าที่ รพ.สต. เขต 208' },
+  { username: 'TB209', password: 'TB@209', role: 'field', zone: '209', name: 'เจ้าหน้าที่ รพ.สต. เขต 209' },
+  // Hospital admin — full access to all zones
+  { username: 'TB11263', password: 'TB@@11263', role: 'admin', zone: '*', name: 'ผู้ดูแลระบบ (รพ.ทับคล้อ)' }
+];
+
+const SESSION_KEY = 'tb_session';
+const SESSION_HOURS = 8; // Auto-logout after 8 hours
+
+/* Permission helpers */
+function isAdmin()      { return State.currentUser?.role === 'admin'; }
+function isField()      { return State.currentUser?.role === 'field'; }
+function canAddPatient(){ return isAdmin(); }
+function canDeletePatient(){ return isAdmin(); }
+function canEditMedical(){ return isAdmin(); }  // testResult, regimen, status
+function canDeleteVisit(visit){
+  if (isAdmin()) return true;
+  // Field staff: can delete OWN visit within 24h
+  if (isField() && visit && visit.createdBy === State.currentUser.username) {
+    const created = new Date(visit.createdAt || visit.date);
+    return (Date.now() - created.getTime()) < 24 * 60 * 60 * 1000;
+  }
+  return false;
+}
+function canEditVisit(visit) { return canDeleteVisit(visit); } // same window
+function userZone()     { return State.currentUser?.zone || '*'; }
+function userCanSeeZone(z) {
+  const myZone = userZone();
+  return myZone === '*' || myZone === z;
+}
+function filterByZone(patients) {
+  if (isAdmin()) return patients;
+  const z = userZone();
+  return patients.filter(p => p.zone === z);
+}
+
+/* ── SESSION MANAGEMENT ────────────────────────────────────── */
+function saveSession(user) {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      username: user.username,
+      loginAt: Date.now()
+    }));
+  } catch (e) {}
+}
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    const elapsed = Date.now() - data.loginAt;
+    if (elapsed > SESSION_HOURS * 60 * 60 * 1000) {
+      localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    const user = USERS.find(u => u.username === data.username);
+    return user || null;
+  } catch (e) { return null; }
+}
+function clearSession() {
+  try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+}
+
+function login(username, password) {
+  const user = USERS.find(u => u.username === username && u.password === password);
+  if (!user) return false;
+  State.currentUser = user;
+  saveSession(user);
+  // Reset views for fresh start
+  State.view = 'cover';
+  State.currentPatientId = null;
+  State.zoneFilter = isAdmin() ? 'all' : user.zone;
+  return true;
+}
+function logout() {
+  State.currentUser = null;
+  clearSession();
+  State.view = 'cover';
+  State.currentPatientId = null;
+  render();
+}
+
+/* ── LOGIN PAGE RENDER ──────────────────────────────────────── */
+function renderLogin(errorMsg = '') {
+  document.body.dataset.view = 'login';
+  // Hide subnav on login
+  const subnav = document.getElementById('subnav');
+  if (subnav) subnav.style.display = 'none';
+  // Hide header actions
+  const navTabs = document.getElementById('navTabs');
+  if (navTabs) navTabs.style.display = 'none';
+
+  document.getElementById('mainView').innerHTML = `
+    <div class="login-page">
+      <div class="login-card">
+        <div class="login-logo">
+          <img src="./logo.png" alt="TB Care Trace">
+        </div>
+        <h1 class="login-title">เข้าสู่ระบบ</h1>
+        <p class="login-subtitle">TB Care Trace · ระบบติดตามผู้ป่วยวัณโรค</p>
+
+        <form id="loginForm" class="login-form" onsubmit="event.preventDefault(); handleLoginSubmit();">
+          <div class="login-field">
+            <label for="loginUser">ชื่อผู้ใช้</label>
+            <div class="login-input-wrap">
+              <svg class="login-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <input type="text" id="loginUser" class="login-input" placeholder="เช่น TB201" autocomplete="username" autocapitalize="none" autocorrect="off" required>
+            </div>
+          </div>
+
+          <div class="login-field">
+            <label for="loginPass">รหัสผ่าน</label>
+            <div class="login-input-wrap">
+              <svg class="login-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <input type="password" id="loginPass" class="login-input" placeholder="••••••" autocomplete="current-password" required>
+              <button type="button" class="login-toggle-pw" onclick="toggleLoginPw()" title="แสดง/ซ่อน รหัสผ่าน">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          ${errorMsg ? `<div class="login-error">${ICON.alert} ${escapeHTML(errorMsg)}</div>` : ''}
+
+          <button type="submit" class="btn btn-primary login-submit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            เข้าสู่ระบบ
+          </button>
+        </form>
+
+        <div class="login-hint">
+          <div class="login-hint-line">
+            <span class="hint-pill hint-field">เจ้าหน้าที่ รพ.สต.</span>
+            <span>ใช้ <code>TB201–TB209</code> ตามเขตที่รับผิดชอบ</span>
+          </div>
+          <div class="login-hint-line">
+            <span class="hint-pill hint-admin">ผู้ดูแลระบบ (รพ.)</span>
+            <span>ติดต่อหัวหน้างานเพื่อขอรหัส</span>
+          </div>
+        </div>
+
+        <div class="login-footer">
+          <span class="org">กลุ่มงานบริการด้านปฐมภูมิและองค์รวม</span> · โรงพยาบาลทับคล้อ จ.พิจิตร
+        </div>
+      </div>
+    </div>
+  `;
+  // Auto-focus username
+  setTimeout(() => document.getElementById('loginUser')?.focus(), 100);
+}
+
+function handleLoginSubmit() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (!u || !p) { renderLogin('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'); return; }
+  if (login(u, p)) {
+    toast(`ยินดีต้อนรับ ${State.currentUser.name}`, 'success', 2500);
+    render();
+  } else {
+    renderLogin('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+    // Re-fill username for convenience
+    setTimeout(() => {
+      const ui = document.getElementById('loginUser');
+      if (ui) ui.value = u;
+      document.getElementById('loginPass')?.focus();
+    }, 50);
+  }
+}
+
+function toggleLoginPw() {
+  const inp = document.getElementById('loginPass');
+  if (!inp) return;
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+/* ── USER BADGE in header ──────────────────────────────────── */
+function updateUserBadge() {
+  const badge = document.getElementById('userBadge');
+  if (!badge) return;
+  if (!State.currentUser) { badge.style.display = 'none'; return; }
+  const u = State.currentUser;
+  badge.style.display = 'inline-flex';
+  badge.classList.toggle('user-badge--admin', isAdmin());
+  badge.classList.toggle('user-badge--field', isField());
+  const avatar = isAdmin() ? '🏥' : u.zone;
+  document.getElementById('userBadgeAvatar').textContent = avatar;
+  document.getElementById('userBadgeName').textContent = u.username;
+  document.getElementById('userBadgeRole').textContent = isAdmin() ? 'ผู้ดูแลระบบ' : `เขต ${u.zone}`;
+  document.getElementById('userMenuName').textContent = u.name;
+  document.getElementById('userMenuMeta').textContent = isAdmin() ? 'รพ.ทับคล้อ · เห็นทุกเขต' : `เจ้าหน้าที่ รพ.สต. · เขต ${u.zone}`;
+}
+function toggleUserMenu(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('userMenu');
+  if (!menu) return;
+  menu.hidden = !menu.hidden;
+}
+function confirmLogout() {
+  if (confirm('ออกจากระบบ?')) logout();
+}
+// Close user menu on outside click
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('userMenu');
+  const badge = document.getElementById('userBadge');
+  if (!menu || !badge || menu.hidden) return;
+  if (!badge.contains(e.target)) menu.hidden = true;
+});
 const ZONES = ['201','202','203','204','205','206','207','208','209'];
 const AREA_TYPES = ['ในเขต','นอกเขต'];
 const IGRA_RESULTS = ['Positive','Negative','Indeterminate','Pending','Not done'];
@@ -4708,9 +5472,10 @@ const ICON = {
 /* ════════════════════════════════════════════════════════════════
    STATS
    ═══════════════════════════════════════════════════════════════ */
-function getStats() {
-  const by = (s) => State.patients.filter(p => p.status === s).length;
-  const needsAttention = State.patients.filter(p => {
+function getStats(patientsList) {
+  const patients = patientsList || State.patients;
+  const by = (s) => patients.filter(p => p.status === s).length;
+  const needsAttention = patients.filter(p => {
     if (p.status !== 'active') return false;
     const visits = State.visits.filter(v => v.patientId === p.id);
     if (visits.length === 0) return true;
@@ -4718,7 +5483,7 @@ function getStats() {
     return daysSince(last) > 14;
   }).length;
   return {
-    total: State.patients.length,
+    total: patients.length,
     active: by('active'),
     cured: by('cured'),
     lost: by('lost'),
@@ -4730,8 +5495,10 @@ function getStats() {
    LIST VIEW
    ═══════════════════════════════════════════════════════════════ */
 function renderList() {
-  const stats = getStats();
-  const filtered = State.patients.filter(p => {
+  // Scope: field staff sees only their zone; admin sees all
+  const scopedPatients = filterByZone(State.patients);
+  const stats = getStats(scopedPatients);
+  const filtered = scopedPatients.filter(p => {
     if (State.filter !== 'all' && p.status !== State.filter) return false;
     if (State.zoneFilter !== 'all' && p.zone !== State.zoneFilter) return false;
     if (State.search) {
@@ -4741,9 +5508,9 @@ function renderList() {
     return true;
   });
 
-  // Count patients per zone for filter pill badges
+  // Count patients per zone for filter pill badges (scoped)
   const zoneCounts = {};
-  ZONES.forEach(z => { zoneCounts[z] = State.patients.filter(p => p.zone === z).length; });
+  ZONES.forEach(z => { zoneCounts[z] = scopedPatients.filter(p => p.zone === z).length; });
 
   document.getElementById('mainView').innerHTML = `
     <div class="stats">
@@ -4759,17 +5526,18 @@ function renderList() {
         ${ICON.search}
         <input type="text" id="searchInput" placeholder="ค้นหาด้วยชื่อ หรือ HN..." value="${escapeHTML(State.search)}">
       </div>
+      ${isAdmin() ? `
       <div class="zone-dropdown" id="zoneDropdown" title="กรองตามเขตพื้นที่รับผิดชอบ">
         <button type="button" class="zone-trigger" onclick="toggleZoneDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
           <svg class="zone-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9.4 8 10 4.5-.6 8-5 8-10V6l-8-4Z"/></svg>
-          <span class="zone-trigger-label">${State.zoneFilter === 'all' ? `ทุกเขต (${State.patients.length})` : `เขต ${State.zoneFilter} (${zoneCounts[State.zoneFilter] || 0})`}</span>
+          <span class="zone-trigger-label">${State.zoneFilter === 'all' ? `ทุกเขต (${scopedPatients.length})` : `เขต ${State.zoneFilter} (${zoneCounts[State.zoneFilter] || 0})`}</span>
           <svg class="zone-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="zone-panel" role="listbox" hidden>
           <button type="button" role="option" class="zone-option ${State.zoneFilter === 'all' ? 'selected' : ''}" onclick="selectZone('all')">
             <svg class="zone-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             <span class="zone-option-label">ทุกเขต</span>
-            <span class="zone-option-count">${State.patients.length}</span>
+            <span class="zone-option-count">${scopedPatients.length}</span>
           </button>
           ${ZONES.map(z => `
             <button type="button" role="option" class="zone-option ${State.zoneFilter === z ? 'selected' : ''}" onclick="selectZone('${z}')">
@@ -4780,7 +5548,13 @@ function renderList() {
           `).join('')}
         </div>
       </div>
-      <button class="btn btn-primary" onclick="openPatientModal()">${ICON.plus} เพิ่มผู้ป่วยใหม่</button>
+      ` : `
+      <div class="zone-pill-fixed" title="คุณดูข้อมูลเฉพาะเขตที่รับผิดชอบ">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9.4 8 10 4.5-.6 8-5 8-10V6l-8-4Z"/></svg>
+        <span>เขต ${userZone()} (${scopedPatients.length})</span>
+      </div>
+      `}
+      ${canAddPatient() ? `<button class="btn btn-primary" onclick="openPatientModal()">${ICON.plus} เพิ่มผู้ป่วยใหม่</button>` : ''}
     </div>
 
     <div class="filters">
@@ -4789,7 +5563,7 @@ function renderList() {
         const label = f === 'all' ? 'ทั้งหมด' : STATUS_LABELS[f];
         return `<button class="filter-btn ${State.filter === f ? 'active' : ''}" onclick="setFilter('${f}')">${label}<span class="count">${count}</span></button>`;
       }).join('')}
-      ${State.zoneFilter !== 'all' ? `
+      ${(isAdmin() && State.zoneFilter !== 'all') ? `
         <div class="filters-divider"></div>
         <button class="filter-btn active-filter-chip" onclick="setZoneFilter('all')" title="ล้างตัวกรองเขต">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 2 4 6v6c0 5 3.5 9.4 8 10 4.5-.6 8-5 8-10V6l-8-4Z"/></svg>
@@ -5223,8 +5997,10 @@ function ymOf(isoDate) {
 }
 
 function computeDashboard() {
-  const P = State.patients;
-  const V = State.visits;
+  // Scope patients/visits to current user's zone (field staff sees only their zone)
+  const P = filterByZone(State.patients);
+  const scopedIds = new Set(P.map(p => p.id));
+  const V = State.visits.filter(v => scopedIds.has(v.patientId));
   const total = P.length;
   const by = (s) => P.filter(p => p.status === s).length;
   const active = by('active');
@@ -5728,7 +6504,7 @@ function renderDetail() {
         <div class="detail-actions">
           <button class="btn btn-secondary" onclick="openPatientModal('${p.id}')">${ICON.edit} แก้ไขข้อมูล</button>
           <button class="btn btn-primary" onclick="openVisitModal()">${ICON.plus} บันทึกการเยี่ยมบ้าน</button>
-          <button class="btn btn-danger" onclick="deletePatient('${p.id}')">${ICON.trash} ลบผู้ป่วย</button>
+          ${canDeletePatient() ? `<button class="btn btn-danger" onclick="deletePatient('${p.id}')">${ICON.trash} ลบผู้ป่วย</button>` : ''}
         </div>
       </div>
 
@@ -5865,7 +6641,7 @@ function renderVisitCard(v) {
           ${v.medicationTaken === true ? '<span class="pill pill-ok">✓ กินยาครบ</span>' : ''}
           ${v.medicationTaken === false ? `<span class="pill pill-bad">✗ ขาดยา${v.missedDoses ? ' ' + v.missedDoses + ' มื้อ' : ''}</span>` : ''}
           ${symptoms.length > 0 ? `<span class="pill pill-warn">${symptoms.length} อาการ</span>` : '<span class="pill pill-ok">ไม่มีอาการผิดปกติ</span>'}
-          <button class="btn-ghost" style="padding: 2px 6px; font-size: 12px;" onclick="deleteVisit('${v.id}')" title="ลบ">${ICON.trash}</button>
+          ${canDeleteVisit(v) ? `<button class="btn-ghost" style="padding: 2px 6px; font-size: 12px;" onclick="deleteVisit('${v.id}')" title="ลบ">${ICON.trash}</button>` : ''}
         </div>
       </div>
       ${(v.weight || v.bloodPressure || v.temperature) ? `
@@ -5879,7 +6655,7 @@ function renderVisitCard(v) {
       ${v.notes ? `<div class="visit-notes">${escapeHTML(v.notes)}</div>` : ''}
       ${photos.length > 0 ? `
         <div class="photo-strip">
-          ${photos.map((ph, i) => `<div class="photo-thumb" style="background-image: url('${ph.url || ph}')" onclick="viewImage('${v.id}', ${i})" title="${escapeHTML(ph.name || '')}"></div>`).join('')}
+          ${photos.map((ph, i) => `<div class="photo-thumb" style="background-image: url('${driveImageUrl(ph, 400)}')" onclick="viewImage('${v.id}', ${i})" title="${escapeHTML(ph.name || '')}"></div>`).join('')}
         </div>` : ''}
       ${v.createdBy ? `<div style="margin-top: 10px; font-size: 11px; color: var(--ink-500);">บันทึกโดย ${escapeHTML(v.createdBy)}</div>` : ''}
     </div>`;
@@ -6070,12 +6846,12 @@ function openPatientModal(id = null) {
             </div>
           </div>
 
-          <div class="form-section">
-            <h4>ข้อมูลการรักษา</h4>
+          <div class="form-section ${canEditMedical() ? '' : 'medical-locked'}">
+            <h4>ข้อมูลการรักษา ${canEditMedical() ? '' : '<span class="readonly-tag">🔒 อ่านอย่างเดียว · เฉพาะ รพ. แก้ไขได้</span>'}</h4>
             <div class="form-row">
-              <div class="form-group" data-field="treatmentStartDate"><label>วันที่เริ่มรักษา<span class="req">*</span></label><input class="input" id="f-treatmentStartDate" type="date" value="${escapeHTML(p.treatmentStartDate)}"><span class="field-error">${ICON.alert} กรุณาเลือกวันที่</span></div>
-              <div class="form-group"><label>ระยะเวลา (เดือน)</label><input class="input" id="f-regimenMonths" type="number" value="${escapeHTML(p.regimenMonths)}" placeholder="6"></div>
-              <div class="form-group"><label>สูตรยา (Regimen)</label><input class="input" id="f-regimen" value="${escapeHTML(p.regimen)}" placeholder="2HRZE / 4HR"></div>
+              <div class="form-group" data-field="treatmentStartDate"><label>วันที่เริ่มรักษา<span class="req">*</span></label><input class="input" id="f-treatmentStartDate" type="date" value="${escapeHTML(p.treatmentStartDate)}" ${canEditMedical() ? '' : 'disabled'}><span class="field-error">${ICON.alert} กรุณาเลือกวันที่</span></div>
+              <div class="form-group"><label>ระยะเวลา (เดือน)</label><input class="input" id="f-regimenMonths" type="number" value="${escapeHTML(p.regimenMonths)}" placeholder="6" ${canEditMedical() ? '' : 'disabled'}></div>
+              <div class="form-group"><label>สูตรยา (Regimen)</label><input class="input" id="f-regimen" value="${escapeHTML(p.regimen)}" placeholder="2HRZE / 4HR" ${canEditMedical() ? '' : 'disabled'}></div>
             </div>
             <div class="form-row">
               <div class="form-group full" data-field="tbClass">
@@ -6094,21 +6870,21 @@ function openPatientModal(id = null) {
             </div>
             <div class="form-row">
               <div class="form-group" data-field="testResult"><label>ผลตรวจ<span class="req">*</span></label>
-                <select class="select" id="f-testResult">
+                <select class="select" id="f-testResult" ${canEditMedical() ? '' : 'disabled'}>
                   <option value="">—</option>
                   ${TEST_RESULTS.map(t => `<option value="${t}" ${(p.testResult || p.afbResult) === t ? 'selected' : ''}>${t}</option>`).join('')}
                 </select>
                 <span class="field-error">${ICON.alert} กรุณาเลือกผลตรวจ</span>
               </div>
               <div class="form-group" data-field="patientType"><label>ประเภทผู้ป่วย<span class="req">*</span></label>
-                <select class="select" id="f-patientType">
+                <select class="select" id="f-patientType" ${canEditMedical() ? '' : 'disabled'}>
                   <option value="">—</option>
                   ${PATIENT_TYPES.map(t => `<option value="${t}" ${p.patientType === t ? 'selected' : ''}>${t}</option>`).join('')}
                 </select>
                 <span class="field-error">${ICON.alert} กรุณาเลือกประเภทผู้ป่วย</span>
               </div>
               <div class="form-group"><label>สถานะ</label>
-                <select class="select" id="f-status" onchange="toggleTransferTo()">
+                <select class="select" id="f-status" onchange="toggleTransferTo()" ${canEditMedical() ? '' : 'disabled'}>
                   ${Object.entries(STATUS_LABELS).map(([k, v]) => `<option value="${k}" ${p.status === k ? 'selected' : ''}>${v}</option>`).join('')}
                 </select>
               </div>
@@ -6302,6 +7078,13 @@ async function savePatient(id) {
   data.address = fullAddress(data);
   // Keep legacy 'afbResult' in sync with new testResult (backward compat for old rows/columns)
   data.afbResult = data.testResult;
+  // Track who created/updated for audit
+  if (State.currentUser) {
+    const stamp = new Date().toISOString();
+    if (!id) { data.createdBy = State.currentUser.username; data.createdAt = stamp; }
+    data.updatedBy = State.currentUser.username;
+    data.updatedAt = stamp;
+  }
 
   const btn = document.getElementById('savePatientBtn');
   btn.disabled = true;
@@ -6384,7 +7167,12 @@ function openVisitModal(id = null) {
             </div>
             <div class="form-row">
               <div class="form-group" data-field="visitorName"><label>ผู้เยี่ยม<span class="req">*</span></label><input class="input" id="v-visitorName" value="${escapeHTML(v.visitorName)}" placeholder="ชื่อเจ้าหน้าที่"><span class="field-error">${ICON.alert} กรุณากรอกชื่อผู้เยี่ยม</span></div>
-              <div class="form-group"><label>ตำแหน่ง</label><input class="input" id="v-visitorRole" value="${escapeHTML(v.visitorRole)}" placeholder="พยาบาลวิชาชีพ"></div>
+              <div class="form-group"><label>ตำแหน่ง</label>
+                <select class="select" id="v-visitorRole">
+                  <option value="">—</option>
+                  ${VISITOR_ROLES.map(r => `<option value="${r}" ${v.visitorRole === r ? 'selected' : ''}>${r}</option>`).join('')}
+                </select>
+              </div>
             </div>
             <div class="form-row">
               <div class="form-group full"><label>ชื่อ อสม. ในพื้นที่</label><input class="input" id="v-asmName" value="${escapeHTML(v.asmName)}" placeholder="ชื่อ - สกุล อสม. ผู้ดูแลพื้นที่"></div>
@@ -6505,7 +7293,8 @@ function refreshPhotoPreview() {
   const grid = document.getElementById('v-photo-preview');
   if (!grid) return;
   grid.innerHTML = visitPhotos.map((p, i) => {
-    const src = p.url || p.base64;
+    // New uploads use base64 (data URI), existing photos use Drive URL → convert
+    const src = p.base64 || driveImageUrl(p, 400);
     return `<div class="photo-preview" style="background-image: url('${src}')"><button type="button" class="photo-remove" onclick="removePhoto(${i})" title="ลบ">${ICON.close}</button></div>`;
   }).join('');
 }
@@ -6619,6 +7408,13 @@ async function saveVisit(id) {
     notes: get('notes'),
     photos: allPhotos
   };
+  // Audit trail: who recorded this visit + when
+  if (State.currentUser) {
+    const stamp = new Date().toISOString();
+    if (!id) { data.createdBy = State.currentUser.username; data.createdAt = stamp; }
+    data.updatedBy = State.currentUser.username;
+    data.updatedAt = stamp;
+  }
 
   try {
     if (State.demo) {
@@ -6649,6 +7445,12 @@ function closeModal() {
 }
 
 function openDetail(id) {
+  // Field staff: block access to patients outside their zone
+  const p = State.patients.find(x => x.id === id);
+  if (p && isField() && !userCanSeeZone(p.zone)) {
+    toast('คุณไม่มีสิทธิ์เข้าถึงข้อมูลผู้ป่วยนอกเขต', 'error', 3500);
+    return;
+  }
   State.currentPatientId = id;
   State.view = 'detail';
   State.currentTab = 'info';
@@ -6787,14 +7589,51 @@ async function toggleDotDay(iso) {
   } finally { hideLoading(); }
 }
 
+/* Convert a Google Drive URL (or photo object) to a direct-loadable image src.
+   Drive returns "https://drive.google.com/file/d/{ID}/view?..." which won't render in <img>.
+   This converts it to "/thumbnail?id={ID}&sz=w{size}" which serves the image binary. */
+function driveImageUrl(p, size = 1200) {
+  if (!p) return '';
+  // Accept string (legacy) or {fileId, url, name}
+  const obj = typeof p === 'string' ? { url: p } : p;
+  // Prefer explicit fileId
+  let id = obj.fileId;
+  if (!id && obj.url) {
+    // Match /file/d/{id} or ?id={id} or /d/{id}
+    const m1 = obj.url.match(/\/file\/d\/([^/?#]+)/);
+    const m2 = obj.url.match(/[?&]id=([^&#]+)/);
+    const m3 = obj.url.match(/\/d\/([^/?#]+)/);
+    id = (m1 || m2 || m3)?.[1];
+  }
+  if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w${size}`;
+  return obj.url || '';
+}
+/* Get the "open original" link — for download/full quality button */
+function driveViewLink(p) {
+  if (!p) return '#';
+  const obj = typeof p === 'string' ? { url: p } : p;
+  if (obj.fileId) return `https://drive.google.com/file/d/${obj.fileId}/view`;
+  return obj.url || '#';
+}
+
 function viewImage(visitId, idx) {
   const v = State.visits.find(x => x.id === visitId);
   if (!v || !v.photos || !v.photos[idx]) return;
-  const src = v.photos[idx].url || v.photos[idx];
+  const ph = v.photos[idx];
+  const src = driveImageUrl(ph, 2000);
+  const openLink = driveViewLink(ph);
   document.getElementById('viewerRoot').innerHTML = `
-    <div class="image-viewer" onclick="closeViewer()">
-      <button class="image-viewer-close">${ICON.close}</button>
-      <img src="${src}" alt="">
+    <div class="image-viewer" onclick="if(event.target===this) closeViewer()">
+      <button class="image-viewer-close" onclick="closeViewer()" title="ปิด">${ICON.close}</button>
+      <a class="image-viewer-open" href="${openLink}" target="_blank" rel="noopener" title="เปิดในแท็บใหม่">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        เปิดต้นฉบับ
+      </a>
+      <img src="${src}" alt="" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="image-viewer-error" style="display:none;">
+        <p>ไม่สามารถโหลดรูปภาพได้</p>
+        <a href="${openLink}" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:14px;">เปิดใน Google Drive</a>
+      </div>
     </div>`;
 }
 function closeViewer() { document.getElementById('viewerRoot').innerHTML = ''; }
@@ -6928,7 +7767,9 @@ async function refreshData() {
    ═══════════════════════════════════════════════════════════════ */
 function render() {
   if (!API.url && !State.demo) { renderSetup(); return; }
-  document.getElementById('settingsBtn').style.display = State.demo ? 'none' : 'grid';
+  // ─── AUTH GATE ─── must be logged in
+  if (!State.currentUser) { renderLogin(); return; }
+  document.getElementById('settingsBtn').style.display = (State.demo || !isAdmin()) ? 'none' : 'grid';
   // Set body data-view for view-specific styling (e.g. list bg image)
   document.body.dataset.view = State.view;
   // Show subnav only on list/dashboard views (hide on cover/detail)
@@ -6944,6 +7785,8 @@ function render() {
   // Move brand + action items between header (cover/detail) and subnav (list/dashboard)
   relocateHeaderBrand(State.view);
   relocateHeaderActions(State.view);
+  // Update user badge (display login state in header)
+  updateUserBadge();
   if (State.view === 'cover') renderCover();
   else if (State.view === 'detail' && State.currentPatientId) renderDetail();
   else if (State.view === 'dashboard') renderDashboard();
@@ -6962,12 +7805,21 @@ function render() {
   // Initialize chart palette from current theme's CSS variables
   updateChartColors();
 
+  // Restore login session if valid
+  const sessionUser = loadSession();
+  if (sessionUser) {
+    State.currentUser = sessionUser;
+    State.zoneFilter = isAdmin() ? 'all' : sessionUser.zone;
+  }
+
   // Demo mode: ?demo=1 — preview the UI without backend (read-only, in-memory data)
   const isDemo = /[?&]demo=1\b/.test(location.search);
   if (isDemo) {
     State.demo = true;
     State.patients = DEMO_PATIENTS.map(normalizePatient);
     State.user = 'Demo';
+    // In demo mode, auto-login as admin so all features visible
+    if (!State.currentUser) State.currentUser = USERS.find(u => u.role === 'admin');
     document.getElementById('settingsBtn').style.display = 'none';
     render();
     showDemoBanner();
