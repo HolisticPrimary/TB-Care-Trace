@@ -5154,11 +5154,15 @@ function toggleUserMenu(e) {
   const badge = document.getElementById('userBadge');
   if (!menu || !badge) return;
   if (menu.hidden) {
-    // Position the menu just below the badge (right-aligned)
+    // Portal: move menu to <body> so it escapes any containing block
+    // (backdrop-filter on .user-badge / .subnav creates containing blocks for fixed)
+    if (menu.parentElement !== document.body) document.body.appendChild(menu);
     const rect = badge.getBoundingClientRect();
+    menu.style.position = 'fixed';
     menu.style.top = `${rect.bottom + 6}px`;
     menu.style.right = `${Math.max(8, window.innerWidth - rect.right)}px`;
     menu.style.left = 'auto';
+    menu.style.zIndex = '10000';
     menu.hidden = false;
   } else {
     menu.hidden = true;
