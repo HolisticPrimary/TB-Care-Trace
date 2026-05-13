@@ -3347,24 +3347,39 @@
   .zone-pill-fixed {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 0 16px;
+    gap: 10px;
+    padding: 0 16px 0 12px;
     height: 44px;
-    background: linear-gradient(135deg, rgba(26, 58, 94, 0.08), rgba(41, 96, 196, 0.08));
+    background: linear-gradient(135deg, rgba(26, 58, 94, 0.08), rgba(41, 96, 196, 0.10));
     color: #1a3a5e;
-    border: 1px solid rgba(41, 96, 196, 0.22);
+    border: 1px solid rgba(41, 96, 196, 0.25);
     border-radius: var(--radius);
     font-weight: 700;
     font-size: 13.5px;
     cursor: default;
+    box-shadow: 0 2px 8px rgba(26, 58, 94, 0.06);
   }
-  .zone-pill-fixed svg { color: #2960c4; }
+  .zone-pill-fixed .zone-pin-icon {
+    color: #2960c4;
+    filter: drop-shadow(0 1px 2px rgba(41, 96, 196, 0.25));
+    animation: zone-pin-bob 4s ease-in-out infinite;
+  }
+  @keyframes zone-pin-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-2px); }
+  }
   [data-theme="dark"] .zone-pill-fixed {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(107, 163, 245, 0.10));
     color: #93c0fa;
     border-color: rgba(107, 163, 245, 0.25);
   }
-  [data-theme="dark"] .zone-pill-fixed svg { color: #6ba3f5; }
+  [data-theme="dark"] .zone-pill-fixed .zone-pin-icon {
+    color: #6ba3f5;
+    filter: drop-shadow(0 1px 3px rgba(107, 163, 245, 0.35));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .zone-pill-fixed .zone-pin-icon { animation: none; }
+  }
 
   /* Read-only tag on locked form sections */
   .readonly-tag {
@@ -5558,7 +5573,10 @@ function renderList() {
       ${isAdmin() ? `
       <div class="zone-dropdown" id="zoneDropdown" title="กรองตามเขตพื้นที่รับผิดชอบ">
         <button type="button" class="zone-trigger" onclick="toggleZoneDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
-          <svg class="zone-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9.4 8 10 4.5-.6 8-5 8-10V6l-8-4Z"/></svg>
+          <svg class="zone-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 10c0 6.5-8 12-8 12s-8-5.5-8-12a8 8 0 1 1 16 0Z"/>
+            <path d="M12 7v6M9 10h6"/>
+          </svg>
           <span class="zone-trigger-label">${State.zoneFilter === 'all' ? `ทุกเขต (${scopedPatients.length})` : `เขต ${State.zoneFilter} (${zoneCounts[State.zoneFilter] || 0})`}</span>
           <svg class="zone-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
@@ -5579,7 +5597,10 @@ function renderList() {
       </div>
       ` : `
       <div class="zone-pill-fixed" title="คุณดูข้อมูลเฉพาะเขตที่รับผิดชอบ">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9.4 8 10 4.5-.6 8-5 8-10V6l-8-4Z"/></svg>
+        <svg class="zone-pin-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 10c0 6.5-8 12-8 12s-8-5.5-8-12a8 8 0 1 1 16 0Z"/>
+          <path d="M12 7v6M9 10h6"/>
+        </svg>
         <span>เขต ${userZone()} (${scopedPatients.length})</span>
       </div>
       `}
@@ -5596,7 +5617,7 @@ function renderList() {
       ${(isAdmin() && State.zoneFilter !== 'all') ? `
         <div class="filters-divider"></div>
         <button class="filter-btn active-filter-chip" onclick="setZoneFilter('all')" title="ล้างตัวกรองเขต">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 2 4 6v6c0 5 3.5 9.4 8 10 4.5-.6 8-5 8-10V6l-8-4Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6.5-8 12-8 12s-8-5.5-8-12a8 8 0 1 1 16 0Z"/><path d="M12 7v6M9 10h6"/></svg>
           เขต ${State.zoneFilter}
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
