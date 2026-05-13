@@ -3263,20 +3263,18 @@
   .subnav-actions .user-badge-chev { color: var(--ink-500); }
   .user-badge:has(.user-menu:not([hidden])) .user-badge-chev { transform: rotate(180deg); }
 
-  /* User menu dropdown */
+  /* User menu dropdown — position: fixed so it escapes overflow:hidden parents */
   .user-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    min-width: 230px;
+    position: fixed;
+    min-width: 240px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 8px;
     box-shadow:
-      0 12px 32px rgba(13, 37, 66, 0.14),
-      0 4px 12px rgba(0, 0, 0, 0.06);
-    z-index: 100;
+      0 16px 40px rgba(13, 37, 66, 0.18),
+      0 6px 16px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
     animation: anim-scaleIn .2s cubic-bezier(.34, 1.56, .64, 1) both;
     transform-origin: top right;
     color: var(--ink-900);
@@ -5153,8 +5151,18 @@ function updateUserBadge() {
 function toggleUserMenu(e) {
   if (e) e.stopPropagation();
   const menu = document.getElementById('userMenu');
-  if (!menu) return;
-  menu.hidden = !menu.hidden;
+  const badge = document.getElementById('userBadge');
+  if (!menu || !badge) return;
+  if (menu.hidden) {
+    // Position the menu just below the badge (right-aligned)
+    const rect = badge.getBoundingClientRect();
+    menu.style.top = `${rect.bottom + 6}px`;
+    menu.style.right = `${Math.max(8, window.innerWidth - rect.right)}px`;
+    menu.style.left = 'auto';
+    menu.hidden = false;
+  } else {
+    menu.hidden = true;
+  }
 }
 function confirmLogout() {
   if (confirm('ออกจากระบบ?')) logout();
