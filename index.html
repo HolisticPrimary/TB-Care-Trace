@@ -6727,9 +6727,10 @@ function renderVisitCard(v) {
           ${v.visitType ? `<span class="pill pill-visit-type">${escapeHTML(v.visitType)}</span>` : ''}
         </div>
         <div class="visit-status-row">
-          ${v.medicationTaken === true ? '<span class="pill pill-ok">✓ กินยาครบ</span>' : ''}
-          ${v.medicationTaken === false ? `<span class="pill pill-bad">✗ ขาดยา${v.missedDoses ? ' ' + v.missedDoses + ' มื้อ' : ''}</span>` : ''}
-          ${symptoms.length > 0 ? `<span class="pill pill-warn">${symptoms.length} อาการ</span>` : '<span class="pill pill-ok">ไม่มีอาการผิดปกติ</span>'}
+          ${v.patientDeclined ? '<span class="pill" style="background:#fef3c7; color:#92400e; border:1px solid #f59e0b;">⚠ ผู้ป่วยไม่ประสงค์ให้เยี่ยม</span>' : ''}
+          ${!v.patientDeclined && v.medicationTaken === true ? '<span class="pill pill-ok">✓ กินยาครบ</span>' : ''}
+          ${!v.patientDeclined && v.medicationTaken === false ? `<span class="pill pill-bad">✗ ขาดยา${v.missedDoses ? ' ' + v.missedDoses + ' มื้อ' : ''}</span>` : ''}
+          ${!v.patientDeclined ? (symptoms.length > 0 ? `<span class="pill pill-warn">${symptoms.length} อาการ</span>` : '<span class="pill pill-ok">ไม่มีอาการผิดปกติ</span>') : ''}
           ${canDeleteVisit(v) ? `<button class="btn-ghost" style="padding: 2px 6px; font-size: 12px;" onclick="deleteVisit('${v.id}')" title="ลบ">${ICON.trash}</button>` : ''}
         </div>
       </div>
@@ -7229,6 +7230,7 @@ function openVisitModal(id = null) {
   const isEdit = !!id;
   const v = isEdit ? State.visits.find(x => x.id === id) : {
     date: todayISO(), visitTime: '', visitType: '', visitorName: '', visitorRole: '', asmName: '',
+    patientDeclined: false,
     medicationTaken: null, missedDoses: 0,
     symptoms: {}, generalSymptoms: {}, generalSymptomsOther: '',
     warningSigns: {}, sideEffects: '',
@@ -7248,6 +7250,17 @@ function openVisitModal(id = null) {
           <div class="form-alert" id="visitFormAlert">${ICON.alert} <span>กรุณากรอกข้อมูลที่บังคับให้ครบ (มีเครื่องหมาย <span style="color:var(--danger);font-weight:700;">*</span>)</span></div>
           <div class="form-section" style="margin-top: 0; padding-top: 0; border: none;">
             <h4>ข้อมูลการเยี่ยม</h4>
+            <div class="form-row">
+              <div class="form-group full">
+                <label for="v-patientDeclined" style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:#fef3c7; border:1px solid #f59e0b; border-radius:10px; cursor:pointer; margin:0;">
+                  <input type="checkbox" id="v-patientDeclined" ${v.patientDeclined ? 'checked' : ''} onchange="onTogglePatientDeclined()" style="width:18px; height:18px; margin-top:2px; cursor:pointer; flex-shrink:0;">
+                  <div>
+                    <div style="font-weight:700; color:#92400e; font-size:14px;">ผู้ป่วยไม่ประสงค์ให้เยี่ยม</div>
+                    <div style="font-size:12px; color:#92400e; margin-top:2px;">เช่น ไม่อยู่บ้าน / ปฏิเสธให้เยี่ยม — เมื่อติ๊ก ไม่ต้องกรอก การกินยา / สัญญาณชีพ / รูปภาพ</div>
+                  </div>
+                </label>
+              </div>
+            </div>
             <div class="form-row">
               <div class="form-group" data-field="date"><label>วันที่เยี่ยม<span class="req">*</span></label><input class="input" id="v-date" type="date" value="${escapeHTML(v.date)}"><span class="field-error">${ICON.alert} กรุณาเลือกวันที่</span></div>
               <div class="form-group"><label>เวลาที่เยี่ยม</label><input class="input" id="v-visitTime" type="time" value="${escapeHTML(v.visitTime)}"></div>
@@ -7364,6 +7377,23 @@ function setMedStatus(s) {
   document.getElementById('v-missed-doses-wrap').style.display = s === false ? 'block' : 'none';
 }
 
+function onTogglePatientDeclined() {
+  const declined = document.getElementById('v-patientDeclined').checked;
+  // Dim sections that become optional when patient declined the visit
+  const sections = document.querySelectorAll('.modal-body .form-section[data-field="medicationTaken"], .modal-body .form-section[data-field="photos"]');
+  sections.forEach(s => {
+    s.style.opacity = declined ? '0.5' : '';
+    s.classList.remove('has-error');
+  });
+  ['weight', 'bloodPressure', 'pulse'].forEach(f => {
+    const el = document.querySelector(`.modal-body .form-group[data-field="${f}"]`);
+    if (el) {
+      el.style.opacity = declined ? '0.5' : '';
+      el.classList.remove('has-error');
+    }
+  });
+}
+
 function toggleSymptom(key) {
   const el = document.querySelector(`[data-sym="${key}"]`);
   if (el) el.classList.toggle('checked');
@@ -7412,17 +7442,24 @@ async function saveVisit(id) {
   // Photos: must have at least 1 (existing or newly added)
   const hasPhoto = (typeof visitPhotos !== 'undefined') && visitPhotos.length > 0;
 
+  // If patient declined the visit, skip required checks for vitals/meds/photos
+  const patientDeclined = !!(document.getElementById('v-patientDeclined') || {}).checked;
+
   // Validate required fields
   const required = [
     { field: 'date',           value: get('date'),           label: 'วันที่เยี่ยม' },
     { field: 'visitType',      value: get('visitType'),      label: 'ลงเยี่ยม' },
-    { field: 'visitorName',    value: get('visitorName'),    label: 'ผู้เยี่ยม' },
-    { field: 'medicationTaken',value: medSelected ? 'ok' : '', label: 'การกินยา' },
-    { field: 'weight',         value: get('weight'),         label: 'น้ำหนัก' },
-    { field: 'bloodPressure',  value: get('bloodPressure'),  label: 'ความดัน' },
-    { field: 'pulse',          value: get('pulse'),          label: 'ชีพจร' },
-    { field: 'photos',         value: hasPhoto ? 'ok' : '',  label: 'รูปภาพประกอบ' }
+    { field: 'visitorName',    value: get('visitorName'),    label: 'ผู้เยี่ยม' }
   ];
+  if (!patientDeclined) {
+    required.push(
+      { field: 'medicationTaken',value: medSelected ? 'ok' : '', label: 'การกินยา' },
+      { field: 'weight',         value: get('weight'),         label: 'น้ำหนัก' },
+      { field: 'bloodPressure',  value: get('bloodPressure'),  label: 'ความดัน' },
+      { field: 'pulse',          value: get('pulse'),          label: 'ชีพจร' },
+      { field: 'photos',         value: hasPhoto ? 'ok' : '',  label: 'รูปภาพประกอบ' }
+    );
+  }
   const missing = required.filter(r => !r.value);
   if (missing.length > 0) {
     missing.forEach(m => {
@@ -7488,6 +7525,7 @@ async function saveVisit(id) {
     visitorName: get('visitorName'),
     visitorRole: get('visitorRole'),
     asmName: get('asmName'),
+    patientDeclined,
     medicationTaken,
     missedDoses: parseInt(get('missedDoses')) || 0,
     generalSymptoms,
