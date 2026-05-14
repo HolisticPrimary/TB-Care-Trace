@@ -5254,8 +5254,15 @@ function normalizeVisit(v) {
 
 // Normalize patient from API
 function normalizePatient(p) {
+  // Google Sheets auto-casts numeric-looking strings to numbers ("201" → 201).
+  // Coerce ID-like fields back to strings so === comparisons in filters/forms work.
+  const toStr = v => (v == null || v === '') ? '' : String(v);
   return {
     ...p,
+    hn: toStr(p.hn),
+    age: toStr(p.age),
+    zone: toStr(p.zone),
+    phone: toStr(p.phone),
     diagnosisDate: toISODateOnly(p.diagnosisDate),
     treatmentStartDate: toISODateOnly(p.treatmentStartDate),
     regimenMonths: parseInt(p.regimenMonths) || 6,
@@ -5272,6 +5279,24 @@ function fullAddress(p) {
     p.addrProvince ? `จ.${p.addrProvince}` : ''
   ].filter(Boolean);
   return parts.length ? parts.join(' ') : (p.address || '');
+}
+
+// Parse legacy combined address string ("99/1 ม.5 ต.X อ.Y จ.Z") back into 5 fields.
+// Used as a one-time fallback when editing rows saved before the form split address into parts.
+function parseLegacyAddress(s) {
+  const out = { addrNo: '', addrMoo: '', addrTambon: '', addrAmphoe: '', addrProvince: '' };
+  if (!s) return out;
+  const str = String(s).trim();
+  const re = /^(.*?)(?:\s+ม\.?\s*(\S+))?(?:\s+ต\.?\s*(\S+))?(?:\s+อ\.?\s*(\S+))?(?:\s+จ\.?\s*(\S+))?\s*$/u;
+  const m = str.match(re);
+  if (!m) { out.addrNo = str; return out; }
+  out.addrNo = (m[1] || '').trim();
+  out.addrMoo = (m[2] || '').trim();
+  out.addrTambon = (m[3] || '').trim();
+  out.addrAmphoe = (m[4] || '').trim();
+  out.addrProvince = (m[5] || '').trim();
+  if (!out.addrNo && !out.addrMoo && !out.addrTambon) { out.addrNo = str; }
+  return out;
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -6844,9 +6869,14 @@ function openPatientModal(id = null) {
     testResult: '', patientType: '', transferTo: '',
     householdContacts: [], notes: ''
   };
-  // legacy fallback: keep old address string visible if new fields empty
+  // legacy fallback: parse old combined address string into split fields
   if (isEdit && p.address && !p.addrNo && !p.addrMoo && !p.addrTambon && !p.addrAmphoe && !p.addrProvince) {
-    p.addrNo = p.address;
+    const parsed = parseLegacyAddress(p.address);
+    p.addrNo = parsed.addrNo;
+    p.addrMoo = parsed.addrMoo;
+    p.addrTambon = parsed.addrTambon;
+    p.addrAmphoe = parsed.addrAmphoe;
+    p.addrProvince = parsed.addrProvince;
   }
   // ensure household contacts is array
   householdContacts = Array.isArray(p.householdContacts) ? p.householdContacts.map(c => ({...c})) : [];
