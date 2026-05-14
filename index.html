@@ -6894,10 +6894,10 @@ function openPatientModal(id = null) {
             <h4>ข้อมูลส่วนบุคคล</h4>
             <div class="form-row">
               <div class="form-group" data-field="name" style="grid-column: span 2;"><label>ชื่อ-นามสกุล<span class="req">*</span></label><input class="input" id="f-name" value="${escapeHTML(p.name)}" placeholder="เช่น นายสมชาย ใจดี"><span class="field-error">${ICON.alert} กรุณากรอกชื่อ-นามสกุล</span></div>
-              <div class="form-group" data-field="hn"><label>HN<span class="req">*</span></label><input class="input" id="f-hn" value="${escapeHTML(p.hn)}" placeholder="HN12345"><span class="field-error">${ICON.alert} กรุณากรอก HN</span></div>
+              <div class="form-group" data-field="hn"><label>HN<span class="req">*</span></label><input class="input" id="f-hn" value="${escapeHTML(p.hn)}" placeholder="เช่น 40995"><span class="field-error">${ICON.alert} กรุณากรอก HN</span></div>
             </div>
             <div class="form-row">
-              <div class="form-group" data-field="age"><label>อายุ (ปี)<span class="req">*</span></label><input class="input" id="f-age" type="number" value="${escapeHTML(p.age)}" placeholder="45"><span class="field-error">${ICON.alert} กรุณากรอกอายุ</span></div>
+              <div class="form-group" data-field="age"><label>อายุ (ปี)<span class="req">*</span></label><input class="input" id="f-age" type="number" value="${escapeHTML(p.age)}" placeholder="เช่น 45"><span class="field-error">${ICON.alert} กรุณากรอกอายุ</span></div>
               <div class="form-group" data-field="gender"><label>เพศ<span class="req">*</span></label>
                 <select class="select" id="f-gender">
                   <option value="">—</option>
@@ -6906,18 +6906,18 @@ function openPatientModal(id = null) {
                 </select>
                 <span class="field-error">${ICON.alert} กรุณาเลือกเพศ</span>
               </div>
-              <div class="form-group"><label>เบอร์โทร</label><input class="input" id="f-phone" value="${escapeHTML(p.phone)}" placeholder="08X-XXX-XXXX"></div>
+              <div class="form-group"><label>เบอร์โทร</label><input class="input" id="f-phone" value="${escapeHTML(p.phone)}" placeholder="เช่น 081-234-5678"></div>
             </div>
           </div>
 
           <div class="form-section">
             <h4>ที่อยู่</h4>
             <div class="form-row">
-              <div class="form-group" data-field="addrNo"><label>บ้านเลขที่<span class="req">*</span></label><input class="input" id="f-addrNo" value="${escapeHTML(p.addrNo)}" placeholder="123/4"><span class="field-error">${ICON.alert} กรุณากรอกบ้านเลขที่</span></div>
-              <div class="form-group" data-field="addrMoo"><label>หมู่<span class="req">*</span></label><input class="input" id="f-addrMoo" value="${escapeHTML(p.addrMoo)}" placeholder="5"><span class="field-error">${ICON.alert} กรุณากรอกหมู่</span></div>
-              <div class="form-group" data-field="addrTambon"><label>ตำบล<span class="req">*</span></label><input class="input" id="f-addrTambon" value="${escapeHTML(p.addrTambon)}" placeholder="ทับคล้อ"><span class="field-error">${ICON.alert} กรุณากรอกตำบล</span></div>
-              <div class="form-group" data-field="addrAmphoe"><label>อำเภอ<span class="req">*</span></label><input class="input" id="f-addrAmphoe" value="${escapeHTML(p.addrAmphoe)}" placeholder="ทับคล้อ"><span class="field-error">${ICON.alert} กรุณากรอกอำเภอ</span></div>
-              <div class="form-group" data-field="addrProvince"><label>จังหวัด<span class="req">*</span></label><input class="input" id="f-addrProvince" value="${escapeHTML(p.addrProvince)}" placeholder="พิจิตร"><span class="field-error">${ICON.alert} กรุณากรอกจังหวัด</span></div>
+              <div class="form-group" data-field="addrNo"><label>บ้านเลขที่<span class="req">*</span></label><input class="input" id="f-addrNo" value="${escapeHTML(p.addrNo)}" placeholder="เช่น 211 หรือ 99/1"><span class="field-error">${ICON.alert} กรุณากรอกบ้านเลขที่</span></div>
+              <div class="form-group" data-field="addrMoo"><label>หมู่<span class="req">*</span></label><input class="input" id="f-addrMoo" value="${escapeHTML(p.addrMoo)}" placeholder="เช่น 17"><span class="field-error">${ICON.alert} กรุณากรอกหมู่</span></div>
+              <div class="form-group" data-field="addrTambon"><label>ตำบล<span class="req">*</span></label><input class="input" id="f-addrTambon" value="${escapeHTML(p.addrTambon)}" placeholder="ระบุชื่อตำบล"><span class="field-error">${ICON.alert} กรุณากรอกตำบล</span></div>
+              <div class="form-group" data-field="addrAmphoe"><label>อำเภอ<span class="req">*</span></label><input class="input" id="f-addrAmphoe" value="${escapeHTML(p.addrAmphoe)}" placeholder="ระบุชื่ออำเภอ"><span class="field-error">${ICON.alert} กรุณากรอกอำเภอ</span></div>
+              <div class="form-group" data-field="addrProvince"><label>จังหวัด<span class="req">*</span></label><input class="input" id="f-addrProvince" value="${escapeHTML(p.addrProvince)}" placeholder="ระบุชื่อจังหวัด"><span class="field-error">${ICON.alert} กรุณากรอกจังหวัด</span></div>
             </div>
             <div class="form-row">
               <div class="form-group" data-field="zone"><label>เขตพื้นที่รับผิดชอบ<span class="req">*</span></label>
@@ -6936,7 +6936,7 @@ function openPatientModal(id = null) {
                 </div>
                 <span class="field-error">${ICON.alert} กรุณาเลือกในเขต/นอกเขต</span>
               </div>
-              <div class="form-group"><label>ผู้ดูแล / ผู้ติดต่อ</label><input class="input" id="f-contact" value="${escapeHTML(p.contactPerson)}" placeholder="ชื่อ - สกุล"></div>
+              <div class="form-group"><label>ผู้ดูแล / ผู้ติดต่อ</label><input class="input" id="f-contact" value="${escapeHTML(p.contactPerson)}" placeholder="ระบุชื่อ-สกุล + ความสัมพันธ์ (เช่น ภรรยา, บุตร)"></div>
             </div>
           </div>
 
@@ -7289,12 +7289,12 @@ function openVisitModal(id = null) {
           <div class="form-section">
             <h4>สัญญาณชีพ (Vital Signs)</h4>
             <div class="form-row">
-              <div class="form-group" data-field="weight"><label>น้ำหนัก (kg)<span class="req">*</span></label><input class="input" id="v-weight" value="${escapeHTML(v.weight)}" placeholder="55"><span class="field-error">${ICON.alert} กรุณากรอกน้ำหนัก</span></div>
-              <div class="form-group" data-field="bloodPressure"><label>ความดัน (mmHg)<span class="req">*</span></label><input class="input" id="v-bloodPressure" value="${escapeHTML(v.bloodPressure)}" placeholder="120/80"><span class="field-error">${ICON.alert} กรุณากรอกความดัน</span></div>
-              <div class="form-group" data-field="pulse"><label>ชีพจร (bpm)<span class="req">*</span></label><input class="input" id="v-pulse" value="${escapeHTML(v.pulse)}" placeholder="72"><span class="field-error">${ICON.alert} กรุณากรอกชีพจร</span></div>
-              <div class="form-group"><label>การหายใจ (/min)</label><input class="input" id="v-respiration" value="${escapeHTML(v.respiration)}" placeholder="18"></div>
-              <div class="form-group"><label>อุณหภูมิ (°C)</label><input class="input" id="v-temperature" value="${escapeHTML(v.temperature)}" placeholder="37.0"></div>
-              <div class="form-group"><label>SpO₂ (%)</label><input class="input" id="v-spo2" value="${escapeHTML(v.spo2)}" placeholder="98"></div>
+              <div class="form-group" data-field="weight"><label>น้ำหนัก (kg)<span class="req">*</span></label><input class="input" id="v-weight" value="${escapeHTML(v.weight)}" placeholder="เช่น 55"><span class="field-error">${ICON.alert} กรุณากรอกน้ำหนัก</span></div>
+              <div class="form-group" data-field="bloodPressure"><label>ความดัน (mmHg)<span class="req">*</span></label><input class="input" id="v-bloodPressure" value="${escapeHTML(v.bloodPressure)}" placeholder="เช่น 120/80"><span class="field-error">${ICON.alert} กรุณากรอกความดัน</span></div>
+              <div class="form-group" data-field="pulse"><label>ชีพจร (bpm)<span class="req">*</span></label><input class="input" id="v-pulse" value="${escapeHTML(v.pulse)}" placeholder="เช่น 72"><span class="field-error">${ICON.alert} กรุณากรอกชีพจร</span></div>
+              <div class="form-group"><label>การหายใจ (/min)</label><input class="input" id="v-respiration" value="${escapeHTML(v.respiration)}" placeholder="เช่น 18"></div>
+              <div class="form-group"><label>อุณหภูมิ (°C)</label><input class="input" id="v-temperature" value="${escapeHTML(v.temperature)}" placeholder="เช่น 37.0"></div>
+              <div class="form-group"><label>SpO₂ (%)</label><input class="input" id="v-spo2" value="${escapeHTML(v.spo2)}" placeholder="เช่น 98"></div>
             </div>
           </div>
 
