@@ -5645,7 +5645,7 @@ function renderList() {
     </div>
 
     <div class="filters">
-      ${['all','active','cured','lost','transferred','died'].map(f => {
+      ${['all', ...Object.keys(STATUS_LABELS)].map(f => {
         // Counts respect zone scope so they always match the visible rows
         const count = f === 'all' ? scopedPatients.length : scopedPatients.filter(p => p.status === f).length;
         const label = f === 'all' ? 'ทั้งหมด' : STATUS_LABELS[f];
@@ -6096,7 +6096,7 @@ function computeDashboard() {
   const complete = by('treatmentComplete');
   const lost = by('lost');
   const transferred = by('transferred');
-  const deceased = by('deceased');
+  const deceased = by('died');
   const diagChange = by('diagnosisChange');
 
   // Closed cases (for outcome rate calc) — exclude active
@@ -6193,7 +6193,7 @@ function computeDashboard() {
     const zComplete = zp.filter(p => p.status === 'treatmentComplete').length;
     const zLost     = zp.filter(p => p.status === 'lost').length;
     const zTrans    = zp.filter(p => p.status === 'transferred').length;
-    const zDec      = zp.filter(p => p.status === 'deceased').length;
+    const zDec      = zp.filter(p => p.status === 'died').length;
     const zDiag     = zp.filter(p => p.status === 'diagnosisChange').length;
     const zTotal    = zp.length;
     const zClosed   = zTotal - zActive;

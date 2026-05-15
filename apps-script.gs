@@ -120,10 +120,50 @@ function migrate() {
     result.visits = ensureHeaders(ss.getSheetByName('visits'), VISIT_HEADERS);
 
     result.addressBackfill = backfillAddresses();
+    result.garbageCleanup = cleanGarbageJSONFields();
 
     Logger.log(JSON.stringify(result, null, 2));
     return result;
   });
+}
+
+// Clear cells that contain Java-toString garbage like "[Ljava.lang.Object;@hash"
+// or "{key=value, ...}" which were written by an earlier Apps Script bug.
+// Also re-stringify any cell that holds a non-string JSON value.
+function cleanGarbageJSONFields() {
+  const result = { patients: 0, visits: 0 };
+  result.patients = cleanJsonInSheet(getSS().getSheetByName('patients'), PATIENT_JSON_FIELDS);
+  result.visits = cleanJsonInSheet(getSS().getSheetByName('visits'), VISIT_JSON_FIELDS);
+  return result;
+}
+
+function cleanJsonInSheet(sheet, jsonFields) {
+  if (!sheet) return 0;
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 0;
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  let cleaned = 0;
+  jsonFields.forEach(f => {
+    const colIdx = headers.indexOf(f);
+    if (colIdx < 0) return;
+    const range = sheet.getRange(2, colIdx + 1, lastRow - 1, 1);
+    const values = range.getValues();
+    let dirty = false;
+    for (let r = 0; r < values.length; r++) {
+      const v = values[r][0];
+      if (typeof v !== 'string' || !v) continue;
+      // Java toString patterns
+      if (v.indexOf('[Ljava.') === 0
+          || /^\{[^"]*=/.test(v)
+          || /=,/.test(v)) {
+        values[r][0] = '';
+        cleaned++;
+        dirty = true;
+      }
+    }
+    if (dirty) range.setValues(values);
+  });
+  return cleaned;
 }
 
 function ensureHeaders(sheet, requiredHeaders) {
@@ -292,15 +332,41 @@ function objectToRow(obj, headers, jsonFields) {
   const jset = jsonFields || [];
   return headers.map(h => {
     let v = obj[h];
-    if (jset.indexOf(h) >= 0) {
-      if (v == null || v === '') return '';
-      if (typeof v === 'object') {
-        try { return JSON.stringify(v); } catch (e) { return ''; }
-      }
-      return v;
-    }
+    if (jset.indexOf(h) >= 0) return safeJSONStringify(v);
     return v != null ? v : '';
   });
+}
+
+// Deep-clone a value into pure JS structures, breaking any Java bridging.
+// Workaround for Apps Script V8 quirk where JSON.parse(body).x can be
+// Java-backed and JSON.stringify(it) returns "[Ljava.lang.Object;@hash" /
+// "{key=value}" instead of valid JSON.
+function plainClone(v) {
+  if (v == null) return v;
+  var t = typeof v;
+  if (t !== 'object') return v;
+  // Detect array-ish values (covers Java Object[] which doesn't pass Array.isArray)
+  var isArr = (typeof Array.isArray === 'function' && Array.isArray(v))
+    || Object.prototype.toString.call(v) === '[object Array]'
+    || (typeof v.length === 'number' && t === 'object' && !v.hasOwnProperty('length'));
+  if (isArr) {
+    var arr = [];
+    for (var i = 0; i < v.length; i++) arr.push(plainClone(v[i]));
+    return arr;
+  }
+  var obj = {};
+  for (var k in v) {
+    try {
+      if (Object.prototype.hasOwnProperty.call(v, k)) obj[k] = plainClone(v[k]);
+    } catch (e) {}
+  }
+  return obj;
+}
+
+function safeJSONStringify(v) {
+  if (v == null || v === '') return '';
+  if (typeof v === 'string') return v;
+  try { return JSON.stringify(plainClone(v)); } catch (e) { return ''; }
 }
 
 function uid(prefix) {
