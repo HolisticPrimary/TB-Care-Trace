@@ -1238,7 +1238,7 @@
   }
   .patient-row-header {
     display: grid;
-    grid-template-columns: minmax(220px, 1.7fr) 110px 110px 140px minmax(170px, 1.1fr) 120px;
+    grid-template-columns: minmax(240px, 1.6fr) minmax(150px, 1fr) 130px minmax(160px, 1fr) 110px;
     gap: 14px;
     padding: 12px 18px;
     background: var(--bg-elevated);
@@ -1251,7 +1251,7 @@
   }
   .patient-row {
     display: grid;
-    grid-template-columns: minmax(220px, 1.7fr) 110px 110px 140px minmax(170px, 1.1fr) 120px;
+    grid-template-columns: minmax(240px, 1.6fr) minmax(150px, 1fr) 130px minmax(160px, 1fr) 110px;
     gap: 14px;
     align-items: center;
     padding: 14px 18px;
@@ -1259,6 +1259,13 @@
     transition: background .15s;
     border-bottom: 1px solid var(--border);
   }
+  .col-clinical {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+  .col-clinical .row-chip { white-space: nowrap; }
   .patient-row:last-child { border-bottom: none; }
   .patient-row:hover { background: var(--bg-elevated); }
   .patient-row-name .name {
@@ -1298,6 +1305,11 @@
   .row-chip.zone-in { background: var(--primary-soft); color: var(--primary-dark); border-color: transparent; }
   .row-chip.zone-out { background: #fef3c7; color: #92400e; border-color: transparent; }
   .row-chip.muted { color: var(--ink-500); }
+  /* TB classification: pulmonary vs extra-pulmonary (color-coded) */
+  .row-chip.row-chip-class-pulm  { background: #dcfce7; color: #166534; border-color: transparent; }
+  .row-chip.row-chip-class-extra { background: #fde7d2; color: #9a3412; border-color: transparent; }
+  [data-theme="dark"] .row-chip.row-chip-class-pulm  { background: #14331f; color: #86efac; }
+  [data-theme="dark"] .row-chip.row-chip-class-extra { background: #3a1f12; color: #fdba74; }
   /* Zone-pill: prominent navy chip showing เขตรับผิดชอบ 201-209 */
   .row-zone-chip {
     display: inline-flex;
@@ -1516,8 +1528,7 @@
     .patient-row .row-chips { grid-area: chips; display: flex; flex-wrap: wrap; gap: 6px; }
     .patient-row .row-mini-progress { grid-area: progress; }
     .patient-row .row-visit { grid-area: visit; }
-    .patient-row .col-type,
-    .patient-row .col-test { display: none; }
+    .patient-row .col-clinical { display: none; }
   }
   @media (min-width: 981px) {
     .row-chips { display: none; }
@@ -5560,19 +5571,12 @@ const ICON = {
 function getStats(patientsList) {
   const patients = patientsList || State.patients;
   const by = (s) => patients.filter(p => p.status === s).length;
-  const needsAttention = patients.filter(p => {
-    if (p.status !== 'active') return false;
-    const visits = State.visits.filter(v => v.patientId === p.id);
-    if (visits.length === 0) return true;
-    const last = visits.map(v => v.date).sort().pop();
-    return daysSince(last) > 14;
-  }).length;
   return {
     total: patients.length,
     active: by('active'),
     cured: by('cured'),
     lost: by('lost'),
-    needsAttention
+    transferred: by('transferred')
   };
 }
 
@@ -5603,7 +5607,7 @@ function renderList() {
       <div class="stat-card" style="--c: var(--primary)"><div class="stat-label">กำลังรักษา</div><div class="stat-value"><span class="count-up" data-target="${stats.active}">0</span><span class="unit">ราย</span></div></div>
       <div class="stat-card" style="--c: var(--success)"><div class="stat-label">รักษาหาย</div><div class="stat-value"><span class="count-up" data-target="${stats.cured}">0</span><span class="unit">ราย</span></div></div>
       <div class="stat-card" style="--c: var(--warning)"><div class="stat-label">ขาดยา</div><div class="stat-value"><span class="count-up" data-target="${stats.lost}">0</span><span class="unit">ราย</span></div></div>
-      <div class="stat-card" style="--c: var(--accent)"><div class="stat-label">ต้องติดตาม</div><div class="stat-value"><span class="count-up" data-target="${stats.needsAttention}">0</span><span class="unit">ราย</span></div></div>
+      <div class="stat-card" style="--c: var(--accent)"><div class="stat-label">โอนออกไปรักษาที่อื่น</div><div class="stat-value"><span class="count-up" data-target="${stats.transferred}">0</span><span class="unit">ราย</span></div></div>
     </div>
 
     <div class="toolbar">
@@ -5674,8 +5678,7 @@ function renderList() {
       <div class="patient-list" id="patientList">
         <div class="patient-row-header">
           <div>ชื่อ / HN / อายุ / เพศ</div>
-          <div>ประเภท</div>
-          <div>ผลตรวจ</div>
+          <div>ประเภท / จำแนก / ผลตรวจ</div>
           <div>การรักษา</div>
           <div>การเยี่ยมล่าสุด</div>
           <div style="text-align:right;">สถานะ</div>
@@ -5722,6 +5725,12 @@ function renderPatientRow(p) {
   const visitText = lastVisit ? (dsv === 0 ? 'เยี่ยมวันนี้' : `${dsv} วันที่แล้ว`) : 'ยังไม่เคยเยี่ยม';
   const testResult = p.testResult || p.afbResult || '';
 
+  // tbClass shortened for compact display: "วัณโรคในปอด" → "ในปอด"
+  const tbClassShort = p.tbClass === 'วัณโรคในปอด' ? 'ในปอด'
+    : p.tbClass === 'วัณโรคนอกปอด' ? 'นอกปอด'
+    : '';
+  const tbClassChipCls = p.tbClass === 'วัณโรคนอกปอด' ? 'row-chip-class-extra' : 'row-chip-class-pulm';
+
   return `
     <div class="patient-row" onclick="openDetail('${p.id}')">
       <div class="patient-row-name">
@@ -5733,11 +5742,11 @@ function renderPatientRow(p) {
           ${p.areaType ? `<span class="row-chip ${areaClass}" style="margin-left:4px;">${escapeHTML(p.areaType)}</span>` : ''}
         </div>
       </div>
-      <div class="col-type">
-        ${p.patientType ? `<span class="row-chip">${escapeHTML(p.patientType)}</span>` : `<span class="row-chip muted">—</span>`}
-      </div>
-      <div class="col-test">
-        ${testResult ? `<span class="row-chip">${escapeHTML(testResult)}</span>` : `<span class="row-chip muted">—</span>`}
+      <div class="col-clinical">
+        ${p.patientType ? `<span class="row-chip" title="ประเภทผู้ป่วย">${escapeHTML(p.patientType)}</span>` : ''}
+        ${tbClassShort ? `<span class="row-chip ${tbClassChipCls}" title="${escapeHTML(p.tbClass)}">${tbClassShort}</span>` : ''}
+        ${testResult ? `<span class="row-chip" title="ผลตรวจ">${escapeHTML(testResult)}</span>` : ''}
+        ${(!p.patientType && !tbClassShort && !testResult) ? `<span class="row-chip muted">—</span>` : ''}
       </div>
       <div>
         ${progress ? `
@@ -5768,6 +5777,7 @@ function renderPatientRow(p) {
       <!-- Mobile-only chips group -->
       <div class="row-chips">
         ${p.patientType ? `<span class="row-chip">${escapeHTML(p.patientType)}</span>` : ''}
+        ${tbClassShort ? `<span class="row-chip ${tbClassChipCls}">${tbClassShort}</span>` : ''}
         ${testResult ? `<span class="row-chip">${escapeHTML(testResult)}</span>` : ''}
       </div>
     </div>`;
@@ -6289,11 +6299,11 @@ function renderDashboard() {
 
       <div class="kpi-card" style="--c: var(--accent); --c-soft: var(--accent-soft);">
         <div class="kpi-top">
-          <span class="kpi-label">ต้องติดตาม</span>
-          <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+          <span class="kpi-label">โอนออกไปรักษาที่อื่น</span>
+          <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/><path d="M3 19V5"/></svg></span>
         </div>
-        <div class="kpi-value"><span class="count-up" data-target="${d.attention.length}">0</span><span class="unit">ราย</span></div>
-        <div class="kpi-foot">เร่งด่วน <span class="pct">${d.attention.filter(a => a.urgent).length}</span> · เฝ้าระวัง ${d.attention.filter(a => !a.urgent).length}</div>
+        <div class="kpi-value"><span class="count-up" data-target="${d.transferred}">0</span><span class="unit">ราย</span></div>
+        <div class="kpi-foot">ส่งต่อโรงพยาบาลอื่นเพื่อรักษาต่อ</div>
       </div>
 
       <div class="kpi-card" style="--c: var(--primary); --c-soft: var(--primary-soft);">
