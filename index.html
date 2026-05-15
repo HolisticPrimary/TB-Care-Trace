@@ -1471,19 +1471,24 @@
     font-weight: 500;
   }
   /* No visits / one visit — red urgent */
-  .visit-badge.vb-none,
-  .visit-badge.vb-low {
+  /* 0 visits — red (urgent attention) */
+  .visit-badge.vb-none {
     background: var(--danger-soft);
     color: var(--danger);
     border-color: rgba(179, 70, 62, 0.22);
   }
-  .visit-badge.vb-none .vb-dot,
-  .visit-badge.vb-low .vb-dot {
+  .visit-badge.vb-none .vb-dot {
     animation: vbPulse 2s ease-in-out infinite;
   }
   @keyframes vbPulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(179, 70, 62, 0.55); }
     50%      { box-shadow: 0 0 0 5px rgba(179, 70, 62, 0); }
+  }
+  /* 1 visit — yellow (needs more visits) */
+  .visit-badge.vb-low {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: rgba(245, 158, 11, 0.30);
   }
   /* 2+ visits — green OK */
   .visit-badge.vb-ok {
@@ -1492,19 +1497,22 @@
     border-color: rgba(74, 122, 90, 0.22);
   }
   /* Dark mode variants */
-  [data-theme="dark"] .visit-badge.vb-none,
-  [data-theme="dark"] .visit-badge.vb-low {
+  [data-theme="dark"] .visit-badge.vb-none {
     background: rgba(224, 128, 121, 0.14);
     color: #e08079;
     border-color: rgba(224, 128, 121, 0.30);
   }
-  [data-theme="dark"] .visit-badge.vb-none .vb-dot,
-  [data-theme="dark"] .visit-badge.vb-low .vb-dot {
+  [data-theme="dark"] .visit-badge.vb-none .vb-dot {
     animation: vbPulseDark 2s ease-in-out infinite;
   }
   @keyframes vbPulseDark {
     0%, 100% { box-shadow: 0 0 0 0 rgba(224, 128, 121, 0.55); }
     50%      { box-shadow: 0 0 0 5px rgba(224, 128, 121, 0); }
+  }
+  [data-theme="dark"] .visit-badge.vb-low {
+    background: rgba(245, 158, 11, 0.16);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.32);
   }
   [data-theme="dark"] .visit-badge.vb-ok {
     background: rgba(129, 217, 160, 0.12);
@@ -4965,8 +4973,8 @@ const STATUS_LABELS = {
 const TEST_RESULTS = ['AFB','AFB Post','TB Lamp Post','X-pert Detect','CT','Film'];
 const PATIENT_TYPES = ['รายใหม่','กลับมาเป็นซ้ำ','รับโอนจากที่อื่น','โอนออกไปที่อื่น'];
 const TB_CLASSES = ['วัณโรคในปอด','วัณโรคนอกปอด'];
-const VISIT_TYPES = ['เยี่ยมโดย รพ.สต.','เยี่ยมโดย รพ.'];
-const VISITOR_ROLES = ['นักวิชาการสาธารณสุข','พยาบาลวิชาชีพ'];
+const VISIT_TYPES = ['เยี่ยมโดย รพ.สต.','เยี่ยมโดย รพ.','เยี่ยมโดยทีมสหวิชาชีพ'];
+const VISITOR_ROLES = ['นักวิชาการสาธารณสุข','พยาบาลวิชาชีพ','เจ้าพนักงานสาธารณสุข'];
 
 /* ════════════════════════════════════════════════════════════════
    USERS & PERMISSIONS — Role-based access control
@@ -5587,9 +5595,14 @@ function renderList() {
   // Scope: field staff sees only their zone; admin sees all
   const scopedPatients = filterByZone(State.patients);
   const stats = getStats(scopedPatients);
+  const matchesZoneFilter = (p) => {
+    if (State.zoneFilter === 'all') return true;
+    if (State.zoneFilter === 'out_of_area') return p.areaType === 'นอกเขต';
+    return p.zone === State.zoneFilter;
+  };
   const filtered = scopedPatients.filter(p => {
     if (State.filter !== 'all' && p.status !== State.filter) return false;
-    if (State.zoneFilter !== 'all' && p.zone !== State.zoneFilter) return false;
+    if (!matchesZoneFilter(p)) return false;
     if (State.search) {
       const q = State.search.toLowerCase();
       return (p.name || '').toLowerCase().includes(q) || (p.hn || '').toLowerCase().includes(q);
@@ -5600,6 +5613,7 @@ function renderList() {
   // Count patients per zone for filter pill badges (scoped)
   const zoneCounts = {};
   ZONES.forEach(z => { zoneCounts[z] = scopedPatients.filter(p => p.zone === z).length; });
+  const outOfAreaCount = scopedPatients.filter(p => p.areaType === 'นอกเขต').length;
 
   document.getElementById('mainView').innerHTML = `
     <div class="stats">
@@ -5621,7 +5635,11 @@ function renderList() {
             <path d="M20 10c0 6.5-8 12-8 12s-8-5.5-8-12a8 8 0 1 1 16 0Z"/>
             <path d="M12 7v6M9 10h6"/>
           </svg>
-          <span class="zone-trigger-label">${State.zoneFilter === 'all' ? `ทุกเขต (${scopedPatients.length})` : `เขต ${State.zoneFilter} (${zoneCounts[State.zoneFilter] || 0})`}</span>
+          <span class="zone-trigger-label">${
+            State.zoneFilter === 'all' ? `ทุกเขต (${scopedPatients.length})` :
+            State.zoneFilter === 'out_of_area' ? `นอกเขต (${outOfAreaCount})` :
+            `เขต ${State.zoneFilter} (${zoneCounts[State.zoneFilter] || 0})`
+          }</span>
           <svg class="zone-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="zone-panel" role="listbox" hidden>
@@ -5637,6 +5655,11 @@ function renderList() {
               <span class="zone-option-count">${zoneCounts[z]}</span>
             </button>
           `).join('')}
+          <button type="button" role="option" class="zone-option ${State.zoneFilter === 'out_of_area' ? 'selected' : ''}" onclick="selectZone('out_of_area')" style="border-top:1px solid var(--border);">
+            <svg class="zone-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span class="zone-option-label">นอกเขต</span>
+            <span class="zone-option-count">${outOfAreaCount}</span>
+          </button>
         </div>
       </div>
       ${canAddPatient() ? `<button class="btn btn-primary" onclick="openPatientModal()">${ICON.plus} เพิ่มผู้ป่วยใหม่</button>` : ''}
@@ -5649,11 +5672,11 @@ function renderList() {
         const label = f === 'all' ? 'ทั้งหมด' : STATUS_LABELS[f];
         return `<button class="filter-btn ${State.filter === f ? 'active' : ''}" onclick="setFilter('${f}')">${label}<span class="count">${count}</span></button>`;
       }).join('')}
-      ${(isAdmin() && State.zoneFilter !== 'all') ? `
+      ${State.zoneFilter !== 'all' ? `
         <div class="filters-divider"></div>
         <button class="filter-btn active-filter-chip" onclick="setZoneFilter('all')" title="ล้างตัวกรองเขต">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6.5-8 12-8 12s-8-5.5-8-12a8 8 0 1 1 16 0Z"/><path d="M12 7v6M9 10h6"/></svg>
-          เขต ${State.zoneFilter}
+          ${State.zoneFilter === 'out_of_area' ? 'นอกเขต' : 'เขต ' + State.zoneFilter}
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       ` : ''}
@@ -5690,13 +5713,18 @@ function renderList() {
 
   const si = document.getElementById('searchInput');
   if (si) {
+    let searchTimer;
     si.addEventListener('input', (e) => {
       State.search = e.target.value;
-      const list = document.getElementById('patientList');
-      if (list) {
+      clearTimeout(searchTimer);
+      // Debounce — avoid re-rendering on every keystroke for snappier typing
+      searchTimer = setTimeout(() => {
+        const list = document.getElementById('patientList');
+        if (!list) return;
         const q = State.search.toLowerCase();
-        const filteredNow = State.patients.filter(p => {
+        const filteredNow = scopedPatients.filter(p => {
           if (State.filter !== 'all' && p.status !== State.filter) return false;
+          if (!matchesZoneFilter(p)) return false;
           return !q || (p.name || '').toLowerCase().includes(q) || (p.hn || '').toLowerCase().includes(q);
         });
         // keep header, replace rows
@@ -5704,7 +5732,7 @@ function renderList() {
         list.innerHTML = '';
         if (header) list.appendChild(header);
         list.insertAdjacentHTML('beforeend', filteredNow.map(renderPatientRow).join(''));
-      }
+      }, 120);
     });
   }
 }
@@ -6089,6 +6117,10 @@ function ymOf(isoDate) {
 }
 
 function computeDashboard() {
+  // Memoize: dashboard iterates all patients/visits ~10x — cheap recompute,
+  // but skipping it on no-op renders avoids visible jank on large datasets.
+  const sig = dataSignature() + '|' + (State.currentUser?.zone || '*');
+  if (_dashCache.sig === sig && _dashCache.value) return _dashCache.value;
   // Scope patients/visits to current user's zone (field staff sees only their zone)
   const P = filterByZone(State.patients);
   const scopedIds = new Set(P.map(p => p.id));
@@ -6181,6 +6213,15 @@ function computeDashboard() {
   // Total visits, total household contacts
   const totalVisits = V.length;
   const totalContacts = P.reduce((sum, p) => sum + (Array.isArray(p.householdContacts) ? p.householdContacts.length : 0), 0);
+  // Household contacts split by patient's tbClass (in-pulm vs extra-pulm vs unspecified)
+  const contactsByTBClass = { 'วัณโรคในปอด': 0, 'วัณโรคนอกปอด': 0, 'ไม่ระบุ': 0 };
+  P.forEach(p => {
+    const n = Array.isArray(p.householdContacts) ? p.householdContacts.length : 0;
+    if (!n) return;
+    if (p.tbClass === 'วัณโรคในปอด') contactsByTBClass['วัณโรคในปอด'] += n;
+    else if (p.tbClass === 'วัณโรคนอกปอด') contactsByTBClass['วัณโรคนอกปอด'] += n;
+    else contactsByTBClass['ไม่ระบุ'] += n;
+  });
   // Avg visits per active patient
   const visitsForActive = active > 0
     ? Math.round((V.filter(v => P.find(p => p.id === v.patientId && p.status === 'active')).length / active) * 10) / 10
@@ -6212,15 +6253,18 @@ function computeDashboard() {
     };
   });
 
-  return {
+  const result = {
     total, active, cured, complete, lost, transferred, deceased, diagChange,
     closedCases, cureRate, lossRate,
     attention, typeCount, tbClassCount, areaCount,
+    contactsByTBClass,
     newPerMonth, visitsPerMonth, testCount,
     totalVisits, dosesTaken, dosesMissed, adherenceRate,
     totalContacts, visitsForActive,
     zoneStats
   };
+  _dashCache = { sig, value: result };
+  return result;
 }
 
 function renderDashboard() {
@@ -6366,6 +6410,32 @@ function renderDashboard() {
           <div class="chart-wrap">${svgDonut(tbClassSegs.length ? tbClassSegs : [{ label: '—', value: 0, color: CHART_COLORS.neutral }], { centerLabel: 'ทั้งหมด' })}</div>
           ${donutLegend(tbClassSegs.length ? tbClassSegs : [{ label: 'ยังไม่มีข้อมูล', value: 0, color: CHART_COLORS.neutral }])}
         </div>
+      </div>
+    </div>
+
+    <!-- CHART ROW 2.5 — household contacts by tbClass -->
+    <div class="dash-grid">
+      <div class="dash-card span-12">
+        <div class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">ผู้สัมผัสร่วมบ้าน — แยกตามจำแนกผู้ป่วย</h3>
+            <div class="dash-card-subtitle">จำนวนผู้สัมผัสในกลุ่มวัณโรคในปอด vs นอกปอด</div>
+          </div>
+          <span class="dash-card-pill">รวม ${d.totalContacts} คน</span>
+        </div>
+        ${(() => {
+          const segs = [
+            { label: 'วัณโรคในปอด', value: d.contactsByTBClass['วัณโรคในปอด'], color: CHART_COLORS.primary },
+            { label: 'วัณโรคนอกปอด', value: d.contactsByTBClass['วัณโรคนอกปอด'], color: CHART_COLORS.accent }
+          ];
+          if (d.contactsByTBClass['ไม่ระบุ']) {
+            segs.push({ label: 'ไม่ระบุจำแนก', value: d.contactsByTBClass['ไม่ระบุ'], color: CHART_COLORS.neutral });
+          }
+          if (d.totalContacts === 0) {
+            return '<div class="attention-empty">ยังไม่มีข้อมูลผู้สัมผัสร่วมบ้าน</div>';
+          }
+          return `<div class="chart-wrap">${svgBarHorizontal(segs, { width: 1100 })}</div>`;
+        })()}
       </div>
     </div>
 
@@ -7872,6 +7942,21 @@ function disconnect() {
 /* ════════════════════════════════════════════════════════════════
    DATA LOADING
    ═══════════════════════════════════════════════════════════════ */
+// Compute a cheap signature of patient+visit data to detect changes
+function dataSignature() {
+  // Use lengths + most-recent updatedAt of each list
+  let pSig = State.patients.length + ':';
+  let vSig = State.visits.length + ':';
+  for (const p of State.patients) pSig += (p.updatedAt || '') + '|';
+  for (const v of State.visits) vSig += (v.updatedAt || v.createdAt || '') + '|';
+  return pSig + '#' + vSig;
+}
+
+// Memoize computeDashboard — recompute only when data changes
+let _dashCache = { sig: null, value: null };
+const _origComputeDashboard = typeof computeDashboard === 'function' ? computeDashboard : null;
+// (computeDashboard wrapping is set up after the function is defined; see end of init.)
+
 async function loadAll(silent = false) {
   if (State.syncing) return;
   State.syncing = true;
@@ -7883,12 +7968,15 @@ async function loadAll(silent = false) {
     else if (State.view === 'dashboard') { showSkeletonDashboard(); usingSkeleton = true; }
     else { showLoading('กำลังโหลดข้อมูล...'); }
   }
+  const sigBefore = silent ? dataSignature() : null;
   try {
     const [patients, visits] = await Promise.all([API.listPatients(), API.listVisits()]);
     State.patients = (patients || []).map(normalizePatient);
     State.visits = (visits || []).map(normalizeVisit);
     State.lastSync = new Date();
     setSyncState('ok', `Sync ${State.lastSync.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`);
+    // Invalidate dashboard cache when data changes
+    _dashCache = { sig: null, value: null };
   } catch (err) {
     setSyncState('error', 'Sync ล้มเหลว');
     if (!silent) toast('ดึงข้อมูลไม่สำเร็จ: ' + err.message, 'error', 4000);
@@ -7897,6 +7985,11 @@ async function loadAll(silent = false) {
     if (!silent && !usingSkeleton) hideLoading();
     // If skeleton was shown, re-render to replace it with actual content
     if (usingSkeleton) render();
+    // Background poll: only re-render when data actually changed (avoid DOM thrash)
+    else if (silent && sigBefore !== null && sigBefore !== dataSignature() &&
+             (State.view === 'list' || State.view === 'dashboard')) {
+      render();
+    }
   }
 }
 
