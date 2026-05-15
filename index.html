@@ -2390,6 +2390,10 @@
       0 4px 14px rgba(111, 211, 160, 0.32),
       inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
+  /* Locked pill-group (read-only for field staff) */
+  .pill-group-locked { opacity: 0.7; cursor: not-allowed; }
+  .pill-group-locked label { cursor: not-allowed !important; pointer-events: none; }
+  .pill-group-locked:hover { border-color: var(--border); }
   @media (max-width: 720px) {
     .contact-card .form-row { grid-template-columns: 1fr 1fr; }
   }
@@ -4440,6 +4444,43 @@
     gap: 14px;
     margin-bottom: 18px;
   }
+  /* Section divider — separate dashboard zones (e.g. household contacts analytics) */
+  .dash-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 32px 0 18px;
+  }
+  .dash-section-divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border) 30%, var(--border) 70%, transparent);
+  }
+  .dash-section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 8px 18px;
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink-900);
+    letter-spacing: -0.2px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  .dash-section-title svg {
+    color: var(--primary);
+    flex-shrink: 0;
+  }
+  /* Form group error border for household contact age */
+  .contact-card .form-group.has-error .input {
+    border-color: var(--danger) !important;
+    background: rgba(179, 70, 62, 0.05);
+  }
   .dash-card {
     grid-column: span 6;
     background: var(--surface);
@@ -6215,13 +6256,37 @@ function computeDashboard() {
   const totalContacts = P.reduce((sum, p) => sum + (Array.isArray(p.householdContacts) ? p.householdContacts.length : 0), 0);
   // Household contacts split by patient's tbClass (in-pulm vs extra-pulm vs unspecified)
   const contactsByTBClass = { 'วัณโรคในปอด': 0, 'วัณโรคนอกปอด': 0, 'ไม่ระบุ': 0 };
+  // IGRA result distribution across all contacts
+  const contactsIgra = { 'Positive': 0, 'Negative': 0, 'Indeterminate': 0, 'Pending': 0, 'Not done': 0, 'ยังไม่ตรวจ': 0 };
+  // CXR coverage: how many contacts have a CXR date recorded?
+  let contactsCxrDone = 0;
+  // Age groups: <15 child, 15-59 adult, 60+ elderly, unknown
+  const contactsAge = { 'เด็ก (<15)': 0, 'ผู้ใหญ่ (15-59)': 0, 'สูงอายุ (60+)': 0, 'ไม่ระบุ': 0 };
+  // Patients with at least 1 contact (for avg)
+  let patientsWithContacts = 0;
   P.forEach(p => {
-    const n = Array.isArray(p.householdContacts) ? p.householdContacts.length : 0;
-    if (!n) return;
-    if (p.tbClass === 'วัณโรคในปอด') contactsByTBClass['วัณโรคในปอด'] += n;
-    else if (p.tbClass === 'วัณโรคนอกปอด') contactsByTBClass['วัณโรคนอกปอด'] += n;
-    else contactsByTBClass['ไม่ระบุ'] += n;
+    const contacts = Array.isArray(p.householdContacts) ? p.householdContacts : [];
+    if (contacts.length === 0) return;
+    patientsWithContacts++;
+    if (p.tbClass === 'วัณโรคในปอด') contactsByTBClass['วัณโรคในปอด'] += contacts.length;
+    else if (p.tbClass === 'วัณโรคนอกปอด') contactsByTBClass['วัณโรคนอกปอด'] += contacts.length;
+    else contactsByTBClass['ไม่ระบุ'] += contacts.length;
+    contacts.forEach(c => {
+      const r = (c.igraResult || '').trim();
+      if (r && contactsIgra[r] !== undefined) contactsIgra[r]++;
+      else contactsIgra['ยังไม่ตรวจ']++;
+      if ((c.cxrDate || '').trim()) contactsCxrDone++;
+      const age = parseInt(c.age);
+      if (!Number.isFinite(age)) contactsAge['ไม่ระบุ']++;
+      else if (age < 15) contactsAge['เด็ก (<15)']++;
+      else if (age < 60) contactsAge['ผู้ใหญ่ (15-59)']++;
+      else contactsAge['สูงอายุ (60+)']++;
+    });
   });
+  const contactsCxrPct = totalContacts > 0 ? Math.round((contactsCxrDone / totalContacts) * 100) : 0;
+  const avgContactsPerPatient = patientsWithContacts > 0 ? Math.round((totalContacts / patientsWithContacts) * 10) / 10 : 0;
+  // High-risk: contacts with Positive IGRA — should be followed up
+  const contactsPositive = contactsIgra['Positive'] || 0;
   // Avg visits per active patient
   const visitsForActive = active > 0
     ? Math.round((V.filter(v => P.find(p => p.id === v.patientId && p.status === 'active')).length / active) * 10) / 10
@@ -6257,7 +6322,8 @@ function computeDashboard() {
     total, active, cured, complete, lost, transferred, deceased, diagChange,
     closedCases, cureRate, lossRate,
     attention, typeCount, tbClassCount, areaCount,
-    contactsByTBClass,
+    contactsByTBClass, contactsIgra, contactsCxrDone, contactsCxrPct,
+    contactsAge, patientsWithContacts, avgContactsPerPatient, contactsPositive,
     newPerMonth, visitsPerMonth, testCount,
     totalVisits, dosesTaken, dosesMissed, adherenceRate,
     totalContacts, visitsForActive,
@@ -6413,13 +6479,47 @@ function renderDashboard() {
       </div>
     </div>
 
-    <!-- CHART ROW 2.5 — household contacts by tbClass -->
+    <!-- ════ ZONE: ผู้สัมผัสร่วมบ้าน (Household Contacts Analytics) ════ -->
+    <div class="dash-section-divider">
+      <div class="dash-section-divider-line"></div>
+      <h2 class="dash-section-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        วิเคราะห์ผู้สัมผัสร่วมบ้าน
+      </h2>
+      <div class="dash-section-divider-line"></div>
+    </div>
+
+    <!-- KPI ROW (Contacts) -->
+    <div class="kpi-row" style="margin-bottom: 20px;">
+      <div class="kpi-card" style="--c: var(--primary); --c-soft: var(--primary-soft);">
+        <div class="kpi-top"><span class="kpi-label">ผู้สัมผัสร่วมบ้าน</span></div>
+        <div class="kpi-value"><span class="count-up" data-target="${d.totalContacts}">0</span><span class="unit">คน</span></div>
+        <div class="kpi-foot">เฉลี่ย <span class="pct">${d.avgContactsPerPatient}</span> คน/ผู้ป่วยที่มีบันทึก</div>
+      </div>
+      <div class="kpi-card" style="--c: var(--success); --c-soft: var(--success-soft);">
+        <div class="kpi-top"><span class="kpi-label">ตรวจ CXR แล้ว</span></div>
+        <div class="kpi-value"><span class="count-up" data-target="${d.contactsCxrDone}">0</span><span class="unit">คน</span></div>
+        <div class="kpi-foot">คิดเป็น <span class="pct">${d.contactsCxrPct}</span>% ของผู้สัมผัสทั้งหมด</div>
+      </div>
+      <div class="kpi-card" style="--c: var(--danger); --c-soft: var(--danger-soft);">
+        <div class="kpi-top"><span class="kpi-label">IGRA Positive</span></div>
+        <div class="kpi-value"><span class="count-up" data-target="${d.contactsPositive}">0</span><span class="unit">คน</span></div>
+        <div class="kpi-foot">ผู้สัมผัสกลุ่มเสี่ยงสูงที่ต้องติดตาม</div>
+      </div>
+      <div class="kpi-card" style="--c: var(--accent); --c-soft: var(--accent-soft);">
+        <div class="kpi-top"><span class="kpi-label">ผู้ป่วยที่บันทึกผู้สัมผัส</span></div>
+        <div class="kpi-value"><span class="count-up" data-target="${d.patientsWithContacts}">0</span><span class="unit">ราย</span></div>
+        <div class="kpi-foot">จาก ${d.total} ราย คิดเป็น ${d.total ? Math.round((d.patientsWithContacts/d.total)*100) : 0}%</div>
+      </div>
+    </div>
+
+    <!-- CHART ROW: contacts breakdowns -->
     <div class="dash-grid">
-      <div class="dash-card span-12">
+      <div class="dash-card span-6">
         <div class="dash-card-head">
           <div>
-            <h3 class="dash-card-title">ผู้สัมผัสร่วมบ้าน — แยกตามจำแนกผู้ป่วย</h3>
-            <div class="dash-card-subtitle">จำนวนผู้สัมผัสในกลุ่มวัณโรคในปอด vs นอกปอด</div>
+            <h3 class="dash-card-title">ผู้สัมผัส — แยกตามจำแนกผู้ป่วย</h3>
+            <div class="dash-card-subtitle">วัณโรคในปอด vs นอกปอด</div>
           </div>
           <span class="dash-card-pill">รวม ${d.totalContacts} คน</span>
         </div>
@@ -6431,13 +6531,61 @@ function renderDashboard() {
           if (d.contactsByTBClass['ไม่ระบุ']) {
             segs.push({ label: 'ไม่ระบุจำแนก', value: d.contactsByTBClass['ไม่ระบุ'], color: CHART_COLORS.neutral });
           }
-          if (d.totalContacts === 0) {
-            return '<div class="attention-empty">ยังไม่มีข้อมูลผู้สัมผัสร่วมบ้าน</div>';
-          }
-          return `<div class="chart-wrap">${svgBarHorizontal(segs, { width: 1100 })}</div>`;
+          if (d.totalContacts === 0) return '<div class="attention-empty">ยังไม่มีข้อมูลผู้สัมผัสร่วมบ้าน</div>';
+          const filtered = segs.filter(s => s.value > 0);
+          return `<div class="donut-wrap">
+            <div class="chart-wrap">${svgDonut(filtered, { centerLabel: 'ทั้งหมด' })}</div>
+            ${donutLegend(filtered)}
+          </div>`;
+        })()}
+      </div>
+
+      <div class="dash-card span-6">
+        <div class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">ผล IGRAs ของผู้สัมผัส</h3>
+            <div class="dash-card-subtitle">การกระจายผลตรวจ IGRA</div>
+          </div>
+        </div>
+        ${(() => {
+          const items = [
+            { label: 'Positive (เสี่ยงสูง)', value: d.contactsIgra['Positive'] || 0, color: CHART_COLORS.danger },
+            { label: 'Negative', value: d.contactsIgra['Negative'] || 0, color: CHART_COLORS.success },
+            { label: 'Indeterminate', value: d.contactsIgra['Indeterminate'] || 0, color: CHART_COLORS.accent },
+            { label: 'Pending', value: d.contactsIgra['Pending'] || 0, color: CHART_COLORS.blue },
+            { label: 'Not done', value: d.contactsIgra['Not done'] || 0, color: CHART_COLORS.neutral },
+            { label: 'ยังไม่ตรวจ / ไม่ระบุ', value: d.contactsIgra['ยังไม่ตรวจ'] || 0, color: CHART_COLORS.neutral }
+          ].filter(s => s.value > 0);
+          if (items.length === 0) return '<div class="attention-empty">ยังไม่มีข้อมูลผล IGRA</div>';
+          return `<div class="chart-wrap">${svgBarHorizontal(items, { width: 540 })}</div>`;
         })()}
       </div>
     </div>
+
+    <!-- CHART ROW: contacts age distribution -->
+    <div class="dash-grid">
+      <div class="dash-card span-12">
+        <div class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">การกระจายอายุของผู้สัมผัส</h3>
+            <div class="dash-card-subtitle">เด็กอายุน้อยกว่า 15 ปีและผู้สูงอายุเป็นกลุ่มเสี่ยงพิเศษ</div>
+          </div>
+          <span class="dash-card-pill">${d.totalContacts} คน</span>
+        </div>
+        ${(() => {
+          const items = [
+            { label: 'เด็ก (<15 ปี)', value: d.contactsAge['เด็ก (<15)'], color: CHART_COLORS.danger },
+            { label: 'ผู้ใหญ่ (15-59 ปี)', value: d.contactsAge['ผู้ใหญ่ (15-59)'], color: CHART_COLORS.primary },
+            { label: 'สูงอายุ (60+ ปี)', value: d.contactsAge['สูงอายุ (60+)'], color: CHART_COLORS.accent },
+            { label: 'ไม่ระบุอายุ', value: d.contactsAge['ไม่ระบุ'], color: CHART_COLORS.neutral }
+          ].filter(s => s.value > 0);
+          if (items.length === 0) return '<div class="attention-empty">ยังไม่มีข้อมูลอายุของผู้สัมผัส</div>';
+          return `<div class="chart-wrap">${svgBarHorizontal(items, { width: 1100 })}</div>`;
+        })()}
+      </div>
+    </div>
+
+    <!-- ════ END ZONE: ผู้สัมผัสร่วมบ้าน ════ -->
 
     <!-- CHART ROW 3 — visits trend (full width) -->
     <div class="dash-grid">
@@ -7003,7 +7151,7 @@ function openPatientModal(id = null) {
                 <span class="field-error">${ICON.alert} กรุณาเลือกเขตพื้นที่</span>
               </div>
               <div class="form-group" data-field="areaType"><label>สถานะพื้นที่<span class="req">*</span></label>
-                <div class="pill-group" id="f-areaType-group">
+                <div class="pill-group ${canEditPatientInfo() ? '' : 'pill-group-locked'}" id="f-areaType-group">
                   ${AREA_TYPES.map((a, i) => `
                     <input type="radio" name="f-areaType" id="f-areaType-${i}" value="${a}" ${p.areaType === a ? 'checked' : ''} ${canEditPatientInfo() ? '' : 'disabled'}>
                     <label for="f-areaType-${i}">${a}</label>
@@ -7025,9 +7173,9 @@ function openPatientModal(id = null) {
             <div class="form-row">
               <div class="form-group full" data-field="tbClass">
                 <label>จำแนกผู้ป่วย<span class="req">*</span></label>
-                <div class="pill-group" id="f-tbClass-group">
+                <div class="pill-group ${canEditMedical() ? '' : 'pill-group-locked'}" id="f-tbClass-group">
                   ${TB_CLASSES.map((t, i) => `
-                    <input type="radio" name="f-tbClass" id="f-tbClass-${i}" value="${t}" ${p.tbClass === t ? 'checked' : ''} onchange="toggleTbClassDetail()">
+                    <input type="radio" name="f-tbClass" id="f-tbClass-${i}" value="${t}" ${p.tbClass === t ? 'checked' : ''} onchange="toggleTbClassDetail()" ${canEditMedical() ? '' : 'disabled'}>
                     <label for="f-tbClass-${i}">${t}</label>
                   `).join('')}
                 </div>
@@ -7035,7 +7183,7 @@ function openPatientModal(id = null) {
               </div>
             </div>
             <div class="form-row" id="tbClassDetailRow" style="display:${p.tbClass === 'วัณโรคนอกปอด' ? 'grid' : 'none'};">
-              <div class="form-group full" data-field="tbClassDetail"><label>ระบุตำแหน่ง / ชนิดของวัณโรคนอกปอด<span class="req">*</span></label><input class="input" id="f-tbClassDetail" value="${escapeHTML(p.tbClassDetail)}" placeholder="เช่น ต่อมน้ำเหลือง, เยื่อหุ้มสมอง, กระดูก, ลำไส้, ไต ฯลฯ"><span class="field-error">${ICON.alert} กรุณาระบุตำแหน่ง/ชนิด</span></div>
+              <div class="form-group full" data-field="tbClassDetail"><label>ระบุตำแหน่ง / ชนิดของวัณโรคนอกปอด<span class="req">*</span></label><input class="input" id="f-tbClassDetail" value="${escapeHTML(p.tbClassDetail)}" placeholder="เช่น ต่อมน้ำเหลือง, เยื่อหุ้มสมอง, กระดูก, ลำไส้, ไต ฯลฯ" ${canEditMedical() ? '' : 'disabled'}><span class="field-error">${ICON.alert} กรุณาระบุตำแหน่ง/ชนิด</span></div>
             </div>
             <div class="form-row">
               <div class="form-group" data-field="testResult"><label>ผลตรวจ<span class="req">*</span></label>
@@ -7095,7 +7243,7 @@ function renderHouseholdList() {
     return;
   }
   list.innerHTML = householdContacts.map((c, i) => `
-    <div class="contact-card">
+    <div class="contact-card" data-hc-row="${i}">
       <div class="contact-card-head">
         <span>ผู้สัมผัสคนที่ ${i + 1}</span>
         <button type="button" class="contact-remove" onclick="removeHouseholdContact(${i})" title="ลบ">✕</button>
@@ -7107,8 +7255,8 @@ function renderHouseholdList() {
             <span class="zone-hint">ข้อมูลพื้นฐาน — กรอกโดยเจ้าหน้าที่ รพ.สต.</span>
           </div>
           <div class="form-row">
-            <div class="form-group"><label>ชื่อ-นามสกุล</label><input class="input" oninput="updateHC(${i},'name',this.value)" value="${escapeHTML(c.name || '')}" placeholder="ชื่อ - สกุล"></div>
-            <div class="form-group"><label>อายุ</label><input class="input" type="number" oninput="updateHC(${i},'age',this.value)" value="${escapeHTML(c.age || '')}" placeholder="—"></div>
+            <div class="form-group" data-hc-field="name"><label>ชื่อ-นามสกุล</label><input class="input" oninput="updateHC(${i},'name',this.value)" value="${escapeHTML(c.name || '')}" placeholder="ชื่อ - สกุล"></div>
+            <div class="form-group" data-hc-field="age"><label>อายุ <span class="hc-age-hint" style="display:none;color:var(--danger);font-size:11px;">* บังคับเมื่อกรอกชื่อ</span></label><input class="input" type="number" oninput="updateHC(${i},'age',this.value)" value="${escapeHTML(c.age || '')}" placeholder="—"></div>
           </div>
         </div>
         <div class="zone-block zone-block-hospital">
@@ -7219,6 +7367,36 @@ async function savePatient(id) {
   }
 
   const name = get('name');
+
+  // Validate household contacts: if name is filled, age is required
+  const hcMissingAge = [];
+  document.querySelectorAll('.contact-card').forEach(card => {
+    card.querySelectorAll('.hc-age-hint').forEach(h => h.style.display = 'none');
+    card.querySelectorAll('[data-hc-field]').forEach(g => g.classList.remove('has-error'));
+  });
+  householdContacts.forEach((c, i) => {
+    const nm = (c.name || '').trim();
+    const ag = (c.age || '').toString().trim();
+    if (nm && !ag) hcMissingAge.push(i);
+  });
+  if (hcMissingAge.length > 0) {
+    hcMissingAge.forEach(i => {
+      const card = document.querySelector(`.contact-card[data-hc-row="${i}"]`);
+      if (card) {
+        const ageGroup = card.querySelector('[data-hc-field="age"]');
+        if (ageGroup) {
+          ageGroup.classList.add('has-error');
+          const hint = ageGroup.querySelector('.hc-age-hint');
+          if (hint) hint.style.display = 'inline';
+        }
+      }
+    });
+    if (alertBox) alertBox.classList.add('show');
+    toast(`กรุณากรอกอายุของผู้สัมผัส (${hcMissingAge.length} ราย)`, 'error', 3500);
+    const firstCard = document.querySelector(`.contact-card[data-hc-row="${hcMissingAge[0]}"]`);
+    if (firstCard) firstCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
 
   const status = get('status') || 'active';
   const cleanedContacts = householdContacts
