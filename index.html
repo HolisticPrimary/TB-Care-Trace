@@ -4983,9 +4983,11 @@ function isAdmin()      { return State.currentUser?.role === 'admin'; }
 function isField()      { return State.currentUser?.role === 'field'; }
 function canAddPatient(){ return isAdmin(); }
 function canDeletePatient(){ return isAdmin(); }
-// เจ้าหน้าที่ รพ.สต. (field) แก้ไขข้อมูลการรักษาได้ — เพิ่มผู้สัมผัส บันทึกเยี่ยม ปรับ status
-// (admin-only คือ การเพิ่มและลบผู้ป่วย)
-function canEditMedical(){ return !!State.currentUser; }  // testResult, regimen, status
+// Field staff (TB201-TB209) เป็น view-only สำหรับข้อมูลผู้ป่วย — ทำได้เฉพาะ
+// เพิ่ม/แก้ ผู้สัมผัสร่วมบ้าน และบันทึกการเยี่ยมบ้าน (ยังเห็นข้อมูลผู้ป่วยทุกเขต)
+function canEditPatientInfo(){ return isAdmin(); }  // name/age/address/zone/areaType/contactPerson
+function canEditMedical(){ return isAdmin(); }      // วันที่/regimen/testResult/tbClass/patientType/status
+function canEditHouseholdContacts(){ return !!State.currentUser; }  // admin + field
 function canDeleteVisit(visit){
   if (isAdmin()) return true;
   // Field staff: can delete OWN visit within 24h
@@ -5002,9 +5004,9 @@ function userCanSeeZone(z) {
   return myZone === '*' || myZone === z;
 }
 function filterByZone(patients) {
-  if (isAdmin()) return patients;
-  const z = userZone();
-  return patients.filter(p => p.zone === z);
+  // ทั้ง admin และ field staff เห็นผู้ป่วยทุกเขต
+  // (filter เขตทำผ่าน State.zoneFilter dropdown แทน)
+  return patients;
 }
 
 /* ── SESSION MANAGEMENT ────────────────────────────────────── */
@@ -5042,7 +5044,7 @@ function login(username, password) {
   // Reset views for fresh start
   State.view = 'cover';
   State.currentPatientId = null;
-  State.zoneFilter = isAdmin() ? 'all' : user.zone;
+  State.zoneFilter = 'all';  // เริ่มที่ทุกเขต ทั้ง admin และ field
   return true;
 }
 function logout() {
@@ -5609,7 +5611,6 @@ function renderList() {
         ${ICON.search}
         <input type="text" id="searchInput" placeholder="ค้นหาด้วยชื่อ หรือ HN..." value="${escapeHTML(State.search)}">
       </div>
-      ${isAdmin() ? `
       <div class="zone-dropdown" id="zoneDropdown" title="กรองตามเขตพื้นที่รับผิดชอบ">
         <button type="button" class="zone-trigger" onclick="toggleZoneDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
           <svg class="zone-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -5634,15 +5635,6 @@ function renderList() {
           `).join('')}
         </div>
       </div>
-      ` : `
-      <div class="zone-pill-fixed" title="คุณดูข้อมูลเฉพาะเขตที่รับผิดชอบ">
-        <svg class="zone-pin-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20 10c0 6.5-8 12-8 12s-8-5.5-8-12a8 8 0 1 1 16 0Z"/>
-          <path d="M12 7v6M9 10h6"/>
-        </svg>
-        <span>เขต ${userZone()} (${scopedPatients.length})</span>
-      </div>
-      `}
       ${canAddPatient() ? `<button class="btn btn-primary" onclick="openPatientModal()">${ICON.plus} เพิ่มผู้ป่วยใหม่</button>` : ''}
     </div>
 
@@ -6893,38 +6885,38 @@ function openPatientModal(id = null) {
         </div>
         <div class="modal-body">
           <div class="form-alert" id="patientFormAlert">${ICON.alert} <span>กรุณากรอกข้อมูลที่บังคับให้ครบ (มีเครื่องหมาย <span style="color:var(--danger);font-weight:700;">*</span>)</span></div>
-          <div class="form-section" style="margin-top: 0; padding-top: 0; border: none;">
-            <h4>ข้อมูลส่วนบุคคล</h4>
+          <div class="form-section ${canEditPatientInfo() ? '' : 'medical-locked'}" style="margin-top: 0; padding-top: 0; border: none;">
+            <h4>ข้อมูลส่วนบุคคล ${canEditPatientInfo() ? '' : '<span class="readonly-tag">🔒 อ่านอย่างเดียว · เฉพาะ รพ. แก้ไขได้</span>'}</h4>
             <div class="form-row">
-              <div class="form-group" data-field="name" style="grid-column: span 2;"><label>ชื่อ-นามสกุล<span class="req">*</span></label><input class="input" id="f-name" value="${escapeHTML(p.name)}" placeholder="เช่น นายสมชาย ใจดี"><span class="field-error">${ICON.alert} กรุณากรอกชื่อ-นามสกุล</span></div>
-              <div class="form-group" data-field="hn"><label>HN<span class="req">*</span></label><input class="input" id="f-hn" value="${escapeHTML(p.hn)}" placeholder="เช่น 40995"><span class="field-error">${ICON.alert} กรุณากรอก HN</span></div>
+              <div class="form-group" data-field="name" style="grid-column: span 2;"><label>ชื่อ-นามสกุล<span class="req">*</span></label><input class="input" id="f-name" value="${escapeHTML(p.name)}" placeholder="เช่น นายสมชาย ใจดี" ${canEditPatientInfo() ? '' : 'disabled'}><span class="field-error">${ICON.alert} กรุณากรอกชื่อ-นามสกุล</span></div>
+              <div class="form-group" data-field="hn"><label>HN<span class="req">*</span></label><input class="input" id="f-hn" value="${escapeHTML(p.hn)}" placeholder="เช่น 40995" ${canEditPatientInfo() ? '' : 'disabled'}><span class="field-error">${ICON.alert} กรุณากรอก HN</span></div>
             </div>
             <div class="form-row">
-              <div class="form-group" data-field="age"><label>อายุ (ปี)<span class="req">*</span></label><input class="input" id="f-age" type="number" value="${escapeHTML(p.age)}" placeholder="เช่น 45"><span class="field-error">${ICON.alert} กรุณากรอกอายุ</span></div>
+              <div class="form-group" data-field="age"><label>อายุ (ปี)<span class="req">*</span></label><input class="input" id="f-age" type="number" value="${escapeHTML(p.age)}" placeholder="เช่น 45" ${canEditPatientInfo() ? '' : 'disabled'}><span class="field-error">${ICON.alert} กรุณากรอกอายุ</span></div>
               <div class="form-group" data-field="gender"><label>เพศ<span class="req">*</span></label>
-                <select class="select" id="f-gender">
+                <select class="select" id="f-gender" ${canEditPatientInfo() ? '' : 'disabled'}>
                   <option value="">—</option>
                   <option value="ชาย" ${p.gender === 'ชาย' ? 'selected' : ''}>ชาย</option>
                   <option value="หญิง" ${p.gender === 'หญิง' ? 'selected' : ''}>หญิง</option>
                 </select>
                 <span class="field-error">${ICON.alert} กรุณาเลือกเพศ</span>
               </div>
-              <div class="form-group"><label>เบอร์โทร</label><input class="input" id="f-phone" value="${escapeHTML(p.phone)}" placeholder="เช่น 081-234-5678"></div>
+              <div class="form-group"><label>เบอร์โทร</label><input class="input" id="f-phone" value="${escapeHTML(p.phone)}" placeholder="เช่น 081-234-5678" ${canEditPatientInfo() ? '' : 'disabled'}></div>
             </div>
           </div>
 
-          <div class="form-section">
-            <h4>ที่อยู่</h4>
+          <div class="form-section ${canEditPatientInfo() ? '' : 'medical-locked'}">
+            <h4>ที่อยู่ ${canEditPatientInfo() ? '' : '<span class="readonly-tag">🔒 อ่านอย่างเดียว</span>'}</h4>
             <div class="form-row">
-              <div class="form-group" data-field="addrNo"><label>บ้านเลขที่<span class="req">*</span></label><input class="input" id="f-addrNo" value="${escapeHTML(p.addrNo)}" placeholder="เช่น 211 หรือ 99/1"><span class="field-error">${ICON.alert} กรุณากรอกบ้านเลขที่</span></div>
-              <div class="form-group" data-field="addrMoo"><label>หมู่<span class="req">*</span></label><input class="input" id="f-addrMoo" value="${escapeHTML(p.addrMoo)}" placeholder="เช่น 17"><span class="field-error">${ICON.alert} กรุณากรอกหมู่</span></div>
-              <div class="form-group" data-field="addrTambon"><label>ตำบล<span class="req">*</span></label><input class="input" id="f-addrTambon" value="${escapeHTML(p.addrTambon)}" placeholder="ระบุชื่อตำบล"><span class="field-error">${ICON.alert} กรุณากรอกตำบล</span></div>
-              <div class="form-group" data-field="addrAmphoe"><label>อำเภอ<span class="req">*</span></label><input class="input" id="f-addrAmphoe" value="${escapeHTML(p.addrAmphoe)}" placeholder="ระบุชื่ออำเภอ"><span class="field-error">${ICON.alert} กรุณากรอกอำเภอ</span></div>
-              <div class="form-group" data-field="addrProvince"><label>จังหวัด<span class="req">*</span></label><input class="input" id="f-addrProvince" value="${escapeHTML(p.addrProvince)}" placeholder="ระบุชื่อจังหวัด"><span class="field-error">${ICON.alert} กรุณากรอกจังหวัด</span></div>
+              <div class="form-group" data-field="addrNo"><label>บ้านเลขที่<span class="req">*</span></label><input class="input" id="f-addrNo" value="${escapeHTML(p.addrNo)}" placeholder="เช่น 211 หรือ 99/1" ${canEditPatientInfo() ? '' : 'disabled'}><span class="field-error">${ICON.alert} กรุณากรอกบ้านเลขที่</span></div>
+              <div class="form-group" data-field="addrMoo"><label>หมู่<span class="req">*</span></label><input class="input" id="f-addrMoo" value="${escapeHTML(p.addrMoo)}" placeholder="เช่น 17" ${canEditPatientInfo() ? '' : 'disabled'}><span class="field-error">${ICON.alert} กรุณากรอกหมู่</span></div>
+              <div class="form-group" data-field="addrTambon"><label>ตำบล<span class="req">*</span></label><input class="input" id="f-addrTambon" value="${escapeHTML(p.addrTambon)}" placeholder="ระบุชื่อตำบล" ${canEditPatientInfo() ? '' : 'disabled'}><span class="field-error">${ICON.alert} กรุณากรอกตำบล</span></div>
+              <div class="form-group" data-field="addrAmphoe"><label>อำเภอ<span class="req">*</span></label><input class="input" id="f-addrAmphoe" value="${escapeHTML(p.addrAmphoe)}" placeholder="ระบุชื่ออำเภอ" ${canEditPatientInfo() ? '' : 'disabled'}><span class="field-error">${ICON.alert} กรุณากรอกอำเภอ</span></div>
+              <div class="form-group" data-field="addrProvince"><label>จังหวัด<span class="req">*</span></label><input class="input" id="f-addrProvince" value="${escapeHTML(p.addrProvince)}" placeholder="ระบุชื่อจังหวัด" ${canEditPatientInfo() ? '' : 'disabled'}><span class="field-error">${ICON.alert} กรุณากรอกจังหวัด</span></div>
             </div>
             <div class="form-row">
               <div class="form-group" data-field="zone"><label>เขตพื้นที่รับผิดชอบ<span class="req">*</span></label>
-                <select class="select" id="f-zone">
+                <select class="select" id="f-zone" ${canEditPatientInfo() ? '' : 'disabled'}>
                   <option value="">—</option>
                   ${ZONES.map(z => `<option value="${z}" ${p.zone === z ? 'selected' : ''}>${z}</option>`).join('')}
                 </select>
@@ -6933,13 +6925,13 @@ function openPatientModal(id = null) {
               <div class="form-group" data-field="areaType"><label>สถานะพื้นที่<span class="req">*</span></label>
                 <div class="pill-group" id="f-areaType-group">
                   ${AREA_TYPES.map((a, i) => `
-                    <input type="radio" name="f-areaType" id="f-areaType-${i}" value="${a}" ${p.areaType === a ? 'checked' : ''}>
+                    <input type="radio" name="f-areaType" id="f-areaType-${i}" value="${a}" ${p.areaType === a ? 'checked' : ''} ${canEditPatientInfo() ? '' : 'disabled'}>
                     <label for="f-areaType-${i}">${a}</label>
                   `).join('')}
                 </div>
                 <span class="field-error">${ICON.alert} กรุณาเลือกในเขต/นอกเขต</span>
               </div>
-              <div class="form-group"><label>ผู้ดูแล / ผู้ติดต่อ</label><input class="input" id="f-contact" value="${escapeHTML(p.contactPerson)}" placeholder="ระบุชื่อ-สกุล + ความสัมพันธ์ (เช่น ภรรยา, บุตร)"></div>
+              <div class="form-group"><label>ผู้ดูแล / ผู้ติดต่อ</label><input class="input" id="f-contact" value="${escapeHTML(p.contactPerson)}" placeholder="ระบุชื่อ-สกุล + ความสัมพันธ์ (เช่น ภรรยา, บุตร)" ${canEditPatientInfo() ? '' : 'disabled'}></div>
             </div>
           </div>
 
@@ -7100,29 +7092,38 @@ async function savePatient(id) {
   const alertBox = document.getElementById('patientFormAlert');
   if (alertBox) alertBox.classList.remove('show');
 
-  // Validate required fields
+  // Validate required fields — skip groups that current user can't edit
+  // (so field staff can save form for adding household contacts without
+  // being blocked by missing fields they have no access to fix)
   const tbClassChecked = (document.querySelector('input[name="f-tbClass"]:checked') || {}).value;
   const areaTypeChecked = (document.querySelector('input[name="f-areaType"]:checked') || {}).value;
-  const required = [
-    { field: 'name',                value: get('name'),                label: 'ชื่อ-นามสกุล' },
-    { field: 'hn',                  value: get('hn'),                  label: 'HN' },
-    { field: 'age',                 value: get('age'),                 label: 'อายุ' },
-    { field: 'gender',              value: get('gender'),              label: 'เพศ' },
-    { field: 'addrNo',              value: get('addrNo'),              label: 'บ้านเลขที่' },
-    { field: 'addrMoo',             value: get('addrMoo'),             label: 'หมู่' },
-    { field: 'addrTambon',          value: get('addrTambon'),          label: 'ตำบล' },
-    { field: 'addrAmphoe',          value: get('addrAmphoe'),          label: 'อำเภอ' },
-    { field: 'addrProvince',        value: get('addrProvince'),        label: 'จังหวัด' },
-    { field: 'zone',                value: get('zone'),                label: 'เขตพื้นที่' },
-    { field: 'areaType',            value: areaTypeChecked,            label: 'สถานะพื้นที่' },
-    { field: 'treatmentStartDate',  value: get('treatmentStartDate'),  label: 'วันที่เริ่มรักษา' },
-    { field: 'tbClass',             value: tbClassChecked,             label: 'จำแนกผู้ป่วย' },
-    { field: 'testResult',          value: get('testResult'),          label: 'ผลตรวจ' },
-    { field: 'patientType',         value: get('patientType'),         label: 'ประเภทผู้ป่วย' }
-  ];
-  // Conditional: tbClassDetail required when tbClass = "วัณโรคนอกปอด"
-  if (tbClassChecked === 'วัณโรคนอกปอด') {
-    required.push({ field: 'tbClassDetail', value: get('tbClassDetail'), label: 'ระบุตำแหน่ง/ชนิด' });
+  const required = [];
+  if (canEditPatientInfo()) {
+    required.push(
+      { field: 'name',                value: get('name'),                label: 'ชื่อ-นามสกุล' },
+      { field: 'hn',                  value: get('hn'),                  label: 'HN' },
+      { field: 'age',                 value: get('age'),                 label: 'อายุ' },
+      { field: 'gender',              value: get('gender'),              label: 'เพศ' },
+      { field: 'addrNo',              value: get('addrNo'),              label: 'บ้านเลขที่' },
+      { field: 'addrMoo',             value: get('addrMoo'),             label: 'หมู่' },
+      { field: 'addrTambon',          value: get('addrTambon'),          label: 'ตำบล' },
+      { field: 'addrAmphoe',          value: get('addrAmphoe'),          label: 'อำเภอ' },
+      { field: 'addrProvince',        value: get('addrProvince'),        label: 'จังหวัด' },
+      { field: 'zone',                value: get('zone'),                label: 'เขตพื้นที่' },
+      { field: 'areaType',            value: areaTypeChecked,            label: 'สถานะพื้นที่' }
+    );
+  }
+  if (canEditMedical()) {
+    required.push(
+      { field: 'treatmentStartDate',  value: get('treatmentStartDate'),  label: 'วันที่เริ่มรักษา' },
+      { field: 'tbClass',             value: tbClassChecked,             label: 'จำแนกผู้ป่วย' },
+      { field: 'testResult',          value: get('testResult'),          label: 'ผลตรวจ' },
+      { field: 'patientType',         value: get('patientType'),         label: 'ประเภทผู้ป่วย' }
+    );
+    // Conditional: tbClassDetail required when tbClass = "วัณโรคนอกปอด"
+    if (tbClassChecked === 'วัณโรคนอกปอด') {
+      required.push({ field: 'tbClassDetail', value: get('tbClassDetail'), label: 'ระบุตำแหน่ง/ชนิด' });
+    }
   }
   const missing = required.filter(r => !r.value);
   if (missing.length > 0) {
