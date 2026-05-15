@@ -6925,7 +6925,7 @@ function openPatientModal(id = null) {
               <div class="form-group" data-field="addrProvince"><label>จังหวัด<span class="req">*</span></label><input class="input" id="f-addrProvince" value="${escapeHTML(p.addrProvince)}" placeholder="ระบุชื่อจังหวัด" ${canEditPatientInfo() ? '' : 'disabled'}><span class="field-error">${ICON.alert} กรุณากรอกจังหวัด</span></div>
             </div>
             <div class="form-row">
-              <div class="form-group" data-field="zone"><label>เขตพื้นที่รับผิดชอบ<span class="req">*</span></label>
+              <div class="form-group" data-field="zone"><label>เขตพื้นที่รับผิดชอบ</label>
                 <select class="select" id="f-zone" ${canEditPatientInfo() ? '' : 'disabled'}>
                   <option value="">—</option>
                   ${ZONES.map(z => `<option value="${z}" ${p.zone === z ? 'selected' : ''}>${z}</option>`).join('')}
@@ -7119,7 +7119,6 @@ async function savePatient(id) {
       { field: 'addrTambon',          value: get('addrTambon'),          label: 'ตำบล' },
       { field: 'addrAmphoe',          value: get('addrAmphoe'),          label: 'อำเภอ' },
       { field: 'addrProvince',        value: get('addrProvince'),        label: 'จังหวัด' },
-      { field: 'zone',                value: get('zone'),                label: 'เขตพื้นที่' },
       { field: 'areaType',            value: areaTypeChecked,            label: 'สถานะพื้นที่' }
     );
   }
