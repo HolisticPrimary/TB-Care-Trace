@@ -4983,7 +4983,9 @@ function isAdmin()      { return State.currentUser?.role === 'admin'; }
 function isField()      { return State.currentUser?.role === 'field'; }
 function canAddPatient(){ return isAdmin(); }
 function canDeletePatient(){ return isAdmin(); }
-function canEditMedical(){ return isAdmin(); }  // testResult, regimen, status
+// เจ้าหน้าที่ รพ.สต. (field) แก้ไขข้อมูลการรักษาได้ — เพิ่มผู้สัมผัส บันทึกเยี่ยม ปรับ status
+// (admin-only คือ การเพิ่มและลบผู้ป่วย)
+function canEditMedical(){ return !!State.currentUser; }  // testResult, regimen, status
 function canDeleteVisit(visit){
   if (isAdmin()) return true;
   // Field staff: can delete OWN visit within 24h
