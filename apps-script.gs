@@ -246,6 +246,12 @@ function doGet(e) {
 function doPost(e) {
   let body = {};
   try { body = JSON.parse(e.postData.contents); } catch (err) {}
+  // LINE webhook: body has "events" array (no "action" key) — route to LINE handler
+  if (body && Array.isArray(body.events)) {
+    handleLineWebhook(body);
+    // LINE requires 200 OK with empty/short body
+    return ContentService.createTextOutput('OK').setMimeType(ContentService.MimeType.TEXT);
+  }
   const action = body.action || 'ping';
   return jsonResponse(handle(action, body));
 }
@@ -266,6 +272,7 @@ function handle(action, params) {
       case 'getStats':     return { ok: true, data: getStats() };
       case 'migrate':      return { ok: true, data: migrate() };
       case 'reset':        return { ok: true, data: resetAll() };
+      case 'getLineStatus':return { ok: true, data: getLineStatus() };
       default:             return { ok: false, error: 'Unknown action: ' + action };
     }
   } catch (err) {
@@ -418,6 +425,8 @@ function addPatient(data) {
     };
     sheet.appendRow(objectToRow(row, headers, PATIENT_JSON_FIELDS));
     audit('create', 'patient', id, row.name || '');
+    // Fire LINE notification (best-effort — won't fail patient save if LINE is down)
+    try { notifyLineNewPatient(row); } catch (e) { Logger.log('LINE notify error: ' + e); }
     return readbackPatient(id);
   });
 }
@@ -620,4 +629,141 @@ function resetAll() {
     });
     return { ok: true, message: 'Cleared all data' };
   });
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LINE MESSAGING API — แจ้งเตือนเข้ากลุ่ม รพ.สต. ทุกครั้งที่เพิ่มผู้ป่วย
+   ═══════════════════════════════════════════════════════════════════
+
+   วิธี setup (ครั้งเดียว):
+   1. paste โค้ดทั้งหมดนี้ลง Apps Script editor + Save
+   2. เลือก function "setLineToken" → กดเครื่องหมาย ▶ Run
+      (ครั้งแรก authorize permission)
+      เปลี่ยน 'PASTE_TOKEN_HERE' ในฟังก์ชันเป็น token จริง แล้ว Run
+      หรือเรียก setLineToken("token...") ผ่าน console ก็ได้
+   3. Deploy → Manage deployments → Edit (ดินสอ) → New version → Deploy
+      copy Web App URL
+   4. ไป LINE Developers Console → channel ของคุณ → แท็บ Messaging API
+      - Webhook URL: ใส่ Web App URL ที่ได้
+      - Use webhook: เปิด
+      - กด Verify (ควรขึ้น Success)
+   5. ในกลุ่ม LINE ที่มี bot อยู่ → พิมพ์ข้อความใดก็ได้
+      bot จะดักจับ groupId อัตโนมัติเก็บใน PropertiesService
+   6. รัน function "getLineStatus" เพื่อเช็กว่า groupId ถูก save หรือไม่
+   7. ทดสอบ: เพิ่มผู้ป่วยใหม่ในเว็บ → ดูข้อความในกลุ่ม LINE
+   ═══════════════════════════════════════════════════════════════════ */
+
+const LINE_API = 'https://api.line.me/v2/bot/message/push';
+
+// เรียกครั้งเดียวเพื่อเก็บ token (อย่า hardcode token ไว้ในโค้ด)
+function setLineToken(token) {
+  if (!token || token === 'PASTE_TOKEN_HERE') {
+    throw new Error('กรุณาส่ง token จริงเป็น argument: setLineToken("xxx...")');
+  }
+  PROPS.setProperty('LINE_TOKEN', token);
+  return { ok: true, message: 'LINE_TOKEN saved (' + token.length + ' chars)' };
+}
+
+// ดูสถานะการตั้งค่า LINE (เช็กว่า token + groupId พร้อมหรือยัง)
+function getLineStatus() {
+  const token = PROPS.getProperty('LINE_TOKEN');
+  const groupId = PROPS.getProperty('LINE_GROUP_ID');
+  return {
+    tokenSet: !!token,
+    tokenLength: token ? token.length : 0,
+    groupId: groupId || null,
+    ready: !!(token && groupId),
+    hint: !token ? 'รัน setLineToken("...") ก่อน' :
+          !groupId ? 'เพิ่ม bot เข้ากลุ่ม + พิมพ์ข้อความในกลุ่ม → bot จะดักจับ groupId' :
+          'พร้อมใช้งาน ✓'
+  };
+}
+
+// (manual setter เผื่อ webhook ไม่ทำงาน — ตั้งค่า groupId เอง)
+function setLineGroupId(groupId) {
+  PROPS.setProperty('LINE_GROUP_ID', groupId);
+  return { ok: true, groupId: groupId };
+}
+
+// ดักจับ LINE webhook events (capture groupId เมื่อมีข้อความในกลุ่ม)
+function handleLineWebhook(body) {
+  if (!body || !Array.isArray(body.events)) return;
+  body.events.forEach(ev => {
+    try {
+      const src = ev.source || {};
+      // Group/room message → save groupId
+      if (src.type === 'group' && src.groupId) {
+        PROPS.setProperty('LINE_GROUP_ID', src.groupId);
+        Logger.log('Captured LINE group ID: ' + src.groupId);
+      } else if (src.type === 'room' && src.roomId) {
+        // Multi-person chat (less common)
+        PROPS.setProperty('LINE_GROUP_ID', src.roomId);
+        PROPS.setProperty('LINE_TARGET_TYPE', 'room');
+        Logger.log('Captured LINE room ID: ' + src.roomId);
+      } else if (src.type === 'user' && src.userId) {
+        // Save user ID as fallback (1-on-1 chat with bot)
+        PROPS.setProperty('LINE_USER_ID', src.userId);
+        Logger.log('Captured LINE user ID: ' + src.userId);
+      }
+    } catch (e) { Logger.log('Webhook parse error: ' + e); }
+  });
+}
+
+// ส่งข้อความเข้ากลุ่ม (best-effort — ถ้า fail จะ log แต่ไม่ throw)
+function sendLineMessage(text) {
+  const token = PROPS.getProperty('LINE_TOKEN');
+  const groupId = PROPS.getProperty('LINE_GROUP_ID') || PROPS.getProperty('LINE_USER_ID');
+  if (!token || !groupId) {
+    Logger.log('LINE not configured (token=' + !!token + ', target=' + !!groupId + ')');
+    return false;
+  }
+  try {
+    const res = UrlFetchApp.fetch(LINE_API, {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { 'Authorization': 'Bearer ' + token },
+      payload: JSON.stringify({
+        to: groupId,
+        messages: [{ type: 'text', text: text.slice(0, 4900) }]
+      }),
+      muteHttpExceptions: true
+    });
+    const code = res.getResponseCode();
+    if (code !== 200) Logger.log('LINE push fail ' + code + ': ' + res.getContentText());
+    return code === 200;
+  } catch (e) {
+    Logger.log('LINE push exception: ' + e);
+    return false;
+  }
+}
+
+// ฟอร์แมตข้อความและส่งเมื่อเพิ่มผู้ป่วยใหม่
+function notifyLineNewPatient(p) {
+  if (!p) return;
+  const fmtDate = (iso) => {
+    if (!iso) return '—';
+    try {
+      const d = new Date(iso);
+      return d.getDate() + '/' + (d.getMonth() + 1) + '/' + (d.getFullYear() + 543);
+    } catch (e) { return String(iso); }
+  };
+  const lines = [
+    '🆕 เพิ่มผู้ป่วยวัณโรครายใหม่',
+    '━━━━━━━━━━━━━━━━━━',
+    '👤 ' + (p.name || '—'),
+    '🆔 HN ' + (p.hn || '—') + ' · ' + (p.age || '—') + ' ปี · ' + (p.gender || '—'),
+    '📍 เขต ' + (p.zone || '—') + ' (' + (p.areaType || '—') + ')',
+    '🩺 ' + (p.tbClass || '—') + (p.tbClassDetail ? ' (' + p.tbClassDetail + ')' : '') + ' · ' + (p.patientType || '—'),
+    '🧪 ผลตรวจ ' + (p.testResult || p.afbResult || '—'),
+    '💊 เริ่มรักษา ' + fmtDate(p.treatmentStartDate),
+    '━━━━━━━━━━━━━━━━━━',
+    'บันทึกโดย ' + (p.createdBy || '—')
+  ];
+  sendLineMessage(lines.join('\n'));
+}
+
+// (เสริม) ส่งข้อความทดสอบ — รัน function นี้เพื่อทดสอบว่าระบบทำงาน
+function sendLineTest() {
+  const ok = sendLineMessage('🔔 ทดสอบการแจ้งเตือนจาก TB Care Trace\nเวลา ' + new Date().toLocaleString('th-TH'));
+  return { ok: ok, status: getLineStatus() };
 }
