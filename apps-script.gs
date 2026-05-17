@@ -668,15 +668,18 @@ function setLineToken(token) {
 function getLineStatus() {
   const token = PROPS.getProperty('LINE_TOKEN');
   const groupId = PROPS.getProperty('LINE_GROUP_ID');
-  return {
+  const result = {
     tokenSet: !!token,
     tokenLength: token ? token.length : 0,
     groupId: groupId || null,
     ready: !!(token && groupId),
-    hint: !token ? 'รัน setLineToken("...") ก่อน' :
+    hint: !token ? 'รัน setLineToken("...") ก่อน หรือ ตั้ง Script Property LINE_TOKEN' :
           !groupId ? 'เพิ่ม bot เข้ากลุ่ม + พิมพ์ข้อความในกลุ่ม → bot จะดักจับ groupId' :
           'พร้อมใช้งาน ✓'
   };
+  // Log ออกมาให้เห็นใน Execution log ทุกครั้งที่ Run ผ่าน editor
+  Logger.log('LINE Status: ' + JSON.stringify(result, null, 2));
+  return result;
 }
 
 // (manual setter เผื่อ webhook ไม่ทำงาน — ตั้งค่า groupId เอง)
@@ -765,5 +768,7 @@ function notifyLineNewPatient(p) {
 // (เสริม) ส่งข้อความทดสอบ — รัน function นี้เพื่อทดสอบว่าระบบทำงาน
 function sendLineTest() {
   const ok = sendLineMessage('🔔 ทดสอบการแจ้งเตือนจาก TB Care Trace\nเวลา ' + new Date().toLocaleString('th-TH'));
-  return { ok: ok, status: getLineStatus() };
+  const result = { ok: ok, status: getLineStatus() };
+  Logger.log('LINE Test: ' + JSON.stringify(result, null, 2));
+  return result;
 }
