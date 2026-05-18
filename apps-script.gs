@@ -750,12 +750,23 @@ function notifyLineNewPatient(p) {
       return d.getDate() + '/' + (d.getMonth() + 1) + '/' + (d.getFullYear() + 543);
     } catch (e) { return String(iso); }
   };
+  // Build address from split fields, fallback to legacy combined string
+  const addrParts = [
+    p.addrNo,
+    p.addrMoo ? 'ม.' + p.addrMoo : '',
+    p.addrTambon ? 'ต.' + p.addrTambon : '',
+    p.addrAmphoe ? 'อ.' + p.addrAmphoe : '',
+    p.addrProvince ? 'จ.' + p.addrProvince : ''
+  ].filter(function(x) { return x; });
+  const addr = addrParts.length ? addrParts.join(' ') : (p.address || '—');
+
   const lines = [
     '🆕 เพิ่มผู้ป่วยวัณโรครายใหม่',
     '━━━━━━━━━━━━━━━━━━',
     '👤 ' + (p.name || '—'),
     '🆔 HN ' + (p.hn || '—') + ' · ' + (p.age || '—') + ' ปี · ' + (p.gender || '—'),
     '📍 เขต ' + (p.zone || '—') + ' (' + (p.areaType || '—') + ')',
+    '🏠 ' + addr,
     '🩺 ' + (p.tbClass || '—') + (p.tbClassDetail ? ' (' + p.tbClassDetail + ')' : '') + ' · ' + (p.patientType || '—'),
     '🧪 ผลตรวจ ' + (p.testResult || p.afbResult || '—'),
     '💊 เริ่มรักษา ' + fmtDate(p.treatmentStartDate),
