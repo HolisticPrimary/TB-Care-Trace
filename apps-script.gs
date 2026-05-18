@@ -762,7 +762,7 @@ function notifyLineNewPatient(p) {
 
   const lines = [
     '🆕 เพิ่มผู้ป่วยวัณโรครายใหม่',
-    '━━━━━━━━━━━━━━━━━━',
+    '',
     '👤 ' + (p.name || '—'),
     '🆔 HN ' + (p.hn || '—') + ' · ' + (p.age || '—') + ' ปี · ' + (p.gender || '—'),
     '📍 เขต ' + (p.zone || '—') + ' (' + (p.areaType || '—') + ')',
@@ -770,8 +770,8 @@ function notifyLineNewPatient(p) {
     '🩺 ' + (p.tbClass || '—') + (p.tbClassDetail ? ' (' + p.tbClassDetail + ')' : '') + ' · ' + (p.patientType || '—'),
     '🧪 ผลตรวจ ' + (p.testResult || p.afbResult || '—'),
     '💊 เริ่มรักษา ' + fmtDate(p.treatmentStartDate),
-    '━━━━━━━━━━━━━━━━━━',
-    'บันทึกโดย ' + (p.createdBy || '—')
+    '',
+    '— บันทึกโดย ' + (p.createdBy || '—')
   ];
   sendLineMessage(lines.join('\n'));
 }
