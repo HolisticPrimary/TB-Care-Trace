@@ -850,6 +850,8 @@
     margin-bottom: 20px;
     align-items: center;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 500;
   }
   .search-box {
     flex: 1;
@@ -882,10 +884,10 @@
   .zone-dropdown {
     position: relative;
     display: inline-block;
-    z-index: 50; /* lift above .patient-list so the panel doesn't get painted over by later siblings */
+    z-index: 1000;
   }
   .zone-dropdown.open {
-    z-index: 200; /* even higher when open — guarantees nothing bleeds through */
+    z-index: 9999;
   }
   .zone-trigger {
     display: inline-flex;
@@ -1232,6 +1234,8 @@
   }
   /* Row layout */
   .patient-list {
+    position: relative;
+    z-index: 0;
     display: flex;
     flex-direction: column;
     gap: 6px;
