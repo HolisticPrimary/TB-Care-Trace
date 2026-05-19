@@ -882,6 +882,10 @@
   .zone-dropdown {
     position: relative;
     display: inline-block;
+    z-index: 50; /* lift above .patient-list so the panel doesn't get painted over by later siblings */
+  }
+  .zone-dropdown.open {
+    z-index: 200; /* even higher when open — guarantees nothing bleeds through */
   }
   .zone-trigger {
     display: inline-flex;
