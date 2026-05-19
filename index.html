@@ -933,53 +933,56 @@
   [data-theme="dark"] .zone-dropdown.open .zone-chevron { color: #6ba3f5; }
 
   /* Dropdown panel */
-  /* Modal-style dropdown — fixed-position panel with full-screen backdrop
-     so it always overlays everything regardless of stacking context */
   .zone-panel {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) scale(0.96);
-    width: min(420px, calc(100vw - 32px));
-    max-height: min(70vh, 560px);
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    min-width: 280px;
+    max-height: 420px;
     overflow-y: auto;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow:
-      0 24px 60px rgba(13, 37, 66, 0.35),
-      0 10px 24px rgba(0, 0, 0, 0.18);
-    padding: 8px;
-    z-index: 100000;
+      0 16px 40px rgba(13, 37, 66, 0.18),
+      0 6px 16px rgba(0, 0, 0, 0.10);
+    padding: 6px;
+    z-index: 9999;
     opacity: 0;
-    transition: opacity .2s ease, transform .25s cubic-bezier(.34, 1.56, .64, 1);
+    transform: translateY(-6px) scale(0.98);
+    transform-origin: top center;
+    transition: opacity .2s ease, transform .2s cubic-bezier(.34, 1.56, .64, 1);
     pointer-events: none;
   }
   .zone-panel[hidden] { display: none; }
   .zone-dropdown.open .zone-panel {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translateY(0) scale(1);
     pointer-events: auto;
   }
-  /* Solid backdrop covering entire viewport — kills any bleed-through */
+  /* Backdrop — dim everything else when dropdown is open (prevents visual overlap with rows below) */
   .zone-dropdown.open::before {
     content: '';
     position: fixed;
     inset: 0;
-    background: rgba(13, 24, 42, 0.55);
-    z-index: 99999;
+    background: rgba(13, 24, 42, 0.18);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+    z-index: 9998;
     pointer-events: auto;
-    animation: zoneBackdropIn .18s ease forwards;
   }
-  @keyframes zoneBackdropIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  /* Narrow screens — bigger tap targets */
+  /* On narrow screens, make the panel cover more area for easier tap targets */
   @media (max-width: 720px) {
     .zone-panel {
-      width: calc(100vw - 24px);
-      max-height: 75vh;
+      position: fixed;
+      top: auto;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      max-height: 60vh;
+      min-width: 0;
+      border-radius: 16px;
       padding: 10px;
     }
     .zone-panel .zone-option {
